@@ -1,0 +1,6 @@
+#!/bin/sh
+# build script for clojurescript app
+
+# lein clojurescript '{:output-dir "public" :output-to "public/project_alpha.js" :optimizations :advanced}'
+
+lein clojurescript '{:output-dir "public" :output-to "public/project_alpha.js"}'

@@ -1,0 +1,26 @@
+# project-alpha
+Clojure based web application based on [JanusClojure](https://github.com/jramb/JanusClojure)
+
+Many thanks to Jörg Ramb for providing this very helpful examples.
+
+This will be the foundation of my upcomming web development. It currently provides the framework for client side Clojurescript and serverside clojure based on Ring/Compojure.
+
+At the moment there are only some playground definitions (buttons, button events). Most importantly these illustrate how to interface Clojurescript to Google Closure classes.
+
+A more interesting implementation follows ...
+
+## Usage
+### Just run it
+1. `git clone git://github.com/linneman/project-alpha.git`
+2. `cd project-alpha`
+3. load clojure and clojurescript: `lein deps`
+4. build javascript app: `./build`
+5. start the server: `lein run`
+6. open http:/localhost:3000/index.html
+
+
+## License
+Copyright (C) 2011 OL
+
+The use and distribution terms for this software are covered
+by the GNU General Public License, version 3.
