@@ -14,65 +14,74 @@
     <link rel="stylesheet" type="text/css" href="css/button.css" media="all">
     <link rel="stylesheet" type="text/css" href="css/flatbutton.css" media="all">
     <link rel="stylesheet" type="text/css" href="css/mainpanel.css" media="all and (min-device-width: 1024px)">
-    <link rel="stylesheet" type="text/css" href="css/tab.css" media="all and (min-device-width: 1024px)">
-    <link rel="stylesheet" type="text/css" href="css/tabbar.css" media="all and (min-device-width: 1024px)">
-    <style>
-      fieldset {
-      padding: 10px;
-      border: 1px solid #369;
-      }
-
-      .goog-tab-content {
-      height: 9em;
-      margin: 0;
-      border: 1px solid #6b90da;
-      border-top: 0;
-      padding: 4px 8px;
-      background: #fff;
-      overflow: auto;
-      }
-    </style>
-<!--[if IE]>
-    <link rel="stylesheet" type="text/css" href="mainpanel.css" media="all">
-<![endif]-->
-<!--[if lt IE 9]>
+    <link rel="stylesheet" type="text/css" href="css/tabpane.css" media="all and (min-device-width: 1024px)">
+    <!--[if IE]>
+	<link rel="stylesheet" type="text/css" href="mainpanel.css" media="all">
+	<![endif]-->
+    <!--[if lt IE 9]>
 	<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-<![endif]-->
+	<![endif]-->
   </head>
 
   <body>
     <div id="bg">
     </div>
-    <div id="tabbar">
-      <table border="0" cellpadding="0" cellspacing="10" width="100%">
-	<tbody>
-	  <tr valign="top">
-            <td width="70%">
-              <b>Above tab content:</b><br><br>
-              <div id="toptab" class="goog-tab-bar goog-tab-bar-top">
-		<div id="Hello" class="goog-tab goog-tab-selected">Hello</div>
-		<div id="Settings" class="goog-tab">Settings</div>
-		<div id="More" class="goog-tab">More</div>
-		<div class="goog-tab goog-tab-disabled">Advanced</div>
-              </div>
-              <!-- Use goog-tab-bar-clear to separate the tabs from the content. -->
-              <div class="goog-tab-bar-clear"></div>
-              <div id="toptab_content" class="goog-tab-content">
-		Use the keyboard or the mouse to switch tabs.
-              </div>
-              <label>
-		Show/hide the first tab
-		<input type="checkbox" id="show_top" checked>
-              </label>
-              <label>
-		Enable/disable the fourth tab
-		<input type="checkbox" id="enable_top">
-              </label>
-            </td>
-	  </tr>
-	</tbody>
-      </table>
+
+    <div id="tabpane1"></div>
+    <strong id="tabpane1index"></strong> selected in tab pane 1.<br/><br/>
+
+    <div id="page1">
+      <h2>Page 1</h2>
+      <p>
+	imperdiet, magna at placerat consectetuer, enim urna aliquam augue, nec
+	tincidunt justo lectus nec lectus. Nam neque. Nullam ullamcorper euismod
+	augue. Maecenas arcu purus, sollicitudin nec, consequat a, gravida quis,
+	massa. Nullam bibendum viverra risus. Sed nibh. Morbi dapibus pellentesque
+	erat.
+      </p>
+      <p>
+	Cras non tellus. Maecenas nulla est, tincidunt sed, porta sit amet, placerat
+	sed, diam. Morbi pulvinar. Vestibulum ante ipsum primis in faucibus orci
+	luctus et ultrices posuere cubilia Curae; Praesent felis lacus, pretium at,
+	egestas sed, fermentum at, est. Pellentesque sagittis feugiat orci. Nam
+	augue. Sed eget dolor. Proin vitae metus scelerisque massa fermentum tempus.
+	Nulla facilisi. Pellentesque habitant morbi tristique senectus et netus et
+	malesuada fames ac turpis egestas. Aenean eleifend, leo gravida mollis
+	tempor, tellus ipsum porttitor leo, eget condimentum tellus neque sit amet
+	orci. Sed non lectus. Suspendisse nonummy purus ac massa. Sed quis elit
+	dapibus nunc semper porta. Maecenas risus eros, euismod quis, sagittis eget,
+	aliquet eget, dui. Donec vel nibh. Vivamus nunc purus, euismod in, feugiat
+	in, sodales vitae, nunc. Nulla lobortis.
+      </p>
     </div>
+
+    <div id="page2">
+      <h2>Page 2</h2>
+      <p>
+	Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Cras et nisi id
+	lorem tempor semper. Suspendisse ante. Integer ligula urna, venenatis quis,
+	placerat vitae, commodo quis, sapien. Quisque nec lectus. Sed non dolor. Sed
+	congue, nisi in pharetra consequat, odio diam pulvinar arcu, in laoreet elit
+	risus id ipsum. Class aptent taciti sociosqu ad litora torquent per conubia
+	nostra, per inceptos hymenaeos. Praesent tellus enim, imperdiet a, sagittis
+	id, pulvinar vel, tortor. Integer nulla. Sed nulla augue, lacinia id,
+	vulputate eu, rhoncus non, ante. Integer lobortis eros vitae quam. Phasellus
+	sagittis, ipsum sollicitudin bibendum laoreet, arcu erat luctus lacus, vel
+	pharetra felis metus tincidunt diam. Cras ac augue in enim ultricies
+	aliquam.
+      </p>
+      <input type="text" />
+      <select><option>Select box</option></select>
+      <button>Button</button>
+    </div>
+
+    <div id="page3">
+      <h2>Page 3</h2>
+      <p>
+	This is page 5.
+      </p>
+    </div>
+
     <div id="scripts">
       <script type="text/javascript" src="goog/base.js"></script>
       <script type="text/javascript" src="project_alpha.js"></script>

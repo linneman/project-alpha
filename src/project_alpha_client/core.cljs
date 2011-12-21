@@ -18,7 +18,7 @@
             [goog.object :as object]
             [goog.ui.Component :as Component]
             [goog.ui.Button :as Button]
-            [goog.ui.TabBar :as TabBar]
+            [goog.ui.TabPane :as TabPane]
             [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
             [goog.Timer :as timer]))
 
@@ -81,22 +81,11 @@
 ;(. mycomponent (render parent-element))
 
 ; =============
-(def tabbar (goog.ui.TabBar.))
-(. tabbar (decorate (dom/get-element "toptab")))
 
-(events/listen tabbar Component/EventType.SELECT
-               (fn [e]
-                 (let [tabSelected (.target e)
-                       contentElement (dom/get-element (+ (. tabbar (getId)) "_content"))
-                       forward (fn [url]
-                                 (js* "function(url) { window.location = url; }"))]
-                   (goog.dom.setTextContent contentElement
-                                            (+ "You selected: " (. tabSelected (getCaption))))
-                   ; ((forward) (+ (. tabSelected (getCaption)) ".html"))
-                   )))
-
-(.setSelectedTab tabbar (.getChild tabbar "Settings")) ; select a tab
-(. (goog.Uri. (object/get (js* "window") "location")) (getPath)) ; get current url
+(def tabpane (goog.ui.TabPane. (dom/get-element "tabpane1")))
+(. tabpane (addPage (TabPane/TabPage. (dom/get-element "page1"))))
+(. tabpane (addPage (TabPane/TabPage. (dom/get-element "page2"))))
+(. tabpane (addPage (TabPane/TabPage. (dom/get-element "page3"))))
 
 ; =============
 
