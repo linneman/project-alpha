@@ -18,6 +18,7 @@
             [goog.object :as object]
             [goog.ui.Component :as Component]
             [goog.ui.Button :as Button]
+            [goog.ui.TabBar :as TabBar]
             [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
             [goog.Timer :as timer]))
 
@@ -66,11 +67,9 @@
 ; =============
 
 (def myobj (json/clj->js {"key1" "value1" "key2" #(println "Hallo Welt")}))
-(println ((.key2 myobj)))
+;(println ((.key2 myobj)))
 
-((goog.bind #(println (js* "this.key1")) myobj))
-
-
+;((goog.bind #(println (js* "this.key1")) myobj))
 
 (def parent-element (dom/get-element "bg"))
 (def mydom (goog.dom.getDomHelper parent-element))
@@ -79,10 +78,27 @@
 ; (set! (.createDom mycomponent)
 ;       (js* "function() { var element=goog.dom.createDom('div', {'id': '123', 'class': 'Otto'}, 'Hallo Welt!'); this.setElementInternal(element);};"))
 
-
-
 ;(. mycomponent (render parent-element))
 
+; =============
+(def tabbar (goog.ui.TabBar.))
+(. tabbar (decorate (dom/get-element "toptab")))
+
+(events/listen tabbar Component/EventType.SELECT
+               (fn [e]
+                 (let [tabSelected (.target e)
+                       contentElement (dom/get-element (+ (. tabbar (getId)) "_content"))
+                       forward (fn [url]
+                                 (js* "function(url) { window.location = url; }"))]
+                   (goog.dom.setTextContent contentElement
+                                            (+ "You selected: " (. tabSelected (getCaption))))
+                   ; ((forward) (+ (. tabSelected (getCaption)) ".html"))
+                   )))
+
+(.setSelectedTab tabbar (.getChild tabbar "Settings")) ; select a tab
+(. (goog.Uri. (object/get (js* "window") "location")) (getPath)) ; get current url
+
+; =============
 
 ; main entry point
 (defn ^:export init []
