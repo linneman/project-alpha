@@ -10,11 +10,28 @@
     <title>project-alpha</title>
     <meta name="author" content="Otto Linnemann">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="css/common.css" media="all">
-    <link rel="stylesheet" type="text/css" href="css/button.css" media="all">
-    <link rel="stylesheet" type="text/css" href="css/flatbutton.css" media="all">
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" type="text/css" href="css/button.css">
+    <link rel="stylesheet" type="text/css" href="css/flatbutton.css">
+    <link rel="stylesheet" type="text/css" href="css/tabpane.css">
+    <link rel="stylesheet" type="text/css" href="css/dialog.css" />
+    <link rel="stylesheet" type="text/css" href="css/linkbutton.css" />
+    <link rel="stylesheet" type="text/css" href="css/menu.css">
+    <link rel="stylesheet" type="text/css" href="css/menuitem.css">
+    <link rel="stylesheet" type="text/css" href="css/menuseparator.css">
+    <link rel="stylesheet" type="text/css" href="css/tab.css" />
+    <link rel="stylesheet" type="text/css" href="css/tabbar.css" />
+    <link rel="stylesheet" type="text/css" href="css/toolbar.css" />
+    <link rel="stylesheet" type="text/css" href="css/colormenubutton.css" />
+    <link rel="stylesheet" type="text/css" href="css/palette.css" />
+    <link rel="stylesheet" type="text/css" href="css/colorpalette.css" />
+
+    <link rel="stylesheet" type="text/css" href="css/editor/bubble.css" />
+    <link rel="stylesheet" type="text/css" href="css/editor/dialog.css" />
+    <link rel="stylesheet" type="text/css" href="css/editor/linkdialog.css" />
+    <link rel="stylesheet" type="text/css" href="css/editortoolbar.css" />
+
     <link rel="stylesheet" type="text/css" href="css/mainpanel.css" media="all and (min-device-width: 1024px)">
-    <link rel="stylesheet" type="text/css" href="css/tabpane.css" media="all and (min-device-width: 1024px)">
     <!--[if IE]>
 	<link rel="stylesheet" type="text/css" href="mainpanel.css" media="all">
 	<![endif]-->
@@ -23,36 +40,27 @@
 	<![endif]-->
   </head>
 
+  <style>
+    #editMe {
+      width: 600px;
+      height: 300px;
+      background-color: white;
+      border: 1px solid grey;
+    }
+  </style>
+
   <body>
     <div id="bg">
     </div>
 
     <div id="tabpane1"></div>
-    <strong id="tabpane1index"></strong> selected in tab pane 1.<br/><br/>
 
     <div id="page1">
       <h2>Page 1</h2>
-      <p>
-	imperdiet, magna at placerat consectetuer, enim urna aliquam augue, nec
-	tincidunt justo lectus nec lectus. Nam neque. Nullam ullamcorper euismod
-	augue. Maecenas arcu purus, sollicitudin nec, consequat a, gravida quis,
-	massa. Nullam bibendum viverra risus. Sed nibh. Morbi dapibus pellentesque
-	erat.
-      </p>
-      <p>
-	Cras non tellus. Maecenas nulla est, tincidunt sed, porta sit amet, placerat
-	sed, diam. Morbi pulvinar. Vestibulum ante ipsum primis in faucibus orci
-	luctus et ultrices posuere cubilia Curae; Praesent felis lacus, pretium at,
-	egestas sed, fermentum at, est. Pellentesque sagittis feugiat orci. Nam
-	augue. Sed eget dolor. Proin vitae metus scelerisque massa fermentum tempus.
-	Nulla facilisi. Pellentesque habitant morbi tristique senectus et netus et
-	malesuada fames ac turpis egestas. Aenean eleifend, leo gravida mollis
-	tempor, tellus ipsum porttitor leo, eget condimentum tellus neque sit amet
-	orci. Sed non lectus. Suspendisse nonummy purus ac massa. Sed quis elit
-	dapibus nunc semper porta. Maecenas risus eros, euismod quis, sagittis eget,
-	aliquet eget, dui. Donec vel nibh. Vivamus nunc purus, euismod in, feugiat
-	in, sodales vitae, nunc. Nulla lobortis.
-      </p>
+      <p>Schreib etwas über Dich ...</p>
+      <div id="toolbar" style='width:602px'></div>
+      <div id="editMe"></div>
+      <hr>
     </div>
 
     <div id="page2">

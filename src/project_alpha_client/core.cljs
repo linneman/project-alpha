@@ -20,6 +20,19 @@
             [goog.ui.Button :as Button]
             [goog.ui.TabPane :as TabPane]
             [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
+            [goog.editor.Field :as EditorField]
+            [goog.editor.Command :as EditorCommand]
+            [goog.editor.plugins.BasicTextFormatter :as BasicTextFormatter]
+            [goog.editor.plugins.RemoveFormatting :as RemoveFormatting]
+            [goog.editor.plugins.UndoRedo :as UndoRedo]
+            [goog.editor.plugins.ListTabHandler :as ListTabHandler]
+            [goog.editor.plugins.SpacesTabHandler :as SpacesTabHandler]
+            [goog.editor.plugins.EnterHandler :as EnterHandler]
+            [goog.editor.plugins.HeaderFormatter :as HeaderFormatter]
+            [goog.editor.plugins.LinkDialogPlugin :as LinkDialogPlugin]
+            [goog.editor.plugins.LinkBubble :as LinkBubble]
+            [goog.ui.editor.DefaultToolbar :as DefaultToolbar]
+            [goog.ui.editor.ToolbarController :as ToolbarController]
             [goog.Timer :as timer]))
 
 
@@ -86,6 +99,48 @@
 (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page1"))))
 (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page2"))))
 (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page3"))))
+
+; =============
+(def myField (goog.editor.Field. "editMe"))
+(. myField (registerPlugin (goog.editor.plugins.BasicTextFormatter.)))
+(. myField (registerPlugin (goog.editor.plugins.RemoveFormatting.)))
+(. myField (registerPlugin (goog.editor.plugins.UndoRedo.)))
+(. myField (registerPlugin (goog.editor.plugins.ListTabHandler.)))
+(. myField (registerPlugin (goog.editor.plugins.SpacesTabHandler.)))
+(. myField (registerPlugin (goog.editor.plugins.EnterHandler.)))
+(. myField (registerPlugin (goog.editor.plugins.HeaderFormatter.)))
+(. myField (registerPlugin (goog.editor.plugins.LinkDialogPlugin.)))
+(. myField (registerPlugin (goog.editor.plugins.LinkBubble.)))
+
+(def buttons (json/clj->js
+              [
+               EditorCommand/BOLD
+               EditorCommand/ITALIC
+               EditorCommand/UNDERLINE
+               EditorCommand/FONT_COLOR
+               EditorCommand/BACKGROUND_COLOR
+               EditorCommand/FONT_FACE
+               EditorCommand/FONT_SIZE
+               EditorCommand/LINK
+               EditorCommand/UNDO
+               EditorCommand/REDO
+               EditorCommand/UNORDERED_LIST
+               EditorCommand/ORDERED_LIST
+               EditorCommand/INDENT
+               EditorCommand/OUTDENT
+               EditorCommand/JUSTIFY_LEFT
+               EditorCommand/JUSTIFY_CENTER
+               EditorCommand/SUBSCRIPT
+               EditorCommand/SUPERSCRIPT
+               EditorCommand/STRIKE_THROUGH
+               EditorCommand/REMOVE_FORMAT
+               ]))
+
+(def myToolbar (DefaultToolbar/makeToolbar buttons (dom/get-element "toolbar")))
+(def myToolbarController (goog.ui.editor.ToolbarController. myField myToolbar))
+
+(. myField (makeEditable))
+
 
 ; =============
 
