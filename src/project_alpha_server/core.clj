@@ -10,15 +10,21 @@
     (:require [ring.adapter.jetty :as jetty])
     (:require [compojure.core :as compojure])
     (:require [compojure.route :as route])
+    (:require [ring.middleware.json-params :as json-params])
     )
 
 (compojure/defroutes app-routes
-    (compojure/GET   "/status" _ "server-running")
+    (compojure/GET  "/status" _ "server-running")
+    (compojure/POST "/profile" {params :params} (do (println (params "text")) "OK"))
     (route/files "/")
     )
 
+(def routes
+  (-> app-routes
+      json-params/wrap-json-params
+      ))
 
-(defonce server (jetty/run-jetty #'app-routes
+(defonce server (jetty/run-jetty #'routes
                            {:port 3000 :join? false}))
 
 (defn -main [& args]
