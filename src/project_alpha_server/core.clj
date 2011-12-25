@@ -13,9 +13,11 @@
             [compojure.handler :as handler]
             [ring.middleware.json-params :as json-params]
             )
-  (:use [ring.util.response :only [response]]
+  (:use [compojure.core :only [GET POST PUT DELETE]]
+        [ring.util.response :only [response]]
         [ring.middleware.session :only [wrap-session]]
         [ring.middleware.multipart-params :only [wrap-multipart-params]]))
+
 
 (defn session-counter [{session :session}]
   (let [count   (:count session 0)
@@ -23,22 +25,51 @@
     (-> (response (str "You accessed this page " count " times."))
         (assoc :session session))))
 
+
+(defn forward-url [url]
+  (format "<html><head><meta  http-equiv=\"refresh\" content=\"0; URL=%s\"></head><body>forwarding ...</body></html>" url))
+
+
+(defn login [session name]
+  (let [session (assoc session :name name)
+        prev-req-uri (or (:prev-req-uri session) "/index.html")]
+    (-> (response (forward-url prev-req-uri)) (assoc :session session))))
+
+
+(defn logout [session]
+  (let [session (assoc session :name "")]
+    (-> (response "<html><body><h1>logged out!</h1></body></html>") (assoc :session session))))
+
+
+(defn wrap-authentification [handler login-uri]
+  (fn [request]
+    (let [resp (handler request)
+          uri (:uri request)
+          session (:session request)
+          name (:name session)]
+      (if (and (not= uri login-uri) (not= name "otto"))
+        (-> (response (forward-url "/login")) (assoc :session (assoc session :prev-req-uri uri)))
+        resp))))
+
+
 (compojure/defroutes main-routes
-    (compojure/GET "/status" _ "server-running")
-    (compojure/GET "/session" args (str "<body>" args "</body>"))
-    (compojure/GET "/login" args (session-counter args))
-    (compojure/POST "/profile" {params :params} (do (println (params "text")) "OK"))
-    (route/resources "/")
-    (route/not-found "Page not found")
-    )
+  (POST "/login" [name :as {session :session}] (login session name))
+  (GET  "/login" _ "<form method='post' action='/login'> Login: <input type='text' name='name' /><input type='submit' /></form>")
+  (GET "/logout" {session :session} (logout session))
+  (GET "/status" _ "server-running")
+  (GET "/session" args (str "<body>" args "</body>"))
+  (GET "/counter" args (session-counter args))
+  (POST "/profile" {params :params} (do (println (params "text")) "OK"))
+  (route/resources "/")
+  (route/not-found "Page not found"))
 
 (def app
   (-> main-routes
-      json-params/wrap-json-params
+      (wrap-authentification "/login")
       (wrap-session {:cookie-attrs {:max-age 604800}})
+      json-params/wrap-json-params
       wrap-multipart-params
-      handler/api
-      ))
+      handler/api))
 
 (defonce server (jetty/run-jetty #'app
                            {:port 3000 :join? false}))
