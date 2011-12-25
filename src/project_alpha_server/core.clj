@@ -13,7 +13,9 @@
             [compojure.handler :as handler]
             [ring.middleware.json-params :as json-params]
             )
-  (:use [ring.util.response :only [response]]))
+  (:use [ring.util.response :only [response]]
+        [ring.middleware.session :only [wrap-session]]
+        [ring.middleware.multipart-params :only [wrap-multipart-params]]))
 
 (defn session-counter [{session :session}]
   (let [count   (:count session 0)
@@ -33,7 +35,9 @@
 (def app
   (-> main-routes
       json-params/wrap-json-params
-      handler/site
+      (wrap-session {:cookie-attrs {:max-age 604800}})
+      wrap-multipart-params
+      handler/api
       ))
 
 (defonce server (jetty/run-jetty #'app
