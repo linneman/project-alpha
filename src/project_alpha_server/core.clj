@@ -16,7 +16,9 @@
   (:use [compojure.core :only [GET POST PUT DELETE]]
         [ring.util.response :only [response]]
         [ring.middleware.session :only [wrap-session]]
-        [ring.middleware.multipart-params :only [wrap-multipart-params]]))
+        [ring.middleware.multipart-params :only [wrap-multipart-params]]
+        [project-alpha-server.model]
+        ))
 
 
 (defn session-counter [{session :session}]
@@ -38,7 +40,7 @@
 
 (defn logout [session]
   (let [session (assoc session :name "")]
-    (-> (response "<html><body><h1>logged out!</h1></body></html>") (assoc :session session))))
+    (-> (response "<html><body><h1>logged out!</h1></body></html>") (assoc :session nil))))
 
 
 (defn wrap-authentification [handler login-uri]
@@ -46,9 +48,10 @@
     (let [resp (handler request)
           uri (:uri request)
           session (:session request)
-          name (:name session)]
+          name (:name session)
+          upd-session (if (re-seq #"\.html$" uri) (assoc session :prev-req-uri uri) session)]
       (if (and (not= uri login-uri) (not= name "otto"))
-        (-> (response (forward-url "/login")) (assoc :session (assoc session :prev-req-uri uri)))
+        (-> (response (forward-url "/login")) (assoc :session upd-session))
         resp))))
 
 
@@ -66,7 +69,7 @@
 (def app
   (-> main-routes
       (wrap-authentification "/login")
-      (wrap-session {:cookie-attrs {:max-age 604800}})
+      (wrap-session {:store (db-session-store) :cookie-attrs {:max-age (* 30 24 3600)}})
       json-params/wrap-json-params
       wrap-multipart-params
       handler/api))
@@ -77,3 +80,11 @@
 (defn -main [& args]
   (.start server)
   )
+
+; (.start server)
+; (.stop server)
+
+
+
+
+
