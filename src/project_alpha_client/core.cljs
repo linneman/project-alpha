@@ -38,38 +38,40 @@
 
 
 ; -------------
-(def parent-element (dom/get-element "bg"))
-(def mydom (goog.dom.getDomHelper parent-element))
-(def mycomponent (goog.ui.Component. mydom))
-(set! (.IdFragment mycomponent) {"ICON" "ic" "LABEL" "la"})
+(comment
+  (def parent-element (dom/get-element "bg"))
+  (def mydom (goog.dom.getDomHelper parent-element))
+  (def mycomponent (goog.ui.Component. mydom))
+  (set! (.IdFragment mycomponent) {"ICON" "ic" "LABEL" "la"})
 
 
-; Javascript based way
-(set! (.createDom mycomponent)
-      (js* "function() { var element=goog.dom.createDom('div', {'id': '123', 'class': 'Otto'}, 'Hallo Welt!'); this.setElementInternal(element);};"))
+  ; Javascript based way
+  (set! (.createDom mycomponent)
+        (js* "function() { var element=goog.dom.createDom('div', {'id': '123', 'class': 'Otto'}, 'Hallo Welt!'); this.setElementInternal(element);};"))
 
-; if mycompoment was a class we would extend its prototype this way in Clojurescript
-(set! (.prototype mycomponent)
-      (json/clj->js
-       { "createDom"
-         (fn [] (. mycomponent (setElementInternal (goog.dom.createDom "class" null)))) }))
+  ; if mycompoment was a class we would extend its prototype this way in Clojurescript
+  (set! (.prototype mycomponent)
+        (json/clj->js
+         { "createDom"
+           (fn [] (. mycomponent (setElementInternal (goog.dom.createDom "class" null)))) }))
 
-; since we did not create another class here we directly overwrite createDom
-(set! (.createDom mycomponent)
-      (fn [] (. mycomponent (setElementInternal (goog.dom.createDom "div" (json/clj->js {"id" "123" "class" "Otto"}) "Hallo Welt!")))))
+  ; since we did not create another class here we directly overwrite createDom
+  (set! (.createDom mycomponent)
+        (fn [] (. mycomponent (setElementInternal (goog.dom.createDom "div" (json/clj->js {"id" "123" "class" "Otto"}) "Hallo Welt!")))))
 
-; render it!
-(. mycomponent (render parent-element))
+  ; render it!
+  (. mycomponent (render parent-element)))
 ; -------------
 
 ; =============
-;(def mybutton (goog.ui.Button. "Hello!"))
-(def mybutton (goog.ui.Button. "Hello!" (FlatButtonRenderer/getInstance)))
-(. mybutton (render parent-element))
-(. mybutton (setTooltip "my tooltip"))
+(comment
+  ;(def mybutton (goog.ui.Button. "Hello!"))
+  (def mybutton (goog.ui.Button. "Hello!" (FlatButtonRenderer/getInstance)))
+  (. mybutton (render parent-element))
+  (. mybutton (setTooltip "my tooltip"))
 
-(goog.object.getValues goog.ui.Component.EventType)
-(events/listen mybutton "action" #(js/alert "button pressed"))
+  (goog.object.getValues goog.ui.Component.EventType)
+  (events/listen mybutton "action" #(js/alert "button pressed")))
 ; =============
 
 (def myobj (json/clj->js {"key1" "value1" "key2" #(println "Hallo Welt")}))

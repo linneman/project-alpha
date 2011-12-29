@@ -176,7 +176,7 @@
       false
       (let [[user] users
             pass-decrypted (decrypt-pass (:password user) (:salt user))]
-        (= pass-entered pass-decrypted)))))
+        (= 0 (compare pass-entered pass-decrypted))))))
 
 (defn find-user-by-name [name]
   (find-user :name name))
@@ -255,13 +255,13 @@
 (deftype DbSessionStore []
   SessionStore
   (read-session [_ key]
-    (println "read-session: key->" key) (read-session-data key))
+    (println "! read-session: key->" key "data->" (read-session-data key)) (read-session-data key))
   (write-session [_ key data]
     (let [key (or key (codec/base64-encode (get-secret-key {})))]
-      (println "write-session: key->" key "data->" data) (write-session-data key data)
+      (println "! write-session: key->" key "data->" data) (write-session-data key data)
       key))
   (delete-session [_ key]
-    (println "delete-session: key->" key) (delete-session-data key)
+    (println "! delete-session: key->" key) (delete-session-data key)
     nil))
 
 (defn db-session-store

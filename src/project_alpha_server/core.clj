@@ -18,47 +18,30 @@
         [ring.middleware.session :only [wrap-session]]
         [ring.middleware.multipart-params :only [wrap-multipart-params]]
         [project-alpha-server.model]
+        [project-alpha-server.auth]
         ))
 
+(def ^{:private true
+       :doc "login resource address for fetching user name and password"}
+  login-get-uri
+  "/login.html")
 
-(defn session-counter [{session :session}]
+(def ^{:private true
+       :doc "login resource address for posting user name and password"}
+  login-post-uri
+  "/login")
+
+(defn session-counter
+  "illustration how to use session (removed later on)"
+  [{session :session}]
   (let [count   (:count session 0)
         session (assoc session :count (inc count))]
     (-> (response (str "You accessed this page " count " times."))
         (assoc :session session))))
 
-
-(defn forward-url [url]
-  (format "<html><head><meta  http-equiv=\"refresh\" content=\"0; URL=%s\"></head><body>forwarding ...</body></html>" url))
-
-
-(defn login [session name password]
-  (let [session (assoc session :name name :password password)
-        prev-req-uri (or (:prev-req-uri session) "/index.html")]
-    (-> (response (forward-url prev-req-uri)) (assoc :session session))))
-
-
-(defn logout [session]
-  (let [session (assoc session :name "")]
-    (-> (response "<html><body><h1>logged out!</h1></body></html>") (assoc :session nil))))
-
-
-(defn wrap-authentification [handler login-uri]
-  (fn [request]
-    (let [resp (handler request)
-          uri (:uri request)
-          session (:session request)
-          name (:name session)
-          password (:password session)
-          upd-session (if (re-seq #"\.html$" uri) (assoc session :prev-req-uri uri) session)]
-      (if (and (not= uri login-uri) (not (check-user-password password {:name name})))
-        (-> (response (forward-url "/login")) (assoc :session upd-session))
-        resp))))
-
-
 (compojure/defroutes main-routes
-  (POST "/login" [name password :as {session :session}] (login session name password))
-  (GET  "/login" _ "<form method='post' action='/login'> Login: <input type='text' name='name'> Password: <input type='text' name='password'><input type='submit'></form>")
+  (POST login-post-uri [name password :as {session :session}]
+        (login session name password login-get-uri))
   (GET "/logout" {session :session} (logout session))
   (GET "/status" _ "server-running")
   (GET "/session" args (str "<body>" args "</body>"))
@@ -69,7 +52,7 @@
 
 (def app
   (-> main-routes
-      (wrap-authentification "/login")
+      (wrap-authentication login-get-uri [login-post-uri])
       (wrap-session {:store (db-session-store) :cookie-attrs {:max-age (* 30 24 3600)}})
       json-params/wrap-json-params
       wrap-multipart-params
@@ -84,6 +67,8 @@
 
 ; (.start server)
 ; (.stop server)
+
+
 
 
 
