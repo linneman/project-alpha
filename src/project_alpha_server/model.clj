@@ -15,10 +15,9 @@
             [korma.core :as sql]
             [clojure.java.jdbc :as jdbc]
             [ring.util.codec :as codec])
-  (:use [ring.middleware.session.store :only [SessionStore]])
-  (:import java.security.SecureRandom
-           (javax.crypto Cipher Mac)
-           (javax.crypto.spec SecretKeySpec IvParameterSpec)))
+  (:use [ring.middleware.session.store :only [SessionStore]]
+        [project-alpha-server.crypto :only
+         [get-secret-key get-encrypt-pass-and-salt decrypt-pass]]))
 
 ;; The database connection
 ;; argument for sql requests
@@ -81,8 +80,14 @@
    [:id :integer "PRIMARY KEY" "AUTO_INCREMENT"]
    [:name "varchar(255)" "UNIQUE"]
    [:email "varchar(255)" "UNIQUE"]
+   [:password "varchar(255)"]
+   [:salt "varchar(255)"]
+   [:confirmation_link "varchar(255)"]
    [:level :integer]
-   [:confirmed :boolean]))
+   [:confirmed :boolean]
+   [:created_at "datetime"]
+   ))
+
 
 (defn drop-users
   []
@@ -126,13 +131,17 @@
 
 (defn add-user
   "add a new user"
-  [& {:keys [name email level confirmed]
+  [& {:keys [name email password level confirmed]
                    :or {level 0 confirmed false}}]
-  (sql/insert users (sql/values
-                     {:name name
-                      :email email
-                      :level level
-                      :confirmed confirmed})))
+  (let [{:keys [password salt]} (get-encrypt-pass-and-salt password)]
+    (sql/insert users (sql/values
+                       {:name name
+                        :email email
+                        :password password
+                        :salt salt
+                        :level level
+                        :confirmed confirmed
+                        :created_at (java.util.Date.)}))))
 
 (defn find-user
   "finds user with given keys"
@@ -143,8 +152,31 @@
   "update user which match given keys with fields"
   [fields where]
   (sql/update users
-          (sql/set-fields fields)
-          (sql/where where)))
+              (sql/set-fields fields)
+              (sql/where where)))
+
+(defn delete-user
+  "deletes session data for a given key"
+  [& {:as args}]
+  (sql/delete users (sql/where args)))
+
+(defn change-user-password
+  "updates the user password"
+  [newpassword where]
+  (let [{:keys [password salt]} (get-encrypt-pass-and-salt newpassword)]
+    (sql/update users
+                (sql/set-fields  {:password password :salt salt})
+                (sql/where where))))
+
+(defn check-user-password
+  "check the save user password agains the login"
+  [pass-entered where]
+  (let [users (sql/select users (sql/where where))]
+    (if (empty? users)
+      false
+      (let [[user] users
+            pass-decrypted (decrypt-pass (:password user) (:salt user))]
+        (= pass-entered pass-decrypted)))))
 
 (defn find-user-by-name [name]
   (find-user :name name))
@@ -159,8 +191,11 @@
 (comment
   usage illustration
 
-  (add-user :name "Otto" :email "linneman@gmx.de")
-  (add-user :name "Konrad" :email "Konrad.Linnemann@google.de")
+  (add-user :name "Otto" :email "linneman@gmx.de" :password "secret")
+  (add-user :name "Konrad" :email "Konrad.Linnemann@google.de" :password "secret")
+  (change-user-password "mynewpassword" {:name "Otto"})
+  (check-user-password "mynewpassword" {:name "Otto"})
+  (delete-user :name "Otto")
 
   (find-user :name "Otto")
   (find-user-by-name "Otto")
@@ -217,43 +252,6 @@
      true (update-session {:data dataenc} {:session_id key}))
     dataenc))
 
-
-(comment
-  usage illustration
-
-  (write-session-data "123" "data1")
-  (write-session-data "456" "data2")
-
-  (read-session-data "123")
-  (write-session-data "123" "data 42")
-  (delete-session-data "123"))
-
-
-;; taken from:
-;; https://github.com/mmcgrana/ring/blob/master/ring-core/src/ring/middleware/session/cookie.clj
-
-(def ^{:private true
-       :doc "Algorithm to seed random numbers."}
-  seed-algorithm
-  "SHA1PRNG")
-
-(defn- secure-random-bytes
-  "Returns a random byte array of the specified size."
-  [size]
-  (let [seed (byte-array size)]
-    (.nextBytes (SecureRandom/getInstance seed-algorithm) seed)
-    seed))
-
-(defn- get-secret-key
-  "Get a valid secret key from a map of options, or create a random one from
-  scratch."
-  [options]
-  (if-let [secret-key (:key options)]
-    (if (string? secret-key)
-      (.getBytes ^String secret-key)
-      secret-key)
-    (secure-random-bytes 16)))
-
 (deftype DbSessionStore []
   SessionStore
   (read-session [_ key]
@@ -266,5 +264,17 @@
     (println "delete-session: key->" key) (delete-session-data key)
     nil))
 
-(defn db-session-store []
+(defn db-session-store
+  "creates the persistent session store (via database)"
+  []
   (DbSessionStore.))
+
+(comment
+  usage illustration
+
+  (write-session-data "123" "data1")
+  (write-session-data "456" "data2")
+
+  (read-session-data "123")
+  (write-session-data "123" "data 42")
+  (delete-session-data "123"))

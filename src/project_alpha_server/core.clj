@@ -32,8 +32,8 @@
   (format "<html><head><meta  http-equiv=\"refresh\" content=\"0; URL=%s\"></head><body>forwarding ...</body></html>" url))
 
 
-(defn login [session name]
-  (let [session (assoc session :name name)
+(defn login [session name password]
+  (let [session (assoc session :name name :password password)
         prev-req-uri (or (:prev-req-uri session) "/index.html")]
     (-> (response (forward-url prev-req-uri)) (assoc :session session))))
 
@@ -49,15 +49,16 @@
           uri (:uri request)
           session (:session request)
           name (:name session)
+          password (:password session)
           upd-session (if (re-seq #"\.html$" uri) (assoc session :prev-req-uri uri) session)]
-      (if (and (not= uri login-uri) (not= name "otto"))
+      (if (and (not= uri login-uri) (not (check-user-password password {:name name})))
         (-> (response (forward-url "/login")) (assoc :session upd-session))
         resp))))
 
 
 (compojure/defroutes main-routes
-  (POST "/login" [name :as {session :session}] (login session name))
-  (GET  "/login" _ "<form method='post' action='/login'> Login: <input type='text' name='name' /><input type='submit' /></form>")
+  (POST "/login" [name password :as {session :session}] (login session name password))
+  (GET  "/login" _ "<form method='post' action='/login'> Login: <input type='text' name='name'> Password: <input type='text' name='password'><input type='submit'></form>")
   (GET "/logout" {session :session} (logout session))
   (GET "/status" _ "server-running")
   (GET "/session" args (str "<body>" args "</body>"))
