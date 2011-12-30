@@ -9,6 +9,6 @@
                  [korma "0.2.1"]
                  [mysql/mysql-connector-java "5.1.6"]
                  [org.clojure/java.jdbc "0.1.1"]
-                 ]
+                 [org.clojure/data.json "0.1.1"]]
   :dev-dependencies [[lein-clojurescript "1.0.1-SNAPSHOT"]]
   :main project-alpha-server.core)

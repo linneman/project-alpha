@@ -29,7 +29,7 @@
   "utility function for processing POST requests comming
    from login forms currently based on user name and password."
   [session name password login-get-uri]
-  (if (check-user-password password {:name name})
+  (if (check-user-password password name)
     (let [session (assoc session :authenticated "true")
           prev-req-uri (or (:prev-req-uri session) login-get-uri)]
       (-> (response (forward-url prev-req-uri)) (assoc :session session)))

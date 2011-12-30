@@ -160,6 +160,9 @@
   [& {:as args}]
   (sql/delete users (sql/where args)))
 
+
+(defn find-user-by-name-or-email [_]) ; forward declaration
+
 (defn change-user-password
   "updates the user password"
   [newpassword where]
@@ -170,8 +173,8 @@
 
 (defn check-user-password
   "check the save user password agains the login"
-  [pass-entered where]
-  (let [users (sql/select users (sql/where where))]
+  [pass-entered login]
+  (let [users (find-user-by-name-or-email login)]
     (if (empty? users)
       false
       (let [[user] users
@@ -184,6 +187,12 @@
 (defn find-user-by-email [email]
   (find-user :email email))
 
+(defn find-user-by-name-or-email [desc]
+  (let [first-try (find-user-by-name desc)]
+    (if (empty? first-try)
+      (find-user-by-email desc)
+      first-try)))
+
 (defn find-user-by-id [id]
   (find-user :id id))
 
@@ -194,13 +203,15 @@
   (add-user :name "Otto" :email "linneman@gmx.de" :password "secret")
   (add-user :name "Konrad" :email "Konrad.Linnemann@google.de" :password "secret")
   (change-user-password "mynewpassword" {:name "Otto"})
-  (check-user-password "mynewpassword" {:name "Otto"})
+  (check-user-password "mynewpassword" "Otto")
+  (check-user-password "mynewpassword" "linneman@gmx.de")
   (delete-user :name "Otto")
 
   (find-user :name "Otto")
   (find-user-by-name "Otto")
   (find-user-by-email "linneman@gmx.de")
   (find-user-by-id 2)
+  (find-user-by-name-or-email "linneman@gmx.de")
 
   (update-user {:email "Otto.Linnemann@google.de"} {:name "Otto"})
   (update-user {:email "Otto.Linnemann@google.de"} {:name "Doppelgänger"})
@@ -255,13 +266,16 @@
 (deftype DbSessionStore []
   SessionStore
   (read-session [_ key]
-    (println "! read-session: key->" key "data->" (read-session-data key)) (read-session-data key))
+    ; (println "! read-session: key->" key "data->" (read-session-data key))
+    (read-session-data key))
   (write-session [_ key data]
     (let [key (or key (codec/base64-encode (get-secret-key {})))]
-      (println "! write-session: key->" key "data->" data) (write-session-data key data)
+      ; (println "! write-session: key->" key "data->" data)
+      (write-session-data key data)
       key))
   (delete-session [_ key]
-    (println "! delete-session: key->" key) (delete-session-data key)
+    ; (println "! delete-session: key->" key)
+    (delete-session-data key)
     nil))
 
 (defn db-session-store
