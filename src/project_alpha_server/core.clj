@@ -71,7 +71,7 @@
 
 (def app
   (-> main-routes
-      (wrap-authentication login-get-uri [login-post-uri register-get-uri register-post-uri])
+      (wrap-authentication login-get-uri [login-post-uri register-get-uri register-post-uri "/user"])
       (wrap-session {:store (db-session-store) :cookie-attrs {:max-age (* 30 24 3600)}})
       json-params/wrap-json-params
       wrap-multipart-params

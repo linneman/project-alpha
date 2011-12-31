@@ -61,10 +61,13 @@
           session (:session request)
           authenticated (:authenticated session)
           uri-white-list (conj uri-white-list login-get-uri)
-          upd-session (if (or (re-seq #"\.html$" uri)    ; remember uri only for html pages
-                              (not (re-seq #"\/.*\..*$" uri))) ; or files without extentions
-                        (assoc session :prev-req-uri uri) session)]
+          uri-html? (fn [uri] (re-seq #"\.html$" uri))
+          uri-json-request? (fn [uri] (not (re-seq #"\/.*\..*$" uri)))
+          upd-session (if (or (uri-html? uri) (uri-json-request? uri))
+                        (assoc session :prev-req-uri uri) ; don't remember css, img, etc.
+                        session)]
       (if (or (= "true" authenticated)
-              (not (not-any? #(= 0 (compare % uri)) uri-white-list)))
+              (and (not (uri-json-request? uri)) (not (uri-html? uri))) ; json and html are forbidden
+              (not (not-any? #(re-seq (re-pattern (str "^" (.replace % "/" "\\/"))) uri) uri-white-list)))
         resp
         (-> (response (forward-url login-get-uri)) (assoc :session upd-session))))))

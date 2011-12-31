@@ -36,6 +36,9 @@
 (defn loginfo [msg]
   (. logger (log LogLevel/INFO msg)))
 
+(def current-url (js* "document.URL"))
+
+(loginfo (str "CURRENT-URL: " current-url))
 
 ; -------------
 (comment
@@ -88,14 +91,10 @@
 
 ;(. mycomponent (render parent-element))
 
-; =============
 
-(def tabpane (goog.ui.TabPane. (dom/get-element "tabpane1")))
-(. tabpane (addPage (TabPane/TabPage. (dom/get-element "page1"))))
-(. tabpane (addPage (TabPane/TabPage. (dom/get-element "page2"))))
-(. tabpane (addPage (TabPane/TabPage. (dom/get-element "page3"))))
 
-; =============
+
+    ;; ====== utility functions ======
 
 (defn send-request
   "send XHTTP request as string"
@@ -105,63 +104,94 @@
      (goog.net.XhrIo/send url function method str (json/clj->js {"Content-Type" ["application/json"]}))))
 
 
-(def editor (editor/create "editMe" "toolbar"))
 
-(events/listen editor goog.editor.Field.EventType.DELAYEDCHANGE
-               (fn [e]
-                 (loginfo (json/generate {"text" (. editor (getCleanContents))}))
-                 (send-request "/profile"
-                               (json/generate {"text" (. editor (getCleanContents))})
-                               (fn [e] nil)
-                               "POST")))
-; =============
+(if (re-seq #"index\.html$" current-url)
+  (do
+    ;;
+    ;; ====== functions for profile pane ======
+    ;;
+    (def tabpane (goog.ui.TabPane. (dom/get-element "tabpane1")))
+    (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page1"))))
+    (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page2"))))
+    (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page3"))))
 
-(defn- when-user-exists
-  "function is executed when user does exists
+    (def editor (editor/create "editMe" "toolbar"))
+
+    (events/listen editor goog.editor.Field.EventType.DELAYEDCHANGE
+                   (fn [e]
+                     (loginfo (json/generate {"text" (. editor (getCleanContents))}))
+                     (send-request "/profile"
+                                   (json/generate {"text" (. editor (getCleanContents))})
+                                   (fn [e] nil)
+                                   "POST")))
+    )) ; (if (re-seq #"index\.html$" current-url))
+
+
+
+
+(if (re-seq #"register\.html$" current-url)
+  (do
+    ;;
+    ;; ====== functions for register pane ======
+    ;;
+
+    (defn- when-user-exists
+      "function is executed when user does exists
    with user data as argument."
-  [name function]
-  (send-request (str "/user/" (goog.string.urlEncode name)) nil
-    (fn [e] (let [text (. (.target e) (getResponseText))
-                  data (json/parse text)]
-              (if (not-empty data) (function data))))))
+      [name function]
+      (send-request (str "/user/" (goog.string.urlEncode name)) nil
+                    (fn [e] (let [text (. (.target e) (getResponseText))
+                                  data (json/parse text)]
+                              (if (not-empty data) (function data))))))
 
-(comment
-  usage illustration
+    (comment
+      usage illustration
 
-  (when-user-exists "Otto" #(loginfo (pr-str "User exists, data: " %)))
-  (when-user-exists "Otto" #(loginfo (% "name")))
-  (when-user-exists "Otto2" (fn [data] (loginfo (data "name"))))
-  )
+      (when-user-exists "Otto" #(loginfo (pr-str "User exists, data: " %)))
+      (when-user-exists "Otto" #(loginfo (% "name")))
+      (when-user-exists "Otto2" (fn [data] (loginfo (data "name"))))
+      )
 
-(defn updateRegisterText [e]
-  (let [target (.target e)
-        target-id (.id target)
-        target-elem (dom/get-element target-id)
-        value (.value target-elem)]
-    (loginfo (str "focus out event triggered for: " target-id))
-    (cond
-     (= target-id "name")
-     (do
-       (loginfo (str "name->" value))
-       (when-user-exists value
-                         (fn [data] (loginfo (pr-str "User " value " exists already!")))))
-     (= target-id "email") (loginfo (str "email->" value))
-     (= target-id "password") (loginfo (str "password->" value))
-     (= target-id "password-repeat") (loginfo (str "password-repeat->" value)))))
+    (defn updateRegisterText [e]
+      (let [target (.target e)
+            target-id (.id target)
+            target-elem (dom/get-element target-id)
+            value (.value target-elem)]
+        (loginfo (str "focus out event triggered for: " target-id))
+        (cond
+         (= target-id "name")
+         (do
+           (loginfo (str "name->" value))
+           (set! (.color (.style target-elem)) "green")
+           (when-user-exists value
+                             (fn [data]
+                               (do
+                                 (loginfo (pr-str "User " value " exists already!"))
+                                 (set! (.color (.style target-elem)) "red")))))
+         (= target-id "email") (loginfo (str "email->" value))
+         (= target-id "password") (loginfo (str "password->" value))
+         (= target-id "password-repeat") (loginfo (str "password-repeat->" value)))))
 
 
-(def registerFields (dom/get-element "register"))
-(def registerFiedlsFocusHandler (goog.events.FocusHandler. registerFields))
+    (def registerFields (dom/get-element "register"))
+    (def registerFiedlsFocusHandler (goog.events.FocusHandler. registerFields))
 
-(events/listen
- registerFiedlsFocusHandler
- goog.events.FocusHandler.EventType.FOCUSOUT
- updateRegisterText)
 
-(comment
-  (def a (dom/get-element "name"))
-  (.value a)
-  (set! (.value a) ""))
+    (events/listen
+     registerFiedlsFocusHandler
+     goog.events.FocusHandler.EventType.FOCUSOUT
+     updateRegisterText)
+
+    (comment
+      (def a (dom/get-element "name"))
+      (.value a)
+      (set! (.value a) "")
+      (set! (.color (.style a)) "red"))
+
+    )) ; (if (re-seq #"register\.html$" current-url))
+
+
+
 
 ; =============
 
