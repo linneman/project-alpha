@@ -53,6 +53,7 @@
 
 (defn user-response [name]
   (let [[data] (find-user-by-name-or-email name)]
+    (println "requested user: " name)
     (if (not-empty data)
       (json-str (select-keys data [:name :email :id :level :confirmed]))
       (json-str {}))))
@@ -61,7 +62,7 @@
   (POST login-post-uri [name password :as {session :session}]
         (login session name password login-get-uri))
   (GET "/logout" {session :session} (logout session))
-  (GET "/user/:name" [name] (let [name (url-decode name)] (user-response name)))
+  (GET ["/user/:name" :name #".*"] [name] (let [name (url-decode name)] (user-response name)))
   (GET "/status" _ "server-running")
   (GET "/session" args (str "<body>" args "</body>"))
   (GET "/counter" args (session-counter args))

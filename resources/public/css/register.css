@@ -35,3 +35,15 @@
     font-size:0.8em;
     width:300px;
 }
+
+#register_message {
+    position:relative;
+}
+
+#register_message .register_message {
+    position:absolute;
+    top:0px;
+    left:20px;
+    color:red;
+    opacity:0;
+}

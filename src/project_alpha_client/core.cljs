@@ -137,7 +137,7 @@
 
     (defn- when-user-exists
       "function is executed when user does exists
-   with user data as argument."
+       with user data as argument."
       [name function]
       (send-request (str "/user/" (goog.string.urlEncode name)) nil
                     (fn [e] (let [text (. (.target e) (getResponseText))
@@ -148,29 +148,51 @@
       usage illustration
 
       (when-user-exists "Otto" #(loginfo (pr-str "User exists, data: " %)))
+      (when-user-exists "linneman@gmx.de" #(loginfo (pr-str "User exists, data: " %)))
       (when-user-exists "Otto" #(loginfo (% "name")))
       (when-user-exists "Otto2" (fn [data] (loginfo (data "name"))))
       )
 
-    (defn updateRegisterText [e]
+    (defn updateRegisterText
+      "validates registration form"
+      [e]
       (let [target (.target e)
             target-id (.id target)
             target-elem (dom/get-element target-id)
-            value (.value target-elem)]
+            value (.value target-elem)
+            name-not-available-error (dom/get-element "name_not_available_error")
+            email-defined-error (dom/get-element "email_defined_error")
+            email-malformed-error (dom/get-element "email_malformed_error")
+            password-mismatch-error (dom/get-element "password_mismatch_error")
+            password-form-error (dom/get-element "password_form_error")]
         (loginfo (str "focus out event triggered for: " target-id))
         (cond
          (= target-id "name")
          (do
            (loginfo (str "name->" value))
            (set! (.color (.style target-elem)) "green")
+           (style/setOpacity name-not-available-error 0)
            (when-user-exists value
                              (fn [data]
                                (do
                                  (loginfo (pr-str "User " value " exists already!"))
-                                 (set! (.color (.style target-elem)) "red")))))
-         (= target-id "email") (loginfo (str "email->" value))
+                                 (set! (.color (.style target-elem)) "red")
+                                 (style/setOpacity name-not-available-error 1)))))
+         (= target-id "email")
+         (do
+           (loginfo (str "email->" value))
+           (set! (.color (.style target-elem)) "green")
+           (style/setOpacity email-defined-error 0)
+           (style/setOpacity email-malformed-error 0)
+           (when-user-exists value
+                             (fn [data]
+                               (do
+                                 (loginfo (pr-str "Email " value " exists already!"))
+                                 (set! (.color (.style target-elem)) "red")
+                                 (style/setOpacity email-defined-error 1))))  )
          (= target-id "password") (loginfo (str "password->" value))
          (= target-id "password-repeat") (loginfo (str "password-repeat->" value)))))
+
 
 
     (def registerFields (dom/get-element "register"))

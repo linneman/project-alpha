@@ -49,6 +49,13 @@
 	<tr><td align="right">Passwort:</td><td><input id="password" class="reg-field" type="password" name="password"></td></tr>
 	<tr><td align="right">Passwort Wiederholung:</td><td><input id="password-repeat" class="reg-field" type="password" name="password-repeat"></td></tr>
       </table>
+      <div id="register_message">
+	<div id="name_not_available_error" class="register_message">Dieser Benutzername ist bereits vergeben!</Div>
+	<div id="email_defined_error" class="register_message">Die gewählte Emailadresse ist bereits vorhanden. Reaktierven Sie ggf. Ihren Zugang!</div>
+	<div id="email_malformed_error" class="register_message">Diese Emailadresse ist nicht korrekt!</div>
+	<div id="password_mismatch_error" class="register_message">Angegebene Passwörter stimmen nicht überein!</div>
+	<div id="password_form_error" class="register_message">Das Passwort muss mindestens 5 Zeichen enthalten</div>
+      </div>
     </div>
 
     <div id="scripts">
