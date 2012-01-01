@@ -1,4 +1,4 @@
-;;; project-alph
+
 ;;;
 ;;; Clojure based web application
 ;;; https://github.com/clojure/clojurescript for further information.
@@ -105,10 +105,11 @@
 
 
 
-(if (re-seq #"index\.html$" current-url)
+(defn ^:export profile
+  "functions for profile pane"
+  []
   (do
     ;;
-    ;; ====== functions for profile pane ======
     ;;
     (def tabpane (goog.ui.TabPane. (dom/get-element "tabpane1")))
     (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page1"))))
@@ -124,17 +125,15 @@
                                    (json/generate {"text" (. editor (getCleanContents))})
                                    (fn [e] nil)
                                    "POST")))
-    )) ; (if (re-seq #"index\.html$" current-url))
+    ))
 
 
 
 
-(if (re-seq #"register\.html$" current-url)
+(defn ^:export register
+  "functions for register pane"
+  []
   (do
-    ;;
-    ;; ====== functions for register pane ======
-    ;;
-
     (defn- when-user-exists
       "function is executed when user does exists
        with user data as argument."
@@ -210,8 +209,7 @@
       (set! (.value a) "")
       (set! (.color (.style a)) "red"))
 
-    )) ; (if (re-seq #"register\.html$" current-url))
-
+    ))
 
 
 
