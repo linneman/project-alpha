@@ -6,6 +6,7 @@
                  [ring-json-params "0.1.3"]
                  [compojure "0.6.5" :exclusions
                   [org.clojure/clojure org.clojure/clojure-contrib]]
+                 [org.ol42/enlive "1.3.0-corfield-alpha1"]
                  [korma "0.2.1"]
                  [mysql/mysql-connector-java "5.1.6"]
                  [org.clojure/java.jdbc "0.1.1"]
