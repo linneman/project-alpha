@@ -13,37 +13,40 @@
 
 #register {
     position:relative;
-    font-size:2.0em;
+    font-size:1.5em;
     background:#bdb;
     width:700px;
-    height:450px;
-    margin:0.2em;
+    height:470px;
+    margin:0.3em;
     border-width:5px;
     border-style:solid;
 }
 
 #register table {
     border-collapse:separate;
-    border-spacing:10px 20px;
+    border-spacing:10px 10px;
+    font-size:0.8em;
+    margin:0.3em;
 }
 
 #register h1 {
-    font-size:36px;
+    font-size:32px;
 }
 
 #register .reg-field {
-    font-size:1.5em;
-    width:300px;
+    font-size:1.3em;
+    width:460px;
 }
 
-#register_message {
-    position:relative;
-}
-
-#register_message .register_message {
-    position:absolute;
+#register .register_message {
+    font-size:0.8em;
     top:0px;
     left:20px;
     color:red;
+    //opacity:0;
+}
+
+#register_messages {
+    position:absolute;
     opacity:0;
 }

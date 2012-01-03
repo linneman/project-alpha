@@ -1,19 +1,26 @@
 <div id="register">
-  <h1 align="center">Registrierung:</h1>
+  <h1 align="center">Anmeldedaten festlegen</h1>
   <table>
     <tr><td align="right">Name:</td><td><input id="name" class="reg-field" type="text" name="name"></td></tr>
+    <tr><td>&nbsp;</td><td><div id="register_message_name" class="register_message"></div></td></tr>
     <tr><td align="right">Email:</td><td><input id="email" class="reg-field" type="text" name="email"></td></tr>
+    <tr><td>&nbsp;</td><td><div id="register_message_email" class="register_message"></div></td></tr>
     <tr><td align="right">Passwort:</td><td><input id="password" class="reg-field" type="password" name="password"></td></tr>
+    <tr><td>&nbsp;</td><td><div id="register_message_password" class="register_message"></div></td></tr>
     <tr><td align="right">Passwort Wiederholung:</td><td><input id="password-repeat" class="reg-field" type="password" name="password-repeat"></td></tr>
+    <tr><td>&nbsp;</td><td><div id="register_message_password_repeat" class="register_message"></div></td></tr>
   </table>
-  <div id="register_message">
-    <div id="name_not_available_error" class="register_message">Dieser Benutzername ist bereits vergeben!</Div>
-    <div id="email_defined_error" class="register_message">Die gewählte Emailadresse ist bereits vorhanden. Reaktierven Sie ggf. Ihren Zugang!</div>
-    <div id="email_malformed_error" class="register_message">Diese Emailadresse ist nicht korrekt!</div>
-    <div id="password_mismatch_error" class="register_message">Angegebene Passwörter stimmen nicht überein!</div>
-    <div id="password_form_error" class="register_message">Das Passwort muss mindestens 5 Zeichen enthalten</div>
-  </div>
 </div>
+
+<div id="register_messages">
+  <div id="name_not_available_error">Dieser Benutzername ist bereits vergeben!</div>
+  <div id="email_defined_error">Die gewählte Emailadresse ist bereits vorhanden!</div>
+  <div id="email_malformed_error">Diese Emailadresse ist nicht korrekt!</div>
+  <div id="password_mismatch_error">Angegebene Passwörter stimmen nicht überein!</div>
+  <div id="password_form_error">Das Passwort muss mindestens 5 Zeichen enthalten!</div>
+</div>
+
+<p>Hier folgt weiterer Inhalt ...</p>
 
 <div id="scripts">
   <script type="text/javascript" src="goog/base.js"></script>

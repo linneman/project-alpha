@@ -1,4 +1,3 @@
-
 ;;;
 ;;; Clojure based web application
 ;;; https://github.com/clojure/clojurescript for further information.
@@ -96,6 +95,7 @@
 
     ;; ====== utility functions ======
 
+
 (defn send-request
   "send XHTTP request as string"
   ([url str] (send-request url str (fn [e] nil) "GET"))
@@ -104,6 +104,44 @@
      (goog.net.XhrIo/send url function method str (json/clj->js {"Content-Type" ["application/json"]}))))
 
 
+(defn validate-email
+  "validates email address for correct canonical form.
+   returns true if email string is valid, otherwise false."
+  [email-str]
+  (not (or
+        (not (re-seq #"@" email-str))
+        (re-seq #"@\." email-str)
+        (re-seq #"\.@" email-str)
+        (re-seq #"@.*@" email-str)
+        (re-seq #"^\." email-str)
+        (re-seq #"\.$" email-str)
+        (re-seq #"\.{2,}" email-str))))
+
+
+(defn copy-id-text
+  "copies the text which is refered by given HTML id
+       string to the 'to-id-str' HTML id."
+  [from-id-str to-id-str]
+  (let [from-elem (dom/get-element from-id-str)
+        to-elem (dom/get-element to-id-str)]
+    (goog.dom.setTextContent to-elem (goog.dom.getTextContent from-elem))))
+
+
+(defn clear-id-text
+  "clears the given HTML id element text"
+  [id-str]
+  (let [elem (dom/get-element id-str)]
+    (goog.dom.setTextContent elem " ")))
+
+(comment
+  usage illustration
+
+  (copy-id-text "name_not_available_error" "register_message_name")
+  (clear-id-text "register_message_name" ""))
+
+
+
+    ;; ====== page functions ======
 
 (defn ^:export profile
   "functions for profile pane"
@@ -158,48 +196,70 @@
       (let [target (.target e)
             target-id (.id target)
             target-elem (dom/get-element target-id)
-            value (.value target-elem)
-            name-not-available-error (dom/get-element "name_not_available_error")
-            email-defined-error (dom/get-element "email_defined_error")
-            email-malformed-error (dom/get-element "email_malformed_error")
-            password-mismatch-error (dom/get-element "password_mismatch_error")
-            password-form-error (dom/get-element "password_form_error")]
+            value (.value target-elem)]
         (loginfo (str "focus out event triggered for: " target-id))
         (cond
          (= target-id "name")
          (do
            (loginfo (str "name->" value))
            (set! (.color (.style target-elem)) "green")
-           (style/setOpacity name-not-available-error 0)
+           (clear-id-text "register_message_name")
            (when-user-exists value
                              (fn [data]
                                (do
                                  (loginfo (pr-str "User " value " exists already!"))
                                  (set! (.color (.style target-elem)) "red")
-                                 (style/setOpacity name-not-available-error 1)))))
+                                 (copy-id-text
+                                  "name_not_available_error"
+                                  "register_message_name")))))
          (= target-id "email")
          (do
            (loginfo (str "email->" value))
            (set! (.color (.style target-elem)) "green")
-           (style/setOpacity email-defined-error 0)
-           (style/setOpacity email-malformed-error 0)
+           (clear-id-text "register_message_email")
            (when-user-exists value
                              (fn [data]
                                (do
-                                 (loginfo (pr-str "Email " value " exists already!"))
+                                 (loginfo (pr-str "Emailaddress " value " exists already!"))
                                  (set! (.color (.style target-elem)) "red")
-                                 (style/setOpacity email-defined-error 1))))  )
-         (= target-id "password") (loginfo (str "password->" value))
-         (= target-id "password-repeat") (loginfo (str "password-repeat->" value)))))
-
+                                 (copy-id-text
+                                  "email_defined_error"
+                                  "register_message_email"))))
+           (when (not (validate-email value))
+             (loginfo (pr-str "Emailaddress " value " is malformed!"))
+             (set! (.color (.style target-elem)) "red")
+             (copy-id-text "email_malformed_error" "register_message_email")))
+         (= target-id "password")
+         (do
+           (loginfo (str "password->" value))
+           (set! (.color (.style target-elem)) "green")
+           (clear-id-text "register_message_password")
+           (if (< (count value) 5)
+             (do
+               (loginfo (pr-str "Password " value " too short"))
+               (set! (.color (.style target-elem)) "red")
+               (copy-id-text "password_form_error" "register_message_password")
+               )))
+         (= target-id "password-repeat")
+         (do
+           (loginfo (str "password-repeat->" value))
+           (set! (.color (.style target-elem)) "green")
+           (clear-id-text "register_message_password_repeat")
+           (if (not= value (.value (dom/get-element "password")))
+             (do
+               (loginfo (pr-str "Password " value " do not match!"))
+               (set! (.color (.style target-elem)) "red")
+               (copy-id-text "password_mismatch_error" "register_message_password_repeat")
+               )
+             ))
+         )))
 
 
     (def registerFields (dom/get-element "register"))
-    (def registerFiedlsFocusHandler (goog.events.FocusHandler. registerFields))
-
+    (def registerFieldsFocusHandler (goog.events.FocusHandler. registerFields))
 
     (events/listen
-     registerFiedlsFocusHandler
+     registerFieldsFocusHandler
      goog.events.FocusHandler.EventType.FOCUSOUT
      updateRegisterText)
 
@@ -210,7 +270,6 @@
       (set! (.color (.style a)) "red"))
 
     ))
-
 
 
 ; =============
