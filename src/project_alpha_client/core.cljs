@@ -334,6 +334,24 @@
       (update-confirm-button-state))
 
 
+    (defn- poll-all-reg-field-checks
+      "check fields every 500ms to send button to be updated
+       even when last input field has not been left."
+      []
+      (let [timer (goog.Timer. 500)]
+        (. timer (start))
+        (events/listen timer goog.Timer/TICK check-all-reg-fields)))
+
+    (defn trigger-polling-when-entered-last-field
+      [e]
+      (let [target (.target e)
+            target-id (.id target)
+            target-elem (dom/get-element target-id)
+            value (.value target-elem)]
+        (cond
+         (= target-id "password-repeat")
+         (poll-all-reg-field-checks))))
+
     (def registerFields (dom/get-element "register"))
     (def registerFieldsFocusHandler (goog.events.FocusHandler. registerFields))
 
@@ -341,6 +359,11 @@
      registerFieldsFocusHandler
      goog.events.FocusHandler.EventType.FOCUSOUT
      updateRegisterText)
+
+    (events/listen
+     registerFieldsFocusHandler
+     goog.events.FocusHandler.EventType.FOCUSIN
+     trigger-polling-when-entered-last-field)
 
     (events/listen confirm-button
                    "action"
