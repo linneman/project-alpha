@@ -82,18 +82,21 @@
        (gen-site full-frame-name [:div#content_pane] full-site-name)
        )))
 
-(defn user-response [name]
+(defn user-response
+  "used for ensuring that user name is unique"
+  [name]
   (let [[data] (find-user-by-name-or-email name)]
-    (println "requested user: " name)
+    ;(println "requested user: " name)
     (if (not-empty data)
       (json-str (select-keys data [:name :email :id :level :confirmed]))
       (json-str {}))))
 
 (compojure/defroutes main-routes
+  ;; --- authentification and registration ---
   (POST login-post-uri [name password :as {session :session}]
         (login session name password login-get-uri))
-  ;; --- authentification and registration ---
   (GET "/logout" {session :session} (logout session))
+  (POST register-post-uri {params :params} (add-user :name (params "name") :email (params "email") :password (params "password")))
   (GET ["/user/:name" :name #".*"] [name] (let [name (url-decode name)] (user-response name)))
   ;; --- static html (composed out of outer layout side and inner content pane ---
   (GET "/index.html" _ (site "index.html"))

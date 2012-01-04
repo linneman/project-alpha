@@ -190,6 +190,88 @@
       (when-user-exists "Otto2" (fn [data] (loginfo (data "name"))))
       )
 
+    (def confirm-button (goog.ui.decorate (dom/get-element "confirm-registration")))
+
+    (def cancel-button (goog.ui.decorate (dom/get-element "cancel-registration")))
+    (. cancel-button (setEnabled true))
+    (events/listen cancel-button "action" #(js* "history.back();"))
+
+    (def reg-form-status (atom
+                          {:name "undefined"
+                           :email "undefined"
+                           :password "undefined"
+                           :password-repeat "undefined"}))
+
+    (defn set-name-error
+      "set an error message with respect to name field"
+      [dom-error-id-string]
+      (swap! reg-form-status assoc :name dom-error-id-string)
+      (copy-id-text dom-error-id-string "register_message_name")
+      (set! (.color (.style (dom/get-element "name"))) "red")
+      )
+
+    (defn clear-name-error
+      "remove all error message with respect to name field"
+      []
+      (swap! reg-form-status dissoc :name)
+      (clear-id-text "register_message_name")
+      (set! (.color (.style (dom/get-element "name"))) "green")
+      )
+
+    (defn set-email-error
+      "set an error message with respect to email field"
+      [dom-error-id-string]
+      (swap! reg-form-status assoc :email dom-error-id-string)
+      (copy-id-text dom-error-id-string "register_message_email")
+      (set! (.color (.style (dom/get-element "email"))) "red")
+      )
+
+    (defn clear-email-error
+      "remove all error message with respect to email field"
+      []
+      (swap! reg-form-status dissoc :email)
+      (clear-id-text "register_message_email")
+      (set! (.color (.style (dom/get-element "email"))) "green")
+      )
+
+    (defn set-password-error
+      "set an error message with respect to password field"
+      [dom-error-id-string]
+      (swap! reg-form-status assoc :password dom-error-id-string)
+      (copy-id-text dom-error-id-string "register_message_password")
+      (set! (.color (.style (dom/get-element "password"))) "red")
+      )
+
+    (defn clear-password-error
+      "remove all error message with respect to password field"
+      []
+      (swap! reg-form-status dissoc :password)
+      (clear-id-text "register_message_password")
+      (set! (.color (.style (dom/get-element "password"))) "green")
+      )
+
+    (defn set-password-repeat-error
+      "set an error message with respect to password repeat field"
+      [dom-error-id-string]
+      (swap! reg-form-status assoc :password-repeat dom-error-id-string)
+      (copy-id-text dom-error-id-string "register_message_password_repeat")
+      (set! (.color (.style (dom/get-element "password-repeat"))) "red")
+      )
+
+    (defn clear-password-repeat-error
+      "remove all error message with respect to password repeat field"
+      []
+      (swap! reg-form-status dissoc :password-repeat)
+      (clear-id-text "register_message_password_repeat")
+      (set! (.color (.style (dom/get-element "password-repeat"))) "green")
+      )
+
+    (defn update-confirm-button-state []
+      (if (empty? @reg-form-status)
+        (do (. confirm-button (setEnabled true)) true)
+        (do (. confirm-button (setEnabled false)) false)))
+
+
     (defn updateRegisterText
       "validates registration form"
       [e]
@@ -202,57 +284,54 @@
          (= target-id "name")
          (do
            (loginfo (str "name->" value))
-           (set! (.color (.style target-elem)) "green")
-           (clear-id-text "register_message_name")
+           (clear-name-error)
            (when-user-exists value
                              (fn [data]
                                (do
                                  (loginfo (pr-str "User " value " exists already!"))
-                                 (set! (.color (.style target-elem)) "red")
-                                 (copy-id-text
-                                  "name_not_available_error"
-                                  "register_message_name")))))
+                                 (set-name-error "name_not_available_error")))))
          (= target-id "email")
          (do
            (loginfo (str "email->" value))
-           (set! (.color (.style target-elem)) "green")
-           (clear-id-text "register_message_email")
+           (clear-email-error)
            (when-user-exists value
                              (fn [data]
                                (do
                                  (loginfo (pr-str "Emailaddress " value " exists already!"))
-                                 (set! (.color (.style target-elem)) "red")
-                                 (copy-id-text
-                                  "email_defined_error"
-                                  "register_message_email"))))
+                                 (set-email-error "email_defined_error"))))
            (when (not (validate-email value))
              (loginfo (pr-str "Emailaddress " value " is malformed!"))
-             (set! (.color (.style target-elem)) "red")
-             (copy-id-text "email_malformed_error" "register_message_email")))
+             (set-email-error "email_malformed_error")))
          (= target-id "password")
          (do
            (loginfo (str "password->" value))
-           (set! (.color (.style target-elem)) "green")
-           (clear-id-text "register_message_password")
+           (clear-password-error)
            (if (< (count value) 5)
              (do
                (loginfo (pr-str "Password " value " too short"))
-               (set! (.color (.style target-elem)) "red")
-               (copy-id-text "password_form_error" "register_message_password")
-               )))
+               (set-password-error "password_form_error"))))
          (= target-id "password-repeat")
          (do
            (loginfo (str "password-repeat->" value))
-           (set! (.color (.style target-elem)) "green")
-           (clear-id-text "register_message_password_repeat")
+           (clear-password-repeat-error)
            (if (not= value (.value (dom/get-element "password")))
              (do
                (loginfo (pr-str "Password " value " do not match!"))
-               (set! (.color (.style target-elem)) "red")
-               (copy-id-text "password_mismatch_error" "register_message_password_repeat")
-               )
+               (set-password-repeat-error "password_mismatch_error"))
              ))
-         )))
+         )
+        (update-confirm-button-state)))
+
+
+    (defn check-all-reg-fields
+      "checks all register pane fields.
+       This is required before final transmission"
+      []
+      (dorun (map
+              #(updateRegisterText
+                (goog.events.Event. "focusout" (dom/get-element %)))
+              ["name" "email" "password" "password-repeat"]))
+      (update-confirm-button-state))
 
 
     (def registerFields (dom/get-element "register"))
@@ -262,6 +341,16 @@
      registerFieldsFocusHandler
      goog.events.FocusHandler.EventType.FOCUSOUT
      updateRegisterText)
+
+    (events/listen confirm-button
+                   "action"
+                   #(do (if (check-all-reg-fields)
+                          (send-request "/register"
+                                        (json/generate {"name" (.value (dom/get-element "name"))
+                                                        "email" (.value (dom/get-element "email"))
+                                                        "password" (.value (dom/get-element "password"))})
+                                        (fn [e] nil)
+                                        "POST"))))
 
     (comment
       (def a (dom/get-element "name"))

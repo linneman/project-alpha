@@ -16,9 +16,9 @@
     font-size:1.5em;
     background:#bdb;
     width:700px;
-    height:470px;
+    height:500px;
     margin:0.3em;
-    border-width:5px;
+    border-width:2px;
     border-style:solid;
 }
 
@@ -27,6 +27,20 @@
     border-spacing:10px 10px;
     font-size:0.8em;
     margin:0.3em;
+}
+
+#confirm-registration {
+    position:absolute;
+    font-size:24px;
+    left:200px;
+    padding: 2px 20px;
+}
+
+#cancel-registration {
+    position:absolute;
+    font-size:24px;
+    left:400px;
+    padding: 2px 20px;
 }
 
 #register h1 {
