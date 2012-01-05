@@ -21,6 +21,7 @@
             [goog.ui.Button :as Button]
             [goog.ui.TabPane :as TabPane]
             [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
+            [goog.ui.Dialog :as Dialog]
             [goog.Timer :as timer]
             [goog.debug.Console :as Console]
             [goog.debug.Logger :as Logger]
@@ -167,11 +168,31 @@
 
 
 
-
 (defn ^:export register
   "functions for register pane"
   []
   (do
+
+    ;; move the registration form to modal dialog panel
+    (def register-pane-elem (dom/get-element "register"))
+    (def dialog (goog.ui.Dialog.))
+    (. dialog (setContent (goog.dom.getOuterHtml register-pane-elem)))
+    (goog.dom.removeNode register-pane-elem)
+    (. dialog (render))
+    (def register-pane-elem (dom/get-element "register"))
+
+    (. dialog (setTitle
+               (goog.dom.getTextContent (dom/get-element "register-dialog-title"))))
+    (. dialog (setButtonSet null))
+    (style/setOpacity register-pane-elem 1)
+    (. dialog (setVisible true))
+
+    (def confirm-button (goog.ui.decorate (dom/get-element "confirm-registration")))
+
+    (def cancel-button (goog.ui.decorate (dom/get-element "cancel-registration")))
+    (. cancel-button (setEnabled true))
+
+
     (defn- when-user-exists
       "function is executed when user does exists
        with user data as argument."
@@ -190,11 +211,6 @@
       (when-user-exists "Otto2" (fn [data] (loginfo (data "name"))))
       )
 
-    (def confirm-button (goog.ui.decorate (dom/get-element "confirm-registration")))
-
-    (def cancel-button (goog.ui.decorate (dom/get-element "cancel-registration")))
-    (. cancel-button (setEnabled true))
-    (events/listen cancel-button "action" #(js* "history.back();"))
 
     (def reg-form-status (atom
                           {:name "undefined"
@@ -202,7 +218,7 @@
                            :password "undefined"
                            :password-repeat "undefined"}))
 
-    (defn set-name-error
+    (defn- set-name-error
       "set an error message with respect to name field"
       [dom-error-id-string]
       (swap! reg-form-status assoc :name dom-error-id-string)
@@ -210,7 +226,7 @@
       (set! (.color (.style (dom/get-element "name"))) "red")
       )
 
-    (defn clear-name-error
+    (defn- clear-name-error
       "remove all error message with respect to name field"
       []
       (swap! reg-form-status dissoc :name)
@@ -218,7 +234,7 @@
       (set! (.color (.style (dom/get-element "name"))) "green")
       )
 
-    (defn set-email-error
+    (defn- set-email-error
       "set an error message with respect to email field"
       [dom-error-id-string]
       (swap! reg-form-status assoc :email dom-error-id-string)
@@ -226,7 +242,7 @@
       (set! (.color (.style (dom/get-element "email"))) "red")
       )
 
-    (defn clear-email-error
+    (defn- clear-email-error
       "remove all error message with respect to email field"
       []
       (swap! reg-form-status dissoc :email)
@@ -234,7 +250,7 @@
       (set! (.color (.style (dom/get-element "email"))) "green")
       )
 
-    (defn set-password-error
+    (defn- set-password-error
       "set an error message with respect to password field"
       [dom-error-id-string]
       (swap! reg-form-status assoc :password dom-error-id-string)
@@ -242,7 +258,7 @@
       (set! (.color (.style (dom/get-element "password"))) "red")
       )
 
-    (defn clear-password-error
+    (defn- clear-password-error
       "remove all error message with respect to password field"
       []
       (swap! reg-form-status dissoc :password)
@@ -250,7 +266,7 @@
       (set! (.color (.style (dom/get-element "password"))) "green")
       )
 
-    (defn set-password-repeat-error
+    (defn- set-password-repeat-error
       "set an error message with respect to password repeat field"
       [dom-error-id-string]
       (swap! reg-form-status assoc :password-repeat dom-error-id-string)
@@ -258,7 +274,7 @@
       (set! (.color (.style (dom/get-element "password-repeat"))) "red")
       )
 
-    (defn clear-password-repeat-error
+    (defn- clear-password-repeat-error
       "remove all error message with respect to password repeat field"
       []
       (swap! reg-form-status dissoc :password-repeat)
@@ -266,13 +282,13 @@
       (set! (.color (.style (dom/get-element "password-repeat"))) "green")
       )
 
-    (defn update-confirm-button-state []
+    (defn- update-confirm-button-state []
       (if (empty? @reg-form-status)
         (do (. confirm-button (setEnabled true)) true)
         (do (. confirm-button (setEnabled false)) false)))
 
 
-    (defn updateRegisterText
+    (defn- updateRegisterText
       "validates registration form"
       [e]
       (let [target (.target e)
@@ -323,7 +339,7 @@
         (update-confirm-button-state)))
 
 
-    (defn check-all-reg-fields
+    (defn- check-all-reg-fields
       "checks all register pane fields.
        This is required before final transmission"
       []
@@ -334,26 +350,34 @@
       (update-confirm-button-state))
 
 
-    (defn- poll-all-reg-field-checks
-      "check fields every 500ms to send button to be updated
+    (def reg-field-poll-timer (goog.Timer. 500))
+
+    (defn- start-polling-all-reg-field-checks
+      "start fields checking every 500ms to send button to be updated
        even when last input field has not been left."
       []
-      (let [timer (goog.Timer. 500)]
-        (. timer (start))
-        (events/listen timer goog.Timer/TICK check-all-reg-fields)))
+      (do  (. reg-field-poll-timer (start))
+           (events/listen reg-field-poll-timer
+                          goog.Timer/TICK check-all-reg-fields)))
 
-    (defn trigger-polling-when-entered-last-field
+    (defn- stop-polling-all-reg-field-checks
+      "stops field checking"
+      []
+      (. reg-field-poll-timer (stop)))
+
+
+    (defn- trigger-polling-when-entered-last-field
       [e]
       (let [target (.target e)
             target-id (.id target)
             target-elem (dom/get-element target-id)
             value (.value target-elem)]
-        (cond
+        (if
          (= target-id "password-repeat")
-         (poll-all-reg-field-checks))))
+         (start-polling-all-reg-field-checks)
+         (stop-polling-all-reg-field-checks))))
 
-    (def registerFields (dom/get-element "register"))
-    (def registerFieldsFocusHandler (goog.events.FocusHandler. registerFields))
+    (def registerFieldsFocusHandler (goog.events.FocusHandler. register-pane-elem))
 
     (events/listen
      registerFieldsFocusHandler
@@ -365,6 +389,7 @@
      goog.events.FocusHandler.EventType.FOCUSIN
      trigger-polling-when-entered-last-field)
 
+    (events/listen cancel-button "action" #(. dialog (setVisible false)))
     (events/listen confirm-button
                    "action"
                    #(do (if (check-all-reg-fields)
@@ -373,7 +398,8 @@
                                                         "email" (.value (dom/get-element "email"))
                                                         "password" (.value (dom/get-element "password"))})
                                         (fn [e] nil)
-                                        "POST"))))
+                                        "POST"))
+                        (. dialog (setVisible false))))
 
     (comment
       (def a (dom/get-element "name"))
