@@ -32,6 +32,11 @@
   "resources/public")
 
 (def ^{:private true
+       :doc "outer frame used for layout"}
+  layout-resource
+  "layout.html")
+
+(def ^{:private true
        :doc "login resource address for fetching user name and password"}
   login-get-uri
   "/login.html")
@@ -61,26 +66,29 @@
 
 (defn gen-site
   "takes enclosing html side and replaces specified
-   element by content-page."
-  [frame-page elem-to-replace content-page]
+   element by concatenated content-pages."
+  [frame-page elem-to-replace & content-pages]
   (let [index (html/html-resource frame-page)
-        replacement-side (html/html-resource content-page)
-        replacement-content (:content (first (:content (first replacement-side))))
-        result (html/transform index elem-to-replace (fn [_] replacement-content))]
+        repl-content
+        (mapcat
+         #(:content (first (:content (first (html/html-resource %)))))
+         content-pages)
+        result (html/transform index elem-to-replace (fn [_] repl-content))]
     (apply str (html/emit* result))))
 
 (defn site
   "shortcut for gen-site which appends <resource-path>
-     to frame and content page and uses the div element
-     'content_pane' to be replaced."
-  ([name] (site name "layout.html"))
-  ([name frame]
-     (let [cat (fn [path name]
-                 (.toString (java.io.File. path name)))
-           full-site-name (cat resource-path name)
-           full-frame-name (cat resource-path frame)]
-       (gen-site full-frame-name [:div#content_pane] full-site-name)
-       )))
+   to frame and content pages and uses the div element
+   'content_pane' to be replaced."
+  [& sites]
+  (let [cat (fn [path name]
+              (.toString (java.io.File. path name)))
+        frame layout-resource
+        full-name-frame (cat resource-path frame)
+        full-name-sites (map #(cat resource-path %) sites)
+        ]
+    (apply (partial gen-site full-name-frame [:div#content_pane])
+           full-name-sites)))
 
 (defn user-response
   "used for ensuring that user name is unique"
@@ -99,7 +107,8 @@
   (POST register-post-uri {params :params} (add-user :name (params "name") :email (params "email") :password (params "password")))
   (GET ["/user/:name" :name #".*"] [name] (let [name (url-decode name)] (user-response name)))
   ;; --- static html (composed out of outer layout side and inner content pane ---
-  (GET "/index.html" _ (site "index.html"))
+  (GET "/index.html" _ (site "index.html" "register.html"))
+  (GET "/profile.html" _ (site "profile.html"))
   (GET "/register.html" _ (site "register.html"))
   ;; --- json handlers ---
   (GET "/status" _ "server-running")
