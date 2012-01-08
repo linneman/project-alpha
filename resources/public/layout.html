@@ -33,6 +33,7 @@
 
     <link rel="stylesheet" type="text/css" href="css/mainpanel.css" />
 
+    <link rel="stylesheet" type="text/css" href="css/login.css" />
     <link rel="stylesheet" type="text/css" href="css/register.css" />
     <link rel="stylesheet" type="text/css" href="css/profile.css" />
     <!--[if IE]>
@@ -42,6 +43,14 @@
 	<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
   </head>
+
+  <div id="global-scripts">
+    <script type="text/javascript" src="goog/base.js"></script>
+    <script type="text/javascript" src="project_alpha.js"></script>
+    <script type="text/javascript">
+      goog.require('project_alpha_client.repl');
+    </script>
+  </div>
 
   <body>
 

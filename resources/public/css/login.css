@@ -5,49 +5,43 @@
    2011/12 Otto Linnemann
 */
 
-#register {
+#login {
     position:relative;
     font-size:1.5em;
     background:#bdb;
     width:700px;
-    height:500px;
+    height:250px;
     margin:0.3em;
     border-width:2px;
     border-style:solid;
     opacity:0;
 }
 
-#register table {
+#login table {
     border-collapse:separate;
     border-spacing:10px 10px;
     font-size:0.8em;
     margin:0.3em;
 }
 
-#confirm-registration {
+#confirm-login {
     position:absolute;
     font-size:24px;
-    left:200px;
+    top:150px;
+    left:350px;
     padding: 2px 20px;
 }
 
-#cancel-registration {
-    position:absolute;
-    font-size:24px;
-    left:400px;
-    padding: 2px 20px;
-}
-
-#register h1 {
+#login h1 {
     font-size:32px;
 }
 
-#register .reg-field {
+#login .login-field {
     font-size:1.3em;
     width:460px;
 }
 
-#register .register_message {
+#login .login-message {
     font-size:0.8em;
     top:0px;
     left:20px;
@@ -55,7 +49,7 @@
     //opacity:0;
 }
 
-#register_messages {
+#login-messages {
     position:absolute;
     opacity:0;
 }

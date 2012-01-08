@@ -18,6 +18,7 @@
         [ring.util.response :only [response]]
         [ring.util.codec :only [url-decode url-encode]]
         [ring.middleware.session :only [wrap-session]]
+        [ring.middleware.cookies :only [wrap-cookies]]
         [ring.middleware.multipart-params :only [wrap-multipart-params]]
         [project-alpha-server.model]
         [project-alpha-server.auth]
@@ -39,7 +40,7 @@
 (def ^{:private true
        :doc "login resource address for fetching user name and password"}
   login-get-uri
-  "/login.html")
+  "/index.html")
 
 (def ^{:private true
        :doc "login resource address for posting user name and password"}
@@ -101,13 +102,12 @@
 
 (compojure/defroutes main-routes
   ;; --- authentification and registration ---
-  (POST login-post-uri [name password :as {session :session}]
-        (login session name password login-get-uri))
+  (POST login-post-uri args (login args login-get-uri))
   (GET "/logout" {session :session} (logout session))
   (POST register-post-uri {params :params} (add-user :name (params "name") :email (params "email") :password (params "password")))
   (GET ["/user/:name" :name #".*"] [name] (let [name (url-decode name)] (user-response name)))
   ;; --- static html (composed out of outer layout side and inner content pane ---
-  (GET "/index.html" _ (site "index.html" "register.html"))
+  (GET "/index.html" _ (site "register.html" "login.html" "index.html"))
   (GET "/profile.html" _ (site "profile.html"))
   (GET "/register.html" _ (site "register.html"))
   ;; --- json handlers ---
@@ -122,6 +122,7 @@
   (-> main-routes
       (wrap-authentication login-get-uri [login-post-uri register-get-uri register-post-uri "/user"])
       (wrap-session {:store (db-session-store) :cookie-attrs {:max-age (* 30 24 3600)}})
+      wrap-cookies
       json-params/wrap-json-params
       wrap-multipart-params
       handler/api))

@@ -1,40 +1,19 @@
-<!doctype html>
-<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
-<!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
-<!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]-->
-<!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->
-<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
-  <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>project-alpha</title>
-    <meta name="author" content="Otto Linnemann">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="css/common.css">
-    <link rel="stylesheet" type="text/css" href="css/mainpanel.css" media="all and (min-device-width: 1024px)">
-    <!--[if IE]>
-	<link rel="stylesheet" type="text/css" href="mainpanel.css" media="all">
-	<![endif]-->
-    <!--[if lt IE 9]>
-	<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
-  </head>
+<div id="login">
+  <table>
+    <tr><td align="right">Name oder Email:</td><td><input id="login-name" class="login-field" type="text" name="name"></td></tr>
+    <tr><td align="right">Passwort:</td><td><input id="login-password" class="login-field" type="password" name="password"></td></tr>
+  </table>
 
-  <body>
-    <div id="login">
-      <form method="post" action="/login">
-	<p>Name or email: <input type="text" name="name"></p>
-	<p>     Password: <input type="text" name="password"></p>
-	<input type="submit">
-      </form>
-    </div>
+  <div id="confirm-login" class="goog-flat-button goog-flat-button-disabled"
+       title="Klicken Sie hier, wenn alle Einträge ausgefüllt sind!">Login</div>
+</div>
 
-    <div id="scripts">
-      <script type="text/javascript" src="goog/base.js"></script>
-      <script type="text/javascript" src="project_alpha.js"></script>
-      <script type="text/javascript">
-	goog.require('project_alpha_client.repl');
-      </script>
-    </div>
-  </body>
-</html>
+<div id="login-messages">
+  <div id="login-dialog-title">Anmeldung</div>
+</div>
+
+<div id="login-scripts">
+  <script type="text/javascript">
+    goog.require('project_alpha_client.login');
+  </script>
+</div>

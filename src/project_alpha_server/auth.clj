@@ -28,12 +28,24 @@
 (defn login
   "utility function for processing POST requests comming
    from login forms currently based on user name and password."
-  [session name password login-get-uri]
-  (if (check-user-password password name)
-    (let [session (assoc session :authenticated "true")
-          prev-req-uri (or (:prev-req-uri session) login-get-uri)]
-      (-> (response (forward-url prev-req-uri)) (assoc :session session)))
-    (response (forward-url login-get-uri))))
+  [ring-args login-get-uri]
+  (let [params (:params ring-args)
+        session (:session ring-args)
+        cookies (:cookies ring-args)
+        name (params "name")
+        password (params "password")]
+    (println "params: " params)
+    (println "name:" name "pass:" password)
+    (println "check:" (check-user-password password name))
+    (if (check-user-password password name)
+      (let [session (assoc session :authenticated "true")
+            cookies (assoc cookies :authenticated "true")
+            prev-req-uri (or (:prev-req-uri session) login-get-uri)]
+        (-> (response (forward-url prev-req-uri))
+            (assoc :session session)
+            (assoc :cookies cookies)
+            ))
+      (response (forward-url login-get-uri)))))
 
 
 (defn logout
