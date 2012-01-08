@@ -11,18 +11,22 @@
 ;;; 2011-11-23, Otto Linnemann
 
 (ns project-alpha-client.index
-  (:require [clojure.browser.dom   :as dom]
+  (:require [clojure.browser.dom :as dom]
             [goog.events :as events])
   (:use [project-alpha-client.login :only [open-login-dialog]]
         [project-alpha-client.register :only [open-register-dialog]]
         [project-alpha-client.logging :only [loginfo]]
+        [project-alpha-client.auth :only [authenticated? registered?]]
         [project-alpha-client.utils :only [send-request validate-email copy-id-text clear-id-text]]))
 
-
 (def login-button (goog.ui.decorate (dom/get-element "login-button")))
-(. login-button (setEnabled true))
-(events/listen login-button "action" open-login-dialog)
+(when (not (authenticated?))
+  (. login-button (setEnabled true))
+  (events/listen login-button "action" open-login-dialog))
 
 (def register-button (goog.ui.decorate (dom/get-element "register-button")))
-(. register-button (setEnabled true))
-(events/listen register-button "action" open-register-dialog)
+(when (not (registered?))
+  (. register-button (setEnabled true))
+  (events/listen register-button "action" open-register-dialog))
+
+
