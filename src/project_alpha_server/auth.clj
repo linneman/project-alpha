@@ -34,12 +34,9 @@
         cookies (:cookies ring-args)
         name (params "name")
         password (params "password")]
-    (println "params: " params)
-    (println "name:" name "pass:" password)
-    (println "check:" (check-user-password password name))
     (if (check-user-password password name)
-      (let [session (assoc session :authenticated "true")
-            cookies (assoc cookies :authenticated "true")
+      (let [session (assoc session :authenticated true)
+            cookies (assoc cookies "authenticated" {:value "true"})
             prev-req-uri (or (:prev-req-uri session) login-get-uri)]
         (-> (response (forward-url prev-req-uri))
             (assoc :session session)
@@ -53,9 +50,13 @@
 
    This will removes the session cookie
    and later on forward to the start location."
-  [session]
-  (let [session (assoc session :name "")]
-    (-> (response "<html><body><h1>logged out!</h1></body></html>") (assoc :session nil))))
+  [ring-args]
+  (let [session (:session ring-args)
+        cookies (:cookies ring-args)
+        session (assoc session :authenticated false)
+        cookies (assoc cookies "authenticated" {:value "false"})]
+    (-> (response "<html><body><h1>logged out!</h1></body></html>")
+        (assoc :session session) (assoc :cookies cookies))))
 
 
 (defn wrap-authentication
@@ -78,7 +79,7 @@
           upd-session (if (or (uri-html? uri) (uri-json-request? uri))
                         (assoc session :prev-req-uri uri) ; don't remember css, img, etc.
                         session)]
-      (if (or (= "true" authenticated)
+      (if (or authenticated
               (and (not (uri-json-request? uri)) (not (uri-html? uri))) ; json and html are forbidden
               (not (not-any? #(re-seq (re-pattern (str "^" (.replace % "/" "\\/"))) uri) uri-white-list)))
         resp
