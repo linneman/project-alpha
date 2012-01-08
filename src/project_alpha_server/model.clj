@@ -14,19 +14,15 @@
   (:require [korma.db :as db]
             [korma.core :as sql]
             [clojure.java.jdbc :as jdbc]
-            [ring.util.codec :as codec])
+            [ring.util.codec :as codec]
+            [project-alpha-server.local-settings :as setup])
   (:use [ring.middleware.session.store :only [SessionStore]]
         [project-alpha-server.crypto :only
          [get-secret-key get-encrypt-pass-and-salt decrypt-pass]]))
 
 ;; The database connection
 ;; argument for sql requests
-(def db-con
-  (db/mysql {:db "project-alpha"
-             :host "localhost"
-             :port 8889
-             :user "project-alpha"
-             :password "test"}))
+(def db-con (db/mysql setup/sql-connection))
 
 ;; korma convenience layer
 (db/defdb db db-con)
