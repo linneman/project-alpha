@@ -127,8 +127,9 @@
 
 (defn add-user
   "add a new user"
-  [& {:keys [name email password level confirmed]
-                   :or {level 0 confirmed false}}]
+  [& {:keys [name email password level confirmed confirmation_link]
+      :or {level 0 confirmed false
+           confirmation_link "undefined"}}]
   (let [{:keys [password salt]} (get-encrypt-pass-and-salt password)]
     (sql/insert users (sql/values
                        {:name name
@@ -137,6 +138,7 @@
                         :salt salt
                         :level level
                         :confirmed confirmed
+                        :confirmation_link confirmation_link
                         :created_at (java.util.Date.)}))))
 
 (defn find-user

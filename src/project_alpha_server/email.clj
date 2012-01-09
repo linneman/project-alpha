@@ -13,6 +13,8 @@
   (:require [project-alpha-server.local-settings :as setup])
   (:import [org.apache.commons.mail SimpleEmail]))
 
+
+
 (defn sendmail
   "sends an email to the given address with the
    setup data in local_settings.clj."
@@ -30,5 +32,16 @@
     (.send)))
 
 ; (sendmail "linneman@gmx.de" "Test" "Eine Nachricht mit Umlauten: ÄÖÜ äöü ß: http://central-services.dnsdojo.org")
+
+
+(defn send-confirm-mail
+  "sends the user with the specified address an email
+   with the url he has to confirm his registration."
+  [to-address url]
+  (let [msg (slurp setup/confirm-email-msg-path)
+        subj (slurp setup/confirm-email-subj-path)]
+    (sendmail to-address subj (str msg url))))
+
+; (send-confirm-mail "linneman@gmx.de" "/confirm/abcdef")
 
 

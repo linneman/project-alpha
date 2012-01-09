@@ -7,6 +7,7 @@
 
 (ns project-alpha-server.local-settings)
 
+(def host-url "http://localhost:3000/")
 
 ;;; --- Definitions for send mail, currently only GMail has been tested ---
 
@@ -17,6 +18,12 @@
 (def email-from-email "projectalpha42@gmail.com")
 (def email-auth-name "projectalpha42@gmail.com")
 (def email-auth-password "projectalpha42")
+
+
+;;; --- Local files e.g. used for sendmail ---
+
+(def confirm-email-msg-path "resources/private/confirm_email_msg.txt")
+(def confirm-email-subj-path "resources/private/confirm_email_subj.txt")
 
 
 ;;; --- Connection parameters to SQL database, currently MySQL ---

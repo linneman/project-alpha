@@ -110,7 +110,7 @@
   ;; --- authentification and registration ---
   (POST login-post-uri args (login args login-get-uri))
   (GET "/logout" args (logout args))
-  (POST register-post-uri {params :params} (add-user :name (params "name") :email (params "email") :password (params "password")))
+  (POST register-post-uri args (register args))
   (GET ["/user/:name" :name #".*"] [name] (let [name (url-decode name)] (user-response name)))
   ;; --- static html (composed out of outer layout side and inner content pane ---
   (GET "/index.html" _ (site "register.html" "login.html" "index.html"))
@@ -120,7 +120,7 @@
   (GET "/status" _ "server-running")
   (GET "/session" args (str "<body>" args "</body>"))
   (GET "/counter" args (session-counter args))
-  (POST "/profile" {params :params session :session} (do (if (:authenticated session) (println (params "text"))) "OK"))
+  (POST "/profile" {params :params session :session} (do (println (params "text")) "OK"))
   (route/resources "/")
   (route/not-found "Page not found"))
 

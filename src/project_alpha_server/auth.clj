@@ -12,17 +12,49 @@
             [compojure.route :as route]
             [compojure.handler :as handler]
             [ring.middleware.json-params :as json-params]
-            )
+            [ring.util.codec :as codec]
+            [project-alpha-server.local-settings :as setup])
   (:use [compojure.core :only [GET POST PUT DELETE]]
         [ring.util.response :only [response]]
         [project-alpha-server.model]
-        ))
+        [project-alpha-server.crypto :only [get-secret-key]]
+        [project-alpha-server.email :only [send-confirm-mail]]))
 
 
 (defn forward-url
   "utility function for forwarding to given url."
   [url]
   (format "<html><head><meta  http-equiv=\"refresh\" content=\"0; URL=%s\"></head><body>forwarding ...</body></html>" url))
+
+
+(defn register
+  "utility function for processing the POST request for
+   user registration data. This triggers also the sending
+   of the confirmation email."
+  [ring-args]
+  (let [params (:params ring-args)
+        name (params "name")
+        email (params "email")
+        password (params "password")
+        cat (fn [url method]
+              (let [URL (java.net.URL. url)
+                    host (.getHost URL)
+                    port (.getPort URL)
+                    protocol (.getProtocol URL)]
+                (.toString (java.net.URL. protocol host port method))))
+        key (codec/base64-encode (get-secret-key {}))
+        confirmation_link (cat setup/host-url (str "/confirm/" key))]
+    (if (and (empty? (find-user-by-name name))
+             (empty? (find-user-by-email email)))
+      (do
+        (add-user
+         :name name
+         :email email
+         :password password
+         :confirmation_link confirmation_link)
+        (send-confirm-mail email confirmation_link)
+        (response "OK"))
+      (response "USER ALREADY REGISTERED, HACKER ACTIVITY?"))))
 
 
 (defn login
@@ -69,8 +101,7 @@
   The login-get-uri is also excluded from blocking."
   [handler login-get-uri uri-white-list]
   (fn [request]
-    (let [resp (handler request)
-          uri (:uri request)
+    (let [uri (:uri request)
           session (:session request)
           authenticated (:authenticated session)
           uri-white-list (conj uri-white-list login-get-uri)
@@ -82,5 +113,5 @@
       (if (or authenticated
               (and (not (uri-json-request? uri)) (not (uri-html? uri))) ; json and html are forbidden
               (not (not-any? #(re-seq (re-pattern (str "^" (.replace % "/" "\\/"))) uri) uri-white-list)))
-        resp
+        (handler request)
         (-> (response (forward-url login-get-uri)) (assoc :session upd-session))))))
