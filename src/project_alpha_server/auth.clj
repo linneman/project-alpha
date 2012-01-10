@@ -18,7 +18,8 @@
         [ring.util.response :only [response]]
         [project-alpha-server.model]
         [project-alpha-server.crypto :only [get-secret-key]]
-        [project-alpha-server.email :only [send-confirm-mail]]))
+        [project-alpha-server.email :only [send-confirm-mail]]
+        [swank.core :only [break]]))
 
 
 (defn forward-url
@@ -43,7 +44,9 @@
                     protocol (.getProtocol URL)]
                 (.toString (java.net.URL. protocol host port method))))
         key (codec/base64-encode (get-secret-key {}))
-        confirmation_link (cat setup/host-url (str "/confirm/" key))]
+        confirmation_link (str "/confirm?key=" (codec/url-encode key))
+        session (:session ring-args)
+        cookies (:cookies ring-args)]
     (if (and (empty? (find-user-by-name name))
              (empty? (find-user-by-email email)))
       (do
@@ -51,30 +54,56 @@
          :name name
          :email email
          :password password
-         :confirmation_link confirmation_link)
-        (send-confirm-mail email confirmation_link)
-        (response "OK"))
+         :confirmation_link key)
+        (if setup/email-authentication-required
+          (let [session (assoc session :registered true)
+                cookies (assoc cookies "registered" {:value "true"})]
+            (send-confirm-mail email (cat setup/host-url confirmation_link))
+            (-> (response "OK") (assoc :session session) (assoc :cookies cookies)))
+          (let [session (assoc session :authenticated true)
+                cookies (assoc cookies "authenticated" {:value "true"})]
+            (-> (response "OK") (assoc :session session) (assoc :cookies cookies)))))
       (response "USER ALREADY REGISTERED, HACKER ACTIVITY?"))))
+
+
+(defn confirm
+  "invoked handler when user clicked email confirmation link"
+  [ring-args url]
+  (let [params (:params ring-args)
+        key (:key params)
+        user (find-user :confirmation_link key)
+        session (:session ring-args)
+        cookies (:cookies ring-args)]
+    (if (not (empty? user))
+      (let [session (assoc session :authenticated true)
+            cookies (assoc cookies "authenticated" {:value "true"})]
+        (update-user {:confirmed 1} {:confirmation_link key})
+        (-> (response (forward-url url))
+            (assoc :session session)
+            (assoc :cookies cookies)
+            ))
+      (response "NOT OK"))))
 
 
 (defn login
   "utility function for processing POST requests comming
    from login forms currently based on user name and password."
-  [ring-args login-get-uri]
+  [ring-args]
   (let [params (:params ring-args)
         session (:session ring-args)
         cookies (:cookies ring-args)
         name (params "name")
-        password (params "password")]
-    (if (check-user-password password name)
+        password (params "password")
+        user (check-user-password password name)]
+    (if (and user (or (:confirmed user)
+                      (not setup/email-authentication-required)))
       (let [session (assoc session :authenticated true)
-            cookies (assoc cookies "authenticated" {:value "true"})
-            prev-req-uri (or (:prev-req-uri session) login-get-uri)]
-        (-> (response (forward-url prev-req-uri))
+            cookies (assoc cookies "authenticated" {:value "true"})]
+        (-> (response "OK")
             (assoc :session session)
             (assoc :cookies cookies)
             ))
-      (response (forward-url login-get-uri)))))
+      (response "NOT OK"))))
 
 
 (defn logout

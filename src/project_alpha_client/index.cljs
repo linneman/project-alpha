@@ -25,7 +25,7 @@
   (events/listen login-button "action" open-login-dialog))
 
 (def register-button (goog.ui.decorate (dom/get-element "register-button")))
-(when (not (registered?))
+(when (not (or (registered?) (authenticated?)))
   (. register-button (setEnabled true))
   (events/listen register-button "action" open-register-dialog))
 

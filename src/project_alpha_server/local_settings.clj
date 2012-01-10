@@ -22,6 +22,7 @@
 
 ;;; --- Local files e.g. used for sendmail ---
 
+(def email-authentication-required true)
 (def confirm-email-msg-path "resources/private/confirm_email_msg.txt")
 (def confirm-email-subj-path "resources/private/confirm_email_subj.txt")
 

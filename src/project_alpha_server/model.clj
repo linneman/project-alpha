@@ -170,14 +170,17 @@
                 (sql/where where))))
 
 (defn check-user-password
-  "check the save user password agains the login"
+  "check the user password against the login and
+   return the user data map when existing."
   [pass-entered login]
   (let [users (find-user-by-name-or-email login)]
     (if (empty? users)
       false
       (let [[user] users
             pass-decrypted (decrypt-pass (:password user) (:salt user))]
-        (= 0 (compare pass-entered pass-decrypted))))))
+        (if (= 0 (compare pass-entered pass-decrypted))
+          user
+          nil)))))
 
 (defn find-user-by-name [name]
   (find-user :name name))

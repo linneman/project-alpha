@@ -108,7 +108,7 @@
 
 (compojure/defroutes main-routes
   ;; --- authentification and registration ---
-  (POST login-post-uri args (login args login-get-uri))
+  (POST login-post-uri args (login args))
   (GET "/logout" args (logout args))
   (POST register-post-uri args (register args))
   (GET ["/user/:name" :name #".*"] [name] (let [name (url-decode name)] (user-response name)))
@@ -116,6 +116,7 @@
   (GET "/index.html" _ (site "register.html" "login.html" "index.html"))
   (GET "/profile.html" _ (site "profile.html"))
   (GET "/register.html" _ (site "register.html"))
+  (GET "/confirm" args (confirm args "index.html"))
   ;; --- json handlers ---
   (GET "/status" _ "server-running")
   (GET "/session" args (str "<body>" args "</body>"))
@@ -126,7 +127,7 @@
 
 (def app
   (-> main-routes
-      (wrap-authentication login-get-uri [login-post-uri register-get-uri register-post-uri "/user"])
+      (wrap-authentication login-get-uri [login-post-uri register-get-uri register-post-uri "/user" "/confirm"])
       (wrap-session {:store (db-session-store) :cookie-attrs {:max-age (* 30 24 3600)}})
       wrap-cookies
       json-params/wrap-json-params
