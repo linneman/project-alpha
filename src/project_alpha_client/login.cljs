@@ -26,15 +26,25 @@
 (def confirm-login-button (goog.ui.decorate (dom/get-element "confirm-login")))
 (. confirm-login-button (setEnabled true))
 
+(def login-response-handler (fn [e] nil))
+
 
 (events/listen confirm-login-button
                "action"
                #(do (send-request "/login"
                                   (json/generate {"name" (.value (dom/get-element "login-name"))
                                                   "password" (.value (dom/get-element "login-password"))})
-                                  (fn [e] nil)
+                                  login-response-handler
                                   "POST")
                     (. dialog (setVisible false))))
+
+
+(defn set-login-response-handler
+  "defines the function which when server response
+   to login data is received."
+  [handler]
+  (def login-response-handler handler))
+
 
 (defn open-login-dialog
   "opens the login dialog"

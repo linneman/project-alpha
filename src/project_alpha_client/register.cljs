@@ -239,6 +239,8 @@
  goog.events.FocusHandler.EventType.FOCUSIN
  trigger-polling-when-entered-last-field)
 
+(def register-response-handler (fn [e] nil))
+
 (events/listen cancel-button "action" #(. dialog (setVisible false)))
 (events/listen confirm-button
                "action"
@@ -247,9 +249,16 @@
                                     (json/generate {"name" (.value (dom/get-element "name"))
                                                     "email" (.value (dom/get-element "email"))
                                                     "password" (.value (dom/get-element "password"))})
-                                    (fn [e] nil)
+                                    register-response-handler
                                     "POST"))
                     (. dialog (setVisible false))))
+
+
+(defn set-register-response-handler
+  "defines the function which when server response
+   to login data is received."
+  [handler]
+  (def register-response-handler handler))
 
 
 (defn open-register-dialog

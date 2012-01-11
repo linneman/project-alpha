@@ -13,20 +13,60 @@
 (ns project-alpha-client.index
   (:require [clojure.browser.dom :as dom]
             [goog.events :as events])
-  (:use [project-alpha-client.login :only [open-login-dialog]]
-        [project-alpha-client.register :only [open-register-dialog]]
+  (:use [project-alpha-client.login :only [open-login-dialog
+                                           set-login-response-handler]]
+        [project-alpha-client.register :only [open-register-dialog
+                                              set-register-response-handler]]
         [project-alpha-client.logging :only [loginfo]]
         [project-alpha-client.auth :only [authenticated? registered?]]
-        [project-alpha-client.utils :only [send-request validate-email copy-id-text clear-id-text]]))
+        [project-alpha-client.utils :only [send-request
+                                           validate-email
+                                           copy-id-text
+                                           clear-id-text]]))
+
 
 (def login-button (goog.ui.decorate (dom/get-element "login-button")))
-(when (not (authenticated?))
-  (. login-button (setEnabled true))
-  (events/listen login-button "action" open-login-dialog))
+(events/listen login-button "action" open-login-dialog)
+
 
 (def register-button (goog.ui.decorate (dom/get-element "register-button")))
-(when (not (or (registered?) (authenticated?)))
-  (. register-button (setEnabled true))
-  (events/listen register-button "action" open-register-dialog))
+(events/listen register-button "action" open-register-dialog)
 
 
+(defn- set-logged-out-state
+  "user not logged and not registered"
+  []
+  (. login-button (setEnabled true))
+  (. register-button (setEnabled true)))
+
+(defn- set-registered-state
+  "user is still not logged in but already registered"
+  []
+  (. login-button (setEnabled true))
+  (. register-button (setEnabled false)))
+
+(defn- set-login-state
+  "user is logged in"
+  []
+  (. login-button (setEnabled false))
+  (. register-button (setEnabled false)))
+
+
+;;; initialize state of this side
+(if (authenticated?)
+  (set-login-state)
+  (if (registered?)
+    (set-registered-state)
+    (set-logged-out-state)))
+
+
+
+;;; register response handlers
+(set-login-response-handler #(let [xhr (.target %)
+                                   resp (. xhr (getResponseText))]
+                               (if (= resp "OK") (set-login-state))))
+
+
+(set-register-response-handler #(let [xhr (.target %)
+                                   resp (. xhr (getResponseText))]
+                               (if (= resp "OK") (set-registered-state))))
