@@ -116,7 +116,7 @@
         cookies (:cookies ring-args)
         session (assoc session :authenticated false)
         cookies (assoc cookies "authenticated" {:value "false"})]
-    (-> (response "<html><body><h1>logged out!</h1></body></html>")
+    (-> (response "OK")
         (assoc :session session) (assoc :cookies cookies))))
 
 

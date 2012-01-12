@@ -17,17 +17,18 @@
         [project-alpha-client.utils :only [send-request get-modal-dialog]]))
 
 
-(def dialog (get-modal-dialog "login"))
+;; login dialog
 
-(. dialog (setTitle
+(def login-dialog (get-modal-dialog "login"))
+
+(. login-dialog (setTitle
            (goog.dom.getTextContent (dom/get-element "login-dialog-title"))))
-(. dialog (setButtonSet null))
+(. login-dialog (setButtonSet null))
 
 (def confirm-login-button (goog.ui.decorate (dom/get-element "confirm-login")))
 (. confirm-login-button (setEnabled true))
 
 (def login-response-handler (fn [e] nil))
-
 
 (events/listen confirm-login-button
                "action"
@@ -36,8 +37,28 @@
                                                   "password" (.value (dom/get-element "login-password"))})
                                   login-response-handler
                                   "POST")
-                    (. dialog (setVisible false))))
+                    (. login-dialog (setVisible false))))
 
+
+
+;;; login failed dialog
+
+(def login-failed-dialog (get-modal-dialog "login-failed"))
+
+(. login-failed-dialog (setTitle
+           (goog.dom.getTextContent (dom/get-element "login-failed-dialog-title"))))
+(. login-failed-dialog (setButtonSet null))
+
+(def confirm-login-failed-button (goog.ui.decorate (dom/get-element "confirm-login-failed")))
+(. confirm-login-failed-button (setEnabled true))
+
+(defn hide-login-failed-diag [] (. login-failed-dialog (setVisible false)))
+
+(events/listen confirm-login-failed-button "action" hide-login-failed-diag)
+
+
+
+;;; exports
 
 (defn set-login-response-handler
   "defines the function which when server response
@@ -45,8 +66,12 @@
   [handler]
   (def login-response-handler handler))
 
-
 (defn open-login-dialog
   "opens the login dialog"
   []
-  (. dialog (setVisible true)))
+  (. login-dialog (setVisible true)))
+
+(defn open-login-failed-dialog
+  "opens the login failed dialog"
+  []
+  (. login-failed-dialog (setVisible true)))

@@ -14,6 +14,7 @@
   (:require [clojure.browser.dom :as dom]
             [goog.events :as events])
   (:use [project-alpha-client.login :only [open-login-dialog
+                                           open-login-failed-dialog
                                            set-login-response-handler]]
         [project-alpha-client.register :only [open-register-dialog
                                               set-register-response-handler]]
@@ -24,31 +25,32 @@
                                            copy-id-text
                                            clear-id-text]]))
 
-
+;;; buttons
 (def login-button (goog.ui.decorate (dom/get-element "login-button")))
-(events/listen login-button "action" open-login-dialog)
-
-
 (def register-button (goog.ui.decorate (dom/get-element "register-button")))
-(events/listen register-button "action" open-register-dialog)
+(def logout-button (goog.ui.decorate (dom/get-element "logout-button")))
 
 
+;;; auth states
 (defn- set-logged-out-state
   "user not logged and not registered"
   []
   (. login-button (setEnabled true))
+  (. logout-button (setEnabled false))
   (. register-button (setEnabled true)))
 
 (defn- set-registered-state
   "user is still not logged in but already registered"
   []
   (. login-button (setEnabled true))
+  (. logout-button (setEnabled false))
   (. register-button (setEnabled false)))
 
 (defn- set-login-state
   "user is logged in"
   []
   (. login-button (setEnabled false))
+  (. logout-button (setEnabled true))
   (. register-button (setEnabled false)))
 
 
@@ -60,13 +62,29 @@
     (set-logged-out-state)))
 
 
+;;; register button events
+
+(events/listen login-button "action" open-login-dialog)
+(events/listen register-button "action" open-register-dialog)
+(events/listen logout-button
+               "action"
+               #(send-request "/logout" ""
+                              (fn [e] (let [xhr (.target e)
+                                            resp (. xhr (getResponseText))]
+                                        (if (= resp "OK") (set-logged-out-state))))
+                              "POST"
+                              ))
+
 
 ;;; register response handlers
+
 (set-login-response-handler #(let [xhr (.target %)
                                    resp (. xhr (getResponseText))]
-                               (if (= resp "OK") (set-login-state))))
+                               (if (= resp "OK") (set-login-state) (open-login-failed-dialog))))
 
 
 (set-register-response-handler #(let [xhr (.target %)
                                    resp (. xhr (getResponseText))]
                                (if (= resp "OK") (set-registered-state))))
+
+

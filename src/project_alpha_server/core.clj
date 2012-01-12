@@ -109,7 +109,7 @@
 (compojure/defroutes main-routes
   ;; --- authentification and registration ---
   (POST login-post-uri args (login args))
-  (GET "/logout" args (logout args))
+  (POST "/logout" args (logout args))
   (POST register-post-uri args (register args))
   (GET ["/user/:name" :name #".*"] [name] (let [name (url-decode name)] (user-response name)))
   ;; --- static html (composed out of outer layout side and inner content pane ---

@@ -17,6 +17,7 @@
     opacity:0;
 }
 
+
 #login table {
     border-collapse:separate;
     border-spacing:10px 10px;
@@ -34,6 +35,7 @@
 
 #login h1 {
     font-size:32px;
+    top:100px;
 }
 
 #login .login-field {
@@ -52,4 +54,29 @@
 #login-messages {
     position:absolute;
     opacity:0;
+}
+
+
+#login-failed {
+    position:relative;
+    font-size:1.5em;
+    background:#bdb;
+    width:500px;
+    height:180px;
+    margin:0.3em;
+    border-width:2px;
+    border-style:solid;
+    opacity:0;
+}
+
+#login-failed h1 {
+    font-size:32px;
+}
+
+#confirm-login-failed {
+    position:absolute;
+    font-size:24px;
+    top:100px;
+    left:210px;
+    padding: 2px 20px;
 }
