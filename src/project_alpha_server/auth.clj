@@ -103,7 +103,9 @@
             (assoc :session session)
             (assoc :cookies cookies)
             ))
-      (response "NOT OK"))))
+      (if user
+        (response "NOT CONFIRMED")
+        (response "NOT OK")))))
 
 
 (defn logout

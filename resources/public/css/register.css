@@ -24,19 +24,14 @@
     margin:0.3em;
 }
 
-#confirm-registration {
+#confirm-registration, #cancel-registration {
     position:absolute;
     font-size:24px;
-    left:200px;
     padding: 2px 20px;
 }
 
-#cancel-registration {
-    position:absolute;
-    font-size:24px;
-    left:400px;
-    padding: 2px 20px;
-}
+#confirm-registration { left:200px; }
+#cancel-registration { left:400px; }
 
 #register h1 {
     font-size:32px;

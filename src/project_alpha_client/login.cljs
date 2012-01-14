@@ -65,6 +65,27 @@
 (events/listen confirm-login-failed-button "action" hide-login-failed-diag)
 
 
+;;; login user not confirmed dialog
+
+(def login-user-not-confirmed (get-modal-dialog "login-user-not-confirmed"))
+
+(. login-user-not-confirmed (setTitle
+           (goog.dom.getTextContent (dom/get-element "login-user-not-confirmed-title"))))
+(. login-user-not-confirmed (setButtonSet null))
+
+(def login-not-confirmed-button (goog.ui.decorate (dom/get-element "confirm-login-user-not-confirmed")))
+(. login-not-confirmed-button (setEnabled true))
+
+(defn- open-login-user-not-confirmed-dialog
+  "opens the user is not confirmed dialog"
+  []
+  (. login-user-not-confirmed (setVisible true)))
+
+(defn- hide-login-not-confirmed [] (. login-user-not-confirmed (setVisible false)))
+
+(events/listen login-not-confirmed-button "action" hide-login-not-confirmed)
+
+
 ;;; global event processing
 
 (def login-resp-reactor
@@ -74,7 +95,7 @@
      (let [{:keys [name resp]} data]
        (condp = resp
          "OK" (dispatch/fire :changed-login-state {:state :login :name name})
-         "NOT-CONFIRMED" (open-login-failed-dialog)
+         "NOT CONFIRMED" (open-login-user-not-confirmed-dialog)
          (open-login-failed-dialog))))))
 
 

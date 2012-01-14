@@ -57,7 +57,7 @@
 }
 
 
-#login-failed {
+#login-failed, #login-user-not-confirmed {
     position:relative;
     font-size:1.5em;
     background:#bdb;
@@ -73,7 +73,7 @@
     font-size:32px;
 }
 
-#confirm-login-failed {
+#confirm-login-failed, #confirm-login-user-not-confirmed {
     position:absolute;
     font-size:24px;
     top:100px;
