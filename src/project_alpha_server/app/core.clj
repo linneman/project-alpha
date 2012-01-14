@@ -6,7 +6,7 @@
 ;;; December 2011, Otto Linnemann
 
 
-(ns project-alpha-server.core
+(ns project-alpha-server.app.core
   (:require [ring.adapter.jetty :as jetty]
             [ring.middleware.json-params :as json-params]
             [compojure.core :as compojure]
@@ -20,8 +20,8 @@
         [ring.middleware.session :only [wrap-session]]
         [ring.middleware.cookies :only [wrap-cookies]]
         [ring.middleware.multipart-params :only [wrap-multipart-params]]
-        [project-alpha-server.model]
-        [project-alpha-server.auth]
+        [project-alpha-server.lib.model]
+        [project-alpha-server.lib.auth]
         [clojure.data.json :only [json-str write-json read-json]]
         [clojure.pprint :only [pprint]]
         ))
@@ -29,8 +29,8 @@
 
 (def ^{:private true
        :doc "path to html resources"}
-  resource-path
-  "resources/public")
+  templates-path
+  "resources/templates")
 
 (def ^{:private true
        :doc "outer frame used for layout"}
@@ -84,15 +84,15 @@
     (apply str (html/emit* result))))
 
 (defn site
-  "shortcut for gen-site which appends <resource-path>
+  "shortcut for gen-site which appends <templates-path>
    to frame and content pages and uses the div element
    'content_pane' to be replaced."
   [& sites]
   (let [cat (fn [path name]
               (.toString (java.io.File. path name)))
         frame layout-resource
-        full-name-frame (cat resource-path frame)
-        full-name-sites (map #(cat resource-path %) sites)
+        full-name-frame (cat templates-path frame)
+        full-name-sites (map #(cat templates-path %) sites)
         ]
     (apply (partial gen-site full-name-frame [:div#content_pane])
            full-name-sites)))

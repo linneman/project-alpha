@@ -3,7 +3,7 @@
 ;;;
 ;;; Eclipse Public License 1.0
 
-(ns project-alpha-client.json)
+(ns project-alpha-client.lib.json)
 
 (defn clj->js
   "Recursively transforms ClojureScript maps into Javascript objects,

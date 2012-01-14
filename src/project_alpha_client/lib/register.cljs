@@ -9,10 +9,10 @@
 ;;;
 ;;; 2011-11-23, Otto Linnemann
 
-(ns project-alpha-client.register
-  (:require [project-alpha-client.json :as json]
-            [project-alpha-client.editor :as editor]
-            [project-alpha-client.dispatch :as dispatch]
+(ns project-alpha-client.lib.register
+  (:require [project-alpha-client.lib.json :as json]
+            [project-alpha-client.lib.editor :as editor]
+            [project-alpha-client.lib.dispatch :as dispatch]
             [clojure.browser.event :as event]
             [clojure.browser.dom   :as dom]
             [goog.net.XhrIo :as ajax]
@@ -21,26 +21,23 @@
             [goog.events :as events]
             [goog.object :as object]
             [goog.ui.Component :as Component]
-            [goog.ui.Button :as Button]
-            [goog.ui.TabPane :as TabPane]
-            [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
-            [goog.ui.Dialog :as Dialog]
             [goog.Timer :as timer])
-  (:use [project-alpha-client.logging :only [loginfo]]
-        [project-alpha-client.utils :only
+  (:use [project-alpha-client.lib.logging :only [loginfo]]
+        [project-alpha-client.lib.utils :only
          [send-request validate-email copy-id-text clear-id-text get-modal-dialog]]))
 
 
-(def dialog (get-modal-dialog "register"))
-
-(. dialog (setTitle
-           (goog.dom.getTextContent (dom/get-element "register-dialog-title"))))
-(. dialog (setButtonSet null))
-
-(def confirm-button (goog.ui.decorate (dom/get-element "confirm-registration")))
-
-(def cancel-button (goog.ui.decorate (dom/get-element "cancel-registration")))
-(. cancel-button (setEnabled true))
+;; instantiate registration dialog and confirmation button
+(let [[dialog ok-button cancel-button]
+      (get-modal-dialog
+       :panel-id "register"
+       :title-id "register-dialog-title"
+       :ok-button-id "confirm-registration"
+       :cancel-button-id "cancel-registration"
+       :dispatched-event :registration-dialog-confirmed)]
+  (. ok-button (setEnabled false)) ; ok-button is only enalbed when form correct
+  (def dialog dialog)
+  (def confirm-button ok-button))
 
 
 (defn- when-user-exists
@@ -241,36 +238,36 @@
  trigger-polling-when-entered-last-field)
 
 
-(events/listen cancel-button "action" #(. dialog (setVisible false)))
-(events/listen confirm-button
-               "action"
-               #(do (if (check-all-reg-fields)
-                      (let [name (.value (dom/get-element "name"))
-                            email (.value (dom/get-element "email"))
-                            password (.value (dom/get-element "password"))]
-                        (send-request "/register"
-                                      (json/generate {"name" name "email" email "password" password})
-                                      (fn [ajax-evt]
-                                        (let [resp (. (.target ajax-evt) (getResponseText))]
-                                          (dispatch/fire :register-resp
-                                                         {:name name :email email :resp resp})))
-                                      "POST")))
-                    (. dialog (setVisible false))))
-
-
-
 
 ;;; registration failed dialog
-
 (defn open-registration-failed-dialog
   "opens when registration failed e.g. due to
    communication error, not implemented yet."
   []
   nil)
 
-;;; global event processing
 
-(def login-resp-reactor
+;;; clojurescript based event processing
+(def register-confirm-reactor
+  (dispatch/react-to
+   #{:registration-dialog-confirmed}
+   (fn [evt data]
+     (if (check-all-reg-fields)
+       (let [name (.value (dom/get-element "name"))
+             email (.value (dom/get-element "email"))
+             password (.value (dom/get-element "password"))]
+         (send-request "/register"
+                       (json/generate {"name" name
+                                       "email" email
+                                       "password" password})
+                       (fn [ajax-evt]
+                         (let [resp (. (.target ajax-evt) (getResponseText))]
+                           (dispatch/fire :register-resp
+                                          {:name name :email email :resp resp})))
+                       "POST"))))))
+
+
+(def register-resp-reactor
   (dispatch/react-to
    #{:register-resp}
    (fn [evt data]
@@ -281,7 +278,6 @@
 
 
 ;;; exports
-
 (defn open-register-dialog
   "opens the register new user dialog"
   []

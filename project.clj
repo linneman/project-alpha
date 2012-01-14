@@ -13,4 +13,4 @@
                  [org.clojure/data.json "0.1.1"]
                  [org.apache.commons/commons-email "1.2"]]
   :dev-dependencies [[lein-clojurescript "1.0.1-SNAPSHOT"]]
-  :main project-alpha-server.core)
+  :main project-alpha-server.app.core)

@@ -10,13 +10,18 @@
 ;;; 2011-11-23, Otto Linnemann
 
 
-(ns project-alpha-client.utils
-  (:require [project-alpha-client.json :as json]
+(ns project-alpha-client.lib.utils
+  (:require [project-alpha-client.lib.json :as json]
+            [project-alpha-client.lib.dispatch :as dispatch]
             [clojure.browser.event :as event]
             [clojure.browser.dom   :as dom]
+            [goog.ui.Dialog :as Dialog]
+            [goog.ui.Button :as Button]
+            [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
             [goog.net.XhrIo :as ajax]
+            [goog.events :as events]
             [goog.style :as style])
-  (:use [project-alpha-client.logging :only [loginfo]]))
+  (:use [project-alpha-client.lib.logging :only [loginfo]]))
 
 
 (defn send-request
@@ -63,7 +68,7 @@
   (clear-id-text "register_message_name" ""))
 
 
-(defn get-modal-dialog
+(defn- setup-modal-dialog-panel
   "retrieves invisible dom element for dialog pane
    for given id string moves the element to a
    foo.ui.Dialog element which is returned."
@@ -75,3 +80,34 @@
       (. dialog (render))
       (style/setOpacity (dom/get-element dom-id-str) 1)
       dialog)))
+
+
+(defn get-modal-dialog
+  "constracts and setup a modal dialog panel from
+   the specified dom element identifiers (given
+   as strings) and returns vector with correspnding
+   document objects for pane, ok-button and cancel
+   button if given."
+  [& {:keys [panel-id
+             title-id
+             ok-button-id
+             cancel-button-id
+             dispatched-event
+             dispatched-data]}]
+  (let [dialog (setup-modal-dialog-panel panel-id)
+        ok-button (goog.ui.decorate (dom/get-element ok-button-id))]
+    (when title-id
+      (. dialog (setTitle
+                 (goog.dom.getTextContent (dom/get-element title-id)))))
+    (. dialog (setButtonSet null))
+    (. ok-button (setEnabled true))
+    (events/listen ok-button "action"
+                   #(do (. dialog (setVisible false))
+                        (dispatch/fire dispatched-event dispatched-data)))
+    (if cancel-button-id
+      (let [cancel-button (goog.ui.decorate (dom/get-element cancel-button-id))]
+        (events/listen cancel-button "action" #(. dialog (setVisible false)))
+        (. cancel-button (setEnabled true))
+        [dialog ok-button cancel-button])
+      [dialog ok-button])))
+

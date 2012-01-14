@@ -10,14 +10,14 @@
 ;;; http://sqlkorma.com
 ;;; https://gist.github.com/1521214
 
-(ns project-alpha-server.model
+(ns project-alpha-server.lib.model
   (:require [korma.db :as db]
             [korma.core :as sql]
             [clojure.java.jdbc :as jdbc]
             [ring.util.codec :as codec]
             [project-alpha-server.local-settings :as setup])
   (:use [ring.middleware.session.store :only [SessionStore]]
-        [project-alpha-server.crypto :only
+        [project-alpha-server.lib.crypto :only
          [get-secret-key get-encrypt-pass-and-salt decrypt-pass]]))
 
 ;; The database connection

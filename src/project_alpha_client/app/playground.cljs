@@ -9,7 +9,7 @@
 ;;;
 ;;; 2011-11-23, Otto Linnemann
 
-(ns project-alpha-client.playground
+(ns project-alpha-client.app.playground
   (:require [project-alpha-client.json :as json]
             [project-alpha-client.editor :as editor]
             [clojure.browser.event :as event]

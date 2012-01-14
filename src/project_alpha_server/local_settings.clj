@@ -23,8 +23,8 @@
 ;;; --- Local files e.g. used for sendmail ---
 
 (def email-authentication-required true)
-(def confirm-email-msg-path "resources/private/confirm_email_msg.txt")
-(def confirm-email-subj-path "resources/private/confirm_email_subj.txt")
+(def confirm-email-msg-path "resources/templates/confirm_email_msg.txt")
+(def confirm-email-subj-path "resources/templates/confirm_email_subj.txt")
 
 
 ;;; --- Connection parameters to SQL database, currently MySQL ---

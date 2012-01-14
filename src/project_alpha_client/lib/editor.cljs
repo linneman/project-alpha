@@ -2,8 +2,8 @@
 ;;;
 ;;; Eclipse Public License 1.0
 
-(ns project-alpha-client.editor
-  (:require [project-alpha-client.json :as json]
+(ns project-alpha-client.lib.editor
+  (:require [project-alpha-client.lib.json :as json]
             [clojure.browser.dom   :as dom]
             [goog.net.XhrIo :as ajax2]
             [goog.events :as events]

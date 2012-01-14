@@ -6,7 +6,7 @@
 ;;; December 2011, Otto Linnemann
 
 
-(ns project-alpha-server.auth
+(ns project-alpha-server.lib.auth
   (:require [ring.adapter.jetty :as jetty]
             [compojure.core :as compojure]
             [compojure.route :as route]
@@ -16,9 +16,9 @@
             [project-alpha-server.local-settings :as setup])
   (:use [compojure.core :only [GET POST PUT DELETE]]
         [ring.util.response :only [response]]
-        [project-alpha-server.model]
-        [project-alpha-server.crypto :only [get-secret-key]]
-        [project-alpha-server.email :only [send-confirm-mail]]
+        [project-alpha-server.lib.model]
+        [project-alpha-server.lib.crypto :only [get-secret-key]]
+        [project-alpha-server.lib.email :only [send-confirm-mail]]
         [swank.core :only [break]]))
 
 

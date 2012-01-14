@@ -10,15 +10,15 @@
 ;;;
 ;;; 2011-11-23, Otto Linnemann
 
-(ns project-alpha-client.index
+(ns project-alpha-client.app.index
   (:require [clojure.browser.dom :as dom]
             [goog.events :as events]
-            [project-alpha-client.dispatch :as dispatch])
-  (:use [project-alpha-client.login :only [open-login-dialog send-logout-request]]
-        [project-alpha-client.register :only [open-register-dialog]]
-        [project-alpha-client.logging :only [loginfo]]
-        [project-alpha-client.auth :only [authenticated? registered?]]
-        [project-alpha-client.utils :only [send-request
+            [project-alpha-client.lib.dispatch :as dispatch])
+  (:use [project-alpha-client.lib.login :only [open-login-dialog send-logout-request]]
+        [project-alpha-client.lib.register :only [open-register-dialog]]
+        [project-alpha-client.lib.logging :only [loginfo]]
+        [project-alpha-client.lib.auth :only [authenticated? registered?]]
+        [project-alpha-client.lib.utils :only [send-request
                                            validate-email
                                            copy-id-text
                                            clear-id-text]]))

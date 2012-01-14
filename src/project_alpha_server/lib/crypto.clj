@@ -9,7 +9,7 @@
 ;;; https://github.com/mmcgrana/ring/blob/master/ring-core/src/ring/middleware/session/cookie.clj
 
 
-(ns project-alpha-server.crypto
+(ns project-alpha-server.lib.crypto
   "Encrypted cookie session storage."
   (:use ring.middleware.session.store)
   (:require [ring.util.codec :as codec])

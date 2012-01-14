@@ -9,7 +9,7 @@
 ;;; December 2011, Otto Linnemann
 
 
-(ns project-alpha-server.email
+(ns project-alpha-server.lib.email
   (:require [project-alpha-server.local-settings :as setup])
   (:import [org.apache.commons.mail SimpleEmail]))
 

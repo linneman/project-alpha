@@ -1,7 +1,7 @@
 ;;; repl for interactive development
 ;;; only invoked when no optimizations used
 
-(ns project-alpha-client.repl
+(ns project-alpha-client.lib.repl
   (:require [clojure.browser.repl :as repl]))
 
 (let [compiled (js* "(function() { return COMPILED; })();")]

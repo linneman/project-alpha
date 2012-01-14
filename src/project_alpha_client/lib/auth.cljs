@@ -12,7 +12,7 @@
 ;;;
 ;;; 2011-11-23, Otto Linnemann
 
-(ns project-alpha-client.auth
+(ns project-alpha-client.lib.auth
   (:require [goog.net.cookies :as cookies]))
 
 

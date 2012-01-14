@@ -9,17 +9,17 @@
 ;;;
 ;;; 2011-11-23, Otto Linnemann
 
-(ns project-alpha-client.profile
-  (:require [project-alpha-client.json :as json]
-            [project-alpha-client.editor :as editor]
+(ns project-alpha-client.app.profile
+  (:require [project-alpha-client.lib.json :as json]
+            [project-alpha-client.lib.editor :as editor]
             [clojure.browser.dom :as dom]
             [goog.style :as style]
             [goog.events :as events]
             [goog.ui.Button :as Button]
             [goog.ui.TabPane :as TabPane]
             )
-  (:use [project-alpha-client.logging :only [loginfo]]
-        [project-alpha-client.utils :only [send-request]]))
+  (:use [project-alpha-client.lib.logging :only [loginfo]]
+        [project-alpha-client.lib.utils :only [send-request]]))
 
 (def tabpane (goog.ui.TabPane. (dom/get-element "tabpane1")))
 (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page1"))))

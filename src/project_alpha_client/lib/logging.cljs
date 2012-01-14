@@ -7,7 +7,7 @@
 ;;;
 ;;; 2011-11-23, Otto Linnemann
 
-(ns project-alpha-client.logging
+(ns project-alpha-client.lib.logging
   (:require [goog.debug.Console :as Console]
             [goog.debug.Logger :as Logger]
             [goog.debug.Logger.Level :as LogLevel]))
