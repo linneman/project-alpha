@@ -12,6 +12,7 @@
 (ns project-alpha-client.register
   (:require [project-alpha-client.json :as json]
             [project-alpha-client.editor :as editor]
+            [project-alpha-client.dispatch :as dispatch]
             [clojure.browser.event :as event]
             [clojure.browser.dom   :as dom]
             [goog.net.XhrIo :as ajax]
@@ -43,7 +44,7 @@
 
 
 (defn- when-user-exists
-  "function is executed when user does exists
+  "function is executed when user does exist
        with user data as argument."
   [name function]
   (send-request (str "/user/" (goog.string.urlEncode name)) nil
@@ -239,29 +240,51 @@
  goog.events.FocusHandler.EventType.FOCUSIN
  trigger-polling-when-entered-last-field)
 
-(def register-response-handler (fn [e] nil))
 
 (events/listen cancel-button "action" #(. dialog (setVisible false)))
 (events/listen confirm-button
                "action"
                #(do (if (check-all-reg-fields)
-                      (send-request "/register"
-                                    (json/generate {"name" (.value (dom/get-element "name"))
-                                                    "email" (.value (dom/get-element "email"))
-                                                    "password" (.value (dom/get-element "password"))})
-                                    register-response-handler
-                                    "POST"))
+                      (let [name (.value (dom/get-element "name"))
+                            email (.value (dom/get-element "email"))
+                            password (.value (dom/get-element "password"))]
+                        (send-request "/register"
+                                      (json/generate {"name" name "email" email "password" password})
+                                      (fn [ajax-evt]
+                                        (let [resp (. (.target ajax-evt) (getResponseText))]
+                                          (dispatch/fire :register-resp
+                                                         {:name name :email email :resp resp})))
+                                      "POST")))
                     (. dialog (setVisible false))))
 
 
-(defn set-register-response-handler
-  "defines the function which when server response
-   to login data is received."
-  [handler]
-  (def register-response-handler handler))
 
+
+;;; registration failed dialog
+
+(defn open-registration-failed-dialog
+  "opens when registration failed e.g. due to
+   communication error, not implemented yet."
+  []
+  nil)
+
+;;; global event processing
+
+(def login-resp-reactor
+  (dispatch/react-to
+   #{:register-resp}
+   (fn [evt data]
+     (let [{:keys [name resp]} data]
+       (condp = resp
+         "OK" (dispatch/fire :changed-login-state {:state :registered :name name})
+         (open-registration-failed-dialog))))))
+
+
+;;; exports
 
 (defn open-register-dialog
   "opens the register new user dialog"
   []
   (. dialog (setVisible true)))
+
+

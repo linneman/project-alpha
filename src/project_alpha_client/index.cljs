@@ -12,12 +12,10 @@
 
 (ns project-alpha-client.index
   (:require [clojure.browser.dom :as dom]
-            [goog.events :as events])
-  (:use [project-alpha-client.login :only [open-login-dialog
-                                           open-login-failed-dialog
-                                           set-login-response-handler]]
-        [project-alpha-client.register :only [open-register-dialog
-                                              set-register-response-handler]]
+            [goog.events :as events]
+            [project-alpha-client.dispatch :as dispatch])
+  (:use [project-alpha-client.login :only [open-login-dialog send-logout-request]]
+        [project-alpha-client.register :only [open-register-dialog]]
         [project-alpha-client.logging :only [loginfo]]
         [project-alpha-client.auth :only [authenticated? registered?]]
         [project-alpha-client.utils :only [send-request
@@ -54,7 +52,8 @@
   (. register-button (setEnabled false)))
 
 
-;;; initialize state of this side
+;;; initialize state according to cookie setup
+;;; when site is loaded
 (if (authenticated?)
   (set-login-state)
   (if (registered?)
@@ -63,28 +62,20 @@
 
 
 ;;; register button events
-
 (events/listen login-button "action" open-login-dialog)
 (events/listen register-button "action" open-register-dialog)
-(events/listen logout-button
-               "action"
-               #(send-request "/logout" ""
-                              (fn [e] (let [xhr (.target e)
-                                            resp (. xhr (getResponseText))]
-                                        (if (= resp "OK") (set-logged-out-state))))
-                              "POST"
-                              ))
+(events/listen logout-button "action" send-logout-request)
 
 
 ;;; register response handlers
-
-(set-login-response-handler #(let [xhr (.target %)
-                                   resp (. xhr (getResponseText))]
-                               (if (= resp "OK") (set-login-state) (open-login-failed-dialog))))
-
-
-(set-register-response-handler #(let [xhr (.target %)
-                                   resp (. xhr (getResponseText))]
-                               (if (= resp "OK") (set-registered-state))))
+(def login-reactor (dispatch/react-to
+                    #{:changed-login-state}
+                    (fn [evt data]
+                      (let [{:keys [state name]} data]
+                        (condp = state
+                          :login (set-login-state)
+                          :logout (set-logged-out-state)
+                          :registered (set-registered-state)
+                          nil)))))
 
 

@@ -12,12 +12,13 @@
 (ns project-alpha-client.login
   (:require [clojure.browser.dom :as dom]
             [goog.events :as events]
-            [project-alpha-client.json :as json])
+            [project-alpha-client.json :as json]
+            [project-alpha-client.dispatch :as dispatch])
   (:use [project-alpha-client.logging :only [loginfo]]
         [project-alpha-client.utils :only [send-request get-modal-dialog]]))
 
 
-;; login dialog
+;;; login dialog
 
 (def login-dialog (get-modal-dialog "login"))
 
@@ -28,17 +29,19 @@
 (def confirm-login-button (goog.ui.decorate (dom/get-element "confirm-login")))
 (. confirm-login-button (setEnabled true))
 
-(def login-response-handler (fn [e] nil))
-
 (events/listen confirm-login-button
                "action"
-               #(do (send-request "/login"
-                                  (json/generate {"name" (.value (dom/get-element "login-name"))
-                                                  "password" (.value (dom/get-element "login-password"))})
-                                  login-response-handler
-                                  "POST")
-                    (. login-dialog (setVisible false))))
-
+               (fn [button-evt]
+                 (let [name (.value (dom/get-element "login-name"))
+                       password (.value (dom/get-element "login-password"))]
+                   (send-request "/login"
+                                 (json/generate {"name" name "password" password})
+                                 (fn [ajax-evt]
+                                   (let [resp (. (.target ajax-evt) (getResponseText))]
+                                     (dispatch/fire :login-resp
+                                                    {:name name :resp resp})))
+                                 "POST")
+                   (. login-dialog (setVisible false)))))
 
 
 ;;; login failed dialog
@@ -52,26 +55,44 @@
 (def confirm-login-failed-button (goog.ui.decorate (dom/get-element "confirm-login-failed")))
 (. confirm-login-failed-button (setEnabled true))
 
-(defn hide-login-failed-diag [] (. login-failed-dialog (setVisible false)))
+(defn- open-login-failed-dialog
+  "opens the login failed dialog"
+  []
+  (. login-failed-dialog (setVisible true)))
+
+(defn- hide-login-failed-diag [] (. login-failed-dialog (setVisible false)))
 
 (events/listen confirm-login-failed-button "action" hide-login-failed-diag)
 
 
+;;; global event processing
+
+(def login-resp-reactor
+  (dispatch/react-to
+   #{:login-resp}
+   (fn [evt data]
+     (let [{:keys [name resp]} data]
+       (condp = resp
+         "OK" (dispatch/fire :changed-login-state {:state :login :name name})
+         "NOT-CONFIRMED" (open-login-failed-dialog)
+         (open-login-failed-dialog))))))
+
 
 ;;; exports
-
-(defn set-login-response-handler
-  "defines the function which when server response
-   to login data is received."
-  [handler]
-  (def login-response-handler handler))
 
 (defn open-login-dialog
   "opens the login dialog"
   []
   (. login-dialog (setVisible true)))
 
-(defn open-login-failed-dialog
-  "opens the login failed dialog"
+
+(defn send-logout-request
+  "sends logout indication to server and change
+   to logout state when positive response arrives."
   []
-  (. login-failed-dialog (setVisible true)))
+  (send-request "/logout" ""
+                (fn [e] (let [xhr (.target e)
+                              resp (. xhr (getResponseText))]
+                          (if (= resp "OK")
+                            (dispatch/fire :changed-login-state {:state :logout}))))
+                "POST"))
