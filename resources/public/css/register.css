@@ -6,15 +6,8 @@
 */
 
 #register {
-    position:relative;
-    font-size:1.5em;
-    background:#bdb;
     width:700px;
     height:500px;
-    margin:0.3em;
-    border-width:2px;
-    border-style:solid;
-    opacity:0;
 }
 
 #register table {

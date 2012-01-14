@@ -40,6 +40,24 @@
   (def confirm-button ok-button))
 
 
+;; instantiate dialog which instructs the user to check the email for confirmation
+(let [[dialog ok-button cancel-button]
+      (get-modal-dialog
+       :panel-id "register-confirm-advice"
+       :title-id "register-confirm-advice-title"
+       :ok-button-id "register-confirm-advice-button")]
+  (def register-confirm-advice-dialog dialog))
+
+
+;; instantiate communication error dialog
+(let [[dialog ok-button cancel-button]
+      (get-modal-dialog
+       :panel-id "register-com-error"
+       :title-id "register-com-error-title"
+       :ok-button-id "register-com-button")]
+  (def register-com-error-dialog dialog))
+
+
 (defn- when-user-exists
   "function is executed when user does exist
        with user data as argument."
@@ -240,11 +258,19 @@
 
 
 ;;; registration failed dialog
-(defn open-registration-failed-dialog
+(defn- open-registration-failed-dialog
   "opens when registration failed e.g. due to
    communication error, not implemented yet."
   []
-  nil)
+  (. register-com-error-dialog (setVisible true)))
+
+
+;;; advice user to check email for registration link
+(defn- open-register-confirm-advice-dialog
+  "opens when registration was succeessful and instructs
+   user to check email and click registration link."
+  []
+  (. register-confirm-advice-dialog (setVisible true)))
 
 
 ;;; clojurescript based event processing
@@ -273,7 +299,8 @@
    (fn [evt data]
      (let [{:keys [name resp]} data]
        (condp = resp
-         "OK" (dispatch/fire :changed-login-state {:state :registered :name name})
+         "OK" (do (open-register-confirm-advice-dialog)
+                  (dispatch/fire :changed-login-state {:state :registered :name name}))
          (open-registration-failed-dialog))))))
 
 

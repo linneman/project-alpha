@@ -1,8 +1,8 @@
-<div id="register">
+<div id="register" class="project-alpha-dialog">
   <h1 align="center">Anmeldedaten festlegen</h1>
   <form>
     <table>
-      <tr><td align="right">Name:</td><td><input id="name" class="reg-field" type="text" name="name"></td></tr>
+      <tr><td align="right">Pseudonym:</td><td><input id="name" class="reg-field" type="text" name="name"></td></tr>
       <tr><td>&nbsp;</td><td><div id="register_message_name" class="register_message"></div></td></tr>
       <tr><td align="right">Email:</td><td><input id="email" class="reg-field" type="text" name="email"></td></tr>
       <tr><td>&nbsp;</td><td><div id="register_message_email" class="register_message"></div></td></tr>
@@ -19,8 +19,21 @@
   </form>
 </div>
 
+<div id="register-confirm-advice" class="project-alpha-dialog">
+  <p>Ihnen wird in den nächsten Minuten eine email zugestellt, die eine URL mit einem Frei&shy;schaltcode enthält.
+Bitte prüfen Sie jetzt Ihr Postfach und klicken Sie auf den in der Bestäti&shy;gungs&shy;email enthaltenen Verweis.</p>
+  <div id="register-confirm-advice-button" class="goog-flat-button goog-flat-button-disabled project-alpha-dialog-button">OK</div>
+</div>
+
+<div id="register-com-error" class="project-alpha-dialog">
+  <p>Bei der Datenübertragung ist eine Fehler aufgetreten! Bitte versuchen Sie es zu einem späteren Zeitpunkt erneut.</p>
+  <div id="register-com-button" class="goog-flat-button goog-flat-button-disabled project-alpha-dialog-button">OK</div>
+</div>
+
 <div id="register_messages">
   <div id="register-dialog-title">Anmeldung</div>
+  <div id="register-confirm-advice-title">Registrierung abschließen</div>
+  <div id="register-com-error-title">Übertragungsfehler</div>
   <div id="name_not_available_error">Dieser Benutzername ist bereits vergeben!</div>
   <div id="email_defined_error">Die gewählte Emailadresse ist bereits vorhanden!</div>
   <div id="email_malformed_error">Diese Emailadresse ist nicht korrekt!</div>

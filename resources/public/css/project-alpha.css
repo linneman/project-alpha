@@ -1,0 +1,38 @@
+/* CSS
+   The use and distribution terms for this software are covered
+   by the Eclipse Public License 1.0
+
+   2011/12 Otto Linnemann
+*/
+
+.project-alpha-dialog  {
+    position:relative;
+    font-size:1.5em;
+    background:#bdb;
+    width:600px;
+    height:300px;
+    margin:0.3em;
+    border-width:2px;
+    border-style:solid;
+    padding:20px;
+    opacity:0;
+}
+
+.project-alpha-dialog h1 {
+    font-size:32px;
+}
+
+.project-alpha-dialog-button {
+    position:absolute;
+    font-size:24px;
+    padding: 2px 20px;
+    text-align:center;
+    width:20%;
+    bottom:15%;
+    left:0;
+    right:0;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+
