@@ -12,6 +12,7 @@
 
 (ns project-alpha-client.app.index
   (:require [clojure.browser.dom :as dom]
+            [goog.style :as style]
             [goog.events :as events]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.login :only [open-login-dialog send-logout-request]]
@@ -19,37 +20,38 @@
         [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.auth :only [authenticated? registered?]]
         [project-alpha-client.lib.utils :only [send-request
-                                           validate-email
-                                           copy-id-text
-                                           clear-id-text]]))
+                                               validate-email
+                                               copy-id-text
+                                               clear-id-text
+                                               init-alpha-button
+                                               set-alpha-button-enabled]]))
 
 ;;; buttons
-(def login-button (goog.ui.decorate (dom/get-element "login-button")))
-(def register-button (goog.ui.decorate (dom/get-element "register-button")))
-(def logout-button (goog.ui.decorate (dom/get-element "logout-button")))
-
+(def login-button (init-alpha-button "login-button" :login-button-clicked))
+(def register-button (init-alpha-button "register-button" :register-button-clicked))
+(def logout-button (init-alpha-button "logout-button" :logout-button-clicked))
 
 ;;; auth states
 (defn- set-logged-out-state
   "user not logged and not registered"
   []
-  (. login-button (setEnabled true))
-  (. logout-button (setEnabled false))
-  (. register-button (setEnabled true)))
+  (set-alpha-button-enabled login-button true)
+  (set-alpha-button-enabled logout-button false)
+  (set-alpha-button-enabled register-button true))
 
 (defn- set-registered-state
   "user is still not logged in but already registered"
   []
-  (. login-button (setEnabled true))
-  (. logout-button (setEnabled false))
-  (. register-button (setEnabled false)))
+  (set-alpha-button-enabled login-button true)
+  (set-alpha-button-enabled logout-button false)
+  (set-alpha-button-enabled register-button false))
 
 (defn- set-login-state
   "user is logged in"
   []
-  (. login-button (setEnabled false))
-  (. logout-button (setEnabled true))
-  (. register-button (setEnabled false)))
+  (set-alpha-button-enabled login-button false)
+  (set-alpha-button-enabled logout-button true)
+  (set-alpha-button-enabled register-button false))
 
 
 ;;; initialize state according to cookie setup
@@ -59,12 +61,6 @@
   (if (registered?)
     (set-registered-state)
     (set-logged-out-state)))
-
-
-;;; register button events
-(events/listen login-button "action" open-login-dialog)
-(events/listen register-button "action" open-register-dialog)
-(events/listen logout-button "action" send-logout-request)
 
 
 ;;; register response handlers
@@ -79,3 +75,13 @@
                           nil)))))
 
 
+;;; register button events
+(def auth-button-reactor (dispatch/react-to
+                          #{:login-button-clicked
+                            :logout-button-clicked
+                            :register-button-clicked}
+                          (fn [evt data]
+                            (condp = evt
+                              :login-button-clicked (open-login-dialog)
+                              :logout-button-clicked (send-logout-request)
+                              :register-button-clicked (open-register-dialog)))))

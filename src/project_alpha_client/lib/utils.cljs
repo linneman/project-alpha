@@ -20,6 +20,7 @@
             [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
             [goog.net.XhrIo :as ajax]
             [goog.events :as events]
+            [goog.events.EventType :as event-type]
             [goog.style :as style])
   (:use [project-alpha-client.lib.logging :only [loginfo]]))
 
@@ -111,3 +112,24 @@
         [dialog ok-button cancel-button])
       [dialog ok-button])))
 
+
+(defn init-alpha-button
+  "function to create a goog.ui.Button instance from
+   an html input button element (alpha-button) with
+   given dom id which also attaches a clojurescript
+   event (dispatch mechanism)."
+  [button-id event]
+  (let [button (goog.ui.Button.)]
+    (. button (decorate (dom/get-element button-id)))
+    (events/listen button "action" #(dispatch/fire event nil))
+    button))
+
+
+(defn set-alpha-button-enabled
+  "function to enable or disabled the alpha-button
+   state."
+  [goog-button state]
+  (let [button (. goog-button (getElement))
+        opacity (if state 1.0 0.5)]
+    (. goog-button (setEnabled state))
+    (style/setOpacity button opacity)))
