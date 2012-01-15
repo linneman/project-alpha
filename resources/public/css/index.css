@@ -1,0 +1,36 @@
+body {
+  margin-left:100px;
+  font-family:Helvetica;
+}
+
+body h1 {
+  font-size:54px;
+}
+
+body h2 {
+  font-size:36px;
+}
+
+#key-assets {
+  line-height:1.4em;
+}
+
+#key-assets ul {
+  font-size:30px;
+  line-height:1.4em;
+}
+
+#button-pane p {
+  font-family:Impact;
+  color:green;
+  margin-top:-5px;
+}
+
+#key-assets {
+  width:70%;
+}
+
+#key-assets ul {
+  margin-top:50px;
+  margin-bottom:50px;
+}
