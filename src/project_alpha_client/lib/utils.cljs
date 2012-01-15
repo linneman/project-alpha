@@ -79,6 +79,7 @@
       (. dialog (setContent (goog.dom.getOuterHtml pane-element)))
       (goog.dom.removeNode pane-element)
       (. dialog (render))
+      (style/setStyle (. dialog (getElement)) "z-index", "3")
       (style/setOpacity (dom/get-element dom-id-str) 1)
       dialog)))
 
@@ -86,9 +87,10 @@
 (defn get-modal-dialog
   "constracts and setup a modal dialog panel from
    the specified dom element identifiers (given
-   as strings) and returns vector with correspnding
+   as strings) and returns vector with corresponding
    document objects for pane, ok-button and cancel
-   button if given."
+   button if given. Fires the event :dialog-closed
+   when cancel or the close box is clicked."
   [& {:keys [panel-id
              title-id
              ok-button-id
@@ -101,16 +103,26 @@
       (. dialog (setTitle
                  (goog.dom.getTextContent (dom/get-element title-id)))))
     (. dialog (setButtonSet null))
+    (set! (.panel-id dialog) panel-id)
     (. ok-button (setEnabled true))
     (events/listen ok-button "action"
                    #(do (. dialog (setVisible false))
                         (dispatch/fire dispatched-event dispatched-data)))
+    (events/listen dialog "afterhide"
+                   #(dispatch/fire :dialog-closed panel-id))
     (if cancel-button-id
       (let [cancel-button (goog.ui.decorate (dom/get-element cancel-button-id))]
         (events/listen cancel-button "action" #(. dialog (setVisible false)))
         (. cancel-button (setEnabled true))
         [dialog ok-button cancel-button])
       [dialog ok-button])))
+
+
+(defn open-modal-dialog
+  "Opens the given dialog and fires the event :dialog-opened"
+  [dialog]
+  (. dialog (setVisible true))
+  (dispatch/fire :dialog-opened (.panel-id dialog)))
 
 
 (defn init-alpha-button

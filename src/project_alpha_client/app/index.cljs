@@ -54,13 +54,24 @@
   (set-alpha-button-enabled register-button false))
 
 
-;;; initialize state according to cookie setup
-;;; when site is loaded
-(if (authenticated?)
-  (set-login-state)
-  (if (registered?)
-    (set-registered-state)
-    (set-logged-out-state)))
+(defn- disable-all-buttons
+  "disable all button to avoid that more than one
+   modal dialog is opened."
+  []
+  (set-alpha-button-enabled login-button false)
+  (set-alpha-button-enabled logout-button false)
+  (set-alpha-button-enabled register-button false))
+
+
+(defn- update-status
+  "initialize state according to cookie setup"
+  []
+  (if (authenticated?)
+    (set-login-state)
+    (if (registered?)
+      (set-registered-state)
+      (set-logged-out-state))))
+
 
 
 ;;; register response handlers
@@ -79,9 +90,18 @@
 (def auth-button-reactor (dispatch/react-to
                           #{:login-button-clicked
                             :logout-button-clicked
-                            :register-button-clicked}
+                            :register-button-clicked
+                            :dialog-opened
+                            :dialog-closed}
                           (fn [evt data]
                             (condp = evt
                               :login-button-clicked (open-login-dialog)
                               :logout-button-clicked (send-logout-request)
-                              :register-button-clicked (open-register-dialog)))))
+                              :register-button-clicked (open-register-dialog)
+                              :dialog-closed (update-status)
+                              :dialog-opened (disable-all-buttons)))))
+
+
+;;; initialize state according to cookie setup
+;;; when site is loaded
+(update-status)

@@ -15,7 +15,9 @@
             [project-alpha-client.lib.json :as json]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
-        [project-alpha-client.lib.utils :only [send-request get-modal-dialog]]))
+        [project-alpha-client.lib.utils :only [send-request
+                                               get-modal-dialog
+                                               open-modal-dialog]]))
 
 
 ;; instantiate login dialog and confirmation button
@@ -42,7 +44,7 @@
 (defn- open-login-failed-dialog
   "opens the login failed dialog"
   []
-  (. login-failed-dialog (setVisible true)))
+  (open-modal-dialog login-failed-dialog))
 
 
 ;;; instantiate login user not confirmed dialog
@@ -58,7 +60,7 @@
 (defn- open-login-user-not-confirmed-dialog
   "opens the user is not confirmed dialog"
   []
-  (. login-user-not-confirmed (setVisible true)))
+  (open-modal-dialog login-user-not-confirmed))
 
 
 
@@ -94,7 +96,7 @@
 (defn open-login-dialog
   "opens the login dialog"
   []
-  (. login-dialog (setVisible true)))
+  (open-modal-dialog login-dialog))
 
 
 (defn send-logout-request
@@ -105,5 +107,6 @@
                 (fn [e] (let [xhr (.target e)
                               resp (. xhr (getResponseText))]
                           (if (= resp "OK")
-                            (dispatch/fire :changed-login-state {:state :logout}))))
+                            (dispatch/fire :changed-login-state
+                                           {:state :logout}))))
                 "POST"))

@@ -24,7 +24,8 @@
             [goog.Timer :as timer])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.utils :only
-         [send-request validate-email copy-id-text clear-id-text get-modal-dialog]]))
+         [send-request validate-email copy-id-text clear-id-text
+          get-modal-dialog open-modal-dialog]]))
 
 
 ;; instantiate registration dialog and confirmation button
@@ -262,7 +263,7 @@
   "opens when registration failed e.g. due to
    communication error, not implemented yet."
   []
-  (. register-com-error-dialog (setVisible true)))
+  (open-modal-dialog register-com-error-dialog))
 
 
 ;;; advice user to check email for registration link
@@ -270,7 +271,7 @@
   "opens when registration was succeessful and instructs
    user to check email and click registration link."
   []
-  (. register-confirm-advice-dialog (setVisible true)))
+  (open-modal-dialog register-confirm-advice-dialog))
 
 
 ;;; clojurescript based event processing
@@ -299,8 +300,7 @@
    (fn [evt data]
      (let [{:keys [name resp]} data]
        (condp = resp
-         "OK" (do (open-register-confirm-advice-dialog)
-                  (dispatch/fire :changed-login-state {:state :registered :name name}))
+         "OK" (open-register-confirm-advice-dialog)
          (open-registration-failed-dialog))))))
 
 
@@ -308,6 +308,6 @@
 (defn open-register-dialog
   "opens the register new user dialog"
   []
-  (. dialog (setVisible true)))
+  (open-modal-dialog dialog))
 
 
