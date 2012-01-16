@@ -300,7 +300,8 @@
    (fn [evt data]
      (let [{:keys [name resp]} data]
        (condp = resp
-         "OK" (open-register-confirm-advice-dialog)
+         "OK" (do (dispatch/fire :changed-login-state {:state :registered})
+                  (open-register-confirm-advice-dialog))
          (open-registration-failed-dialog))))))
 
 

@@ -19,48 +19,66 @@
         [project-alpha-client.lib.register :only [open-register-dialog]]
         [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.auth :only [authenticated? registered?]]
-        [project-alpha-client.lib.utils :only [send-request
-                                               validate-email
-                                               copy-id-text
-                                               clear-id-text
-                                               init-alpha-button
-                                               set-alpha-button-enabled]]))
+        [project-alpha-client.lib.utils :only [init-alpha-button
+                                               set-alpha-button-enabled
+                                               is-alpha-button-enabled]]))
 
 ;;; buttons
 (def login-button (init-alpha-button "login-button" :login-button-clicked))
 (def register-button (init-alpha-button "register-button" :register-button-clicked))
 (def logout-button (init-alpha-button "logout-button" :logout-button-clicked))
 
+;;; button panes
+(def login-pane (dom/get-element "login-button-pane"))
+(def register-pane (dom/get-element "register-button-pane"))
+(def logout-pane (dom/get-element "logout-button-pane"))
+
+
 ;;; auth states
 (defn- set-logged-out-state
   "user not logged and not registered"
   []
-  (set-alpha-button-enabled login-button true)
-  (set-alpha-button-enabled logout-button false)
-  (set-alpha-button-enabled register-button true))
+  (style/showElement login-pane true)
+  (style/showElement logout-pane false)
+  (style/showElement register-pane true))
 
 (defn- set-registered-state
   "user is still not logged in but already registered"
   []
-  (set-alpha-button-enabled login-button true)
-  (set-alpha-button-enabled logout-button false)
-  (set-alpha-button-enabled register-button false))
+  (style/showElement login-pane true)
+  (style/showElement logout-pane false)
+  (style/showElement register-pane false))
 
 (defn- set-login-state
   "user is logged in"
   []
-  (set-alpha-button-enabled login-button false)
-  (set-alpha-button-enabled logout-button true)
-  (set-alpha-button-enabled register-button false))
+  (style/showElement login-pane false)
+  (style/showElement logout-pane true)
+  (style/showElement register-pane false))
 
 
-(defn- disable-all-buttons
+(def button-states (atom []))
+
+(defn- save-button-states
+  []
+  (let [buttons [login-button logout-button register-button]]
+    (reset! button-states (doall (map #(vector (identity %) (is-alpha-button-enabled %)) buttons))))
+  )
+
+(defn- disable-buttons
   "disable all button to avoid that more than one
    modal dialog is opened."
   []
-  (set-alpha-button-enabled login-button false)
-  (set-alpha-button-enabled logout-button false)
-  (set-alpha-button-enabled register-button false))
+  (save-button-states)
+  (dorun (map #(set-alpha-button-enabled % false)
+              [login-button logout-button register-button])))
+
+(defn- enable-buttons
+  "(re)enable all buttons after disabled-buttons
+   has been invoked"
+  []
+  (dorun (map #(set-alpha-button-enabled (first %) (second %))
+              @button-states)))
 
 
 (defn- update-status
@@ -98,10 +116,11 @@
                               :login-button-clicked (open-login-dialog)
                               :logout-button-clicked (send-logout-request)
                               :register-button-clicked (open-register-dialog)
-                              :dialog-closed (update-status)
-                              :dialog-opened (disable-all-buttons)))))
+                              :dialog-closed (enable-buttons)
+                              :dialog-opened (disable-buttons)))))
 
 
 ;;; initialize state according to cookie setup
 ;;; when site is loaded
 (update-status)
+

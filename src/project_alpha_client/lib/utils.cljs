@@ -145,3 +145,10 @@
         opacity (if state 1.0 0.5)]
     (. goog-button (setEnabled state))
     (style/setOpacity button opacity)))
+
+
+(defn is-alpha-button-enabled
+  "true when button enabled"
+  [goog-button]
+  (let [button (. goog-button (getElement))]
+    (. goog-button (isEnabled))))
