@@ -1,15 +1,6 @@
-body {
-  margin-left:100px;
-  margin-right:100px;
-  font-family:Helvetica;
-}
-
-body h1 {
-  font-size:54px;
-}
-
-body h2 {
-  font-size:36px;
+#index-pane {
+  /* display:none; */
+  opacity:0;
 }
 
 #key-assets {
@@ -19,6 +10,9 @@ body h2 {
 #key-assets ul {
   font-size:30px;
   line-height:1.4em;
+}
+
+#button-pane {
 }
 
 #button-pane p {

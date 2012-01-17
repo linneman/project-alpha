@@ -5,6 +5,24 @@
    2011/12 Otto Linnemann
 */
 
+/* global layout */
+
+body {
+  margin-left:100px;
+  margin-right:100px;
+  font-family:Helvetica;
+}
+
+body h1 {
+  font-size:54px;
+}
+
+body h2 {
+  font-size:36px;
+}
+
+/* modal dialog layout (e.g. login/register) */
+
 .project-alpha-dialog  {
     position:relative;
     font-size:1.5em;

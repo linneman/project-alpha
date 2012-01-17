@@ -23,6 +23,10 @@
                                                set-alpha-button-enabled
                                                is-alpha-button-enabled]]))
 
+
+;;; the index page (client side equivalent to index.html)
+(def index-pane (dom/get-element "index-pane"))
+
 ;;; buttons
 (def login-button (init-alpha-button "login-button" :login-button-clicked))
 (def register-button (init-alpha-button "register-button" :register-button-clicked))
@@ -119,8 +123,33 @@
                               :dialog-closed (enable-buttons)
                               :dialog-opened (disable-buttons)))))
 
+(def side-enabled-reactor (dispatch/react-to
+                           #{:page-switched}
+                           (fn [evt data]
+                             (if (= (:to data) :index)
+                               (enable-index-page)
+                               (disable-index-page)))))
+
 
 ;;; initialize state according to cookie setup
-;;; when site is loaded
-(update-status)
+;;; when site is loaded directly via
+;;; goog.require('project_alpha_client.app.index')
+;;;
+;;; (update-status)
 
+
+(defn- enable-index-page
+  "shows the index-page and updates the status"
+  []
+  (update-status)
+  (style/setOpacity index-pane 1) ;; important for first load only
+  (style/showElement index-pane true)
+  (loginfo "index page enabled")
+  )
+
+
+(defn- disable-index-page
+  "hides the index-page, activates the status"
+  []
+  (style/showElement index-pane false)
+  )

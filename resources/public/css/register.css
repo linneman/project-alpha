@@ -8,6 +8,7 @@
 #register {
     width:700px;
     height:500px;
+    opacity:0;
 }
 
 #register table {
@@ -40,7 +41,6 @@
     top:0px;
     left:20px;
     color:red;
-    //opacity:0;
 }
 
 #register_messages {
