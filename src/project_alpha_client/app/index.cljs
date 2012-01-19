@@ -11,7 +11,8 @@
 ;;; 2011-11-23, Otto Linnemann
 
 (ns project-alpha-client.app.index
-  (:require [clojure.browser.dom :as dom]
+  (:require [project-alpha-client.lib.pages :as pages]
+            [clojure.browser.dom :as dom]
             [goog.style :as style]
             [goog.events :as events]
             [project-alpha-client.lib.dispatch :as dispatch])
@@ -58,7 +59,9 @@
   []
   (style/showElement login-pane false)
   (style/showElement logout-pane true)
-  (style/showElement register-pane false))
+  (style/showElement register-pane false)
+  (pages/switch-to-page :profile)
+  )
 
 
 (def button-states (atom []))
@@ -123,7 +126,7 @@
                               :dialog-closed (enable-buttons)
                               :dialog-opened (disable-buttons)))))
 
-(def side-enabled-reactor (dispatch/react-to
+(def site-enabled-reactor (dispatch/react-to
                            #{:page-switched}
                            (fn [evt data]
                              (if (= (:to data) :index)
@@ -141,10 +144,10 @@
 (defn- enable-index-page
   "shows the index-page and updates the status"
   []
-  (update-status)
   (style/setOpacity index-pane 1) ;; important for first load only
   (style/showElement index-pane true)
   (loginfo "index page enabled")
+  (update-status)
   )
 
 

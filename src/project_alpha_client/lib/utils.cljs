@@ -25,6 +25,18 @@
   (:use [project-alpha-client.lib.logging :only [loginfo]]))
 
 
+(defn- current-url-keyword
+  "returns the keyword matching to the currently opened URL (page)
+   This allows to select the page the client renders by the URL.
+   In example for http://project-alpha/index.html we get the
+   symbol :index which per definition is used used for the client
+   side rendering via switch-to-page function."
+  []
+  (let [[page-html page]
+        (first (re-seq #"([a-zA-Z]*)\.html$" (js* "document.URL")))]
+    (keyword page)))
+
+
 (defn send-request
   "send XHTTP request as string"
   ([url str] (send-request url str (fn [e] nil) "GET"))

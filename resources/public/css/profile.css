@@ -5,6 +5,11 @@
    2011/12 Otto Linnemann
 */
 
+#profile-pane {
+  /* display:none; */
+  opacity:0;
+}
+
 #editMe {
     width: 600px;
     height: 300px;

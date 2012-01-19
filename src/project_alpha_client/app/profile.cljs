@@ -10,16 +10,20 @@
 ;;; 2011-11-23, Otto Linnemann
 
 (ns project-alpha-client.app.profile
-  (:require [project-alpha-client.lib.json :as json]
+  (:require [project-alpha-client.lib.pages :as pages]
+            [project-alpha-client.lib.json :as json]
             [project-alpha-client.lib.editor :as editor]
             [clojure.browser.dom :as dom]
             [goog.style :as style]
             [goog.events :as events]
             [goog.ui.Button :as Button]
             [goog.ui.TabPane :as TabPane]
-            )
+            [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.utils :only [send-request]]))
+
+;;; the profile page (client side equivalent to index.html)
+(def profile-pane (dom/get-element "profile-pane"))
 
 (def tabpane (goog.ui.TabPane. (dom/get-element "tabpane1")))
 (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page1"))))
@@ -35,3 +39,28 @@
                                (json/generate {"text" (. editor (getCleanContents))})
                                (fn [e] nil)
                                "POST")))
+
+
+
+(def site-enabled-reactor (dispatch/react-to
+                           #{:page-switched}
+                           (fn [evt data]
+                             (if (= (:to data) :profile)
+                               (enable-profile-page)
+                               (disable-profile-page)))))
+
+
+(defn- enable-profile-page
+  "shows the profile-page"
+  []
+  (style/setOpacity profile-pane 1) ;; important for first load only
+  (style/showElement profile-pane true)
+  (loginfo "profile page enabled")
+  )
+
+
+(defn- disable-profile-page
+  "hides the index-page, activates the status"
+  []
+  (style/showElement profile-pane false)
+  )

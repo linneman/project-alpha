@@ -13,14 +13,15 @@
 (ns project-alpha-client.app.core
   (:require [project-alpha-client.app.index :as index]
             [project-alpha-client.lib.pages :as pages])
-  (:use [project-alpha-client.lib.logging :only [loginfo]]))
+  (:use [project-alpha-client.lib.logging :only [loginfo]]
+        [project-alpha-client.lib.utils :only [current-url-keyword]]))
 
 
 (defn ^:export start
   "Start the application by switching to the index page"
   []
-  (pages/switch-to-page :index))
+  (pages/switch-to-page (current-url-keyword)))
 
 
-;;; and do it
+;;; start the client side application
 (start)

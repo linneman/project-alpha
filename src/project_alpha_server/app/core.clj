@@ -113,9 +113,8 @@
   (POST register-post-uri args (register args))
   (GET ["/user/:name" :name #".*"] [name] (let [name (url-decode name)] (user-response name)))
   ;; --- static html (composed out of outer layout side and inner content pane ---
-  (GET "/index.html" _ (site "register.html" "login.html" "index.html"))
-  (GET "/profile.html" _ (site "profile.html"))
-  (GET "/register.html" _ (site "register.html"))
+  (GET "/index.html" _ (site "register.html" "login.html" "index.html" "profile.html"))
+  (GET "/profile.html" _ (site "register.html" "login.html" "index.html" "profile.html"))
   (GET "/confirm" args (confirm args "index.html"))
   ;; --- json handlers ---
   (GET "/status" _ "server-running")
