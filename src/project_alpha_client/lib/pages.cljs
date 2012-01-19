@@ -25,13 +25,22 @@
   page (atom nil))
 
 
+(defn rewrite-url
+  [url]
+  (loginfo (str "url rewritten to: " url))
+  (js/eval (str "window.history.pushState('', 'project-alpha', '" url "');")))
+
+
 (defn switch-to-page
-  "switches to new page"
+  "switches to new page and rewrites the url
+   This is emulating a new page load from server."
   [new-page]
-  (swap! page #(when (not= % new-page)
-                 (loginfo (str "switched to page " new-page))
-                 (dispatch/fire :page-switched {:from page :to new-page})
-                 new-page)))
+  (let [new-url (str "/" (. (str new-page) (substring 1)) ".html")]
+    (swap! page #(when (not= % new-page)
+                   (loginfo (str "switched to page " new-page))
+                   (rewrite-url new-url)
+                   (dispatch/fire :page-switched {:from page :to new-page})
+                   new-page))))
 
 
 (defn get-active-page
