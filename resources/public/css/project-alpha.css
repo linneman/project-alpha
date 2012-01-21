@@ -21,6 +21,15 @@ body h2 {
   font-size:36px;
 }
 
+
+/* global navigation button style */
+
+#nav-pane {
+  /* display:none; */
+  opacity:1;
+}
+
+
 /* modal dialog layout (e.g. login/register) */
 
 .project-alpha-dialog  {

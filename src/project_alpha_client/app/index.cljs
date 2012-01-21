@@ -12,6 +12,7 @@
 
 (ns project-alpha-client.app.index
   (:require [project-alpha-client.lib.pages :as pages]
+            [project-alpha-client.app.nav :as nav]
             [clojure.browser.dom :as dom]
             [goog.style :as style]
             [goog.events :as events]

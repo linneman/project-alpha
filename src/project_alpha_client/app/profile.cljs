@@ -11,6 +11,7 @@
 
 (ns project-alpha-client.app.profile
   (:require [project-alpha-client.lib.pages :as pages]
+            [project-alpha-client.app.nav :as nav]
             [project-alpha-client.lib.json :as json]
             [project-alpha-client.lib.editor :as editor]
             [clojure.browser.dom :as dom]
