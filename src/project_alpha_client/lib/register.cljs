@@ -38,10 +38,15 @@
          :title-id "register-dialog-title"
          :ok-button-id "confirm-registration"
          :cancel-button-id "cancel-registration"
-         :dispatched-event :registration-dialog-confirmed)]
+         :dispatched-event :registration-dialog-confirmed
+         :keep-open true)]
     (. ok-button (setEnabled false)) ; ok-button is only enalbed when form correct
     (def dialog dialog)
-    (def confirm-button ok-button))
+    (def confirm-button ok-button)
+    (def progress_pane (dom/get-element "register_progress"))
+    (style/showElement progress_pane false)
+    (style/setOpacity progress_pane 1)
+    )
 
 
   ;; instantiate dialog which instructs the user to check the email for confirmation
@@ -259,6 +264,13 @@
    trigger-polling-when-entered-last-field)
 
 
+  (defn set-progress-pane-visible
+    "crossfades progess message over content of
+     registration dialog indicating the wating
+     for server response."
+    [visible]
+    (style/showElement progress_pane visible))
+
 
   ;; registration failed dialog
   (defn- open-registration-failed-dialog
@@ -285,6 +297,7 @@
          (let [name (.value (dom/get-element "name"))
                email (.value (dom/get-element "email"))
                password (.value (dom/get-element "password"))]
+           (set-progress-pane-visible true)
            (send-request "/register"
                          (json/generate {"name" name
                                          "email" email
@@ -301,6 +314,8 @@
      #{:register-resp}
      (fn [evt data]
        (let [{:keys [name resp]} data]
+         (set-progress-pane-visible false)
+         (. dialog (setVisible false))
          (condp = resp
            "OK" (do (dispatch/fire :changed-login-state {:state :registered})
                     (open-register-confirm-advice-dialog))
@@ -314,5 +329,4 @@
     (open-modal-dialog dialog))
 
   ) ;; (when register-pane
-
 

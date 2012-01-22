@@ -119,7 +119,8 @@
              ok-button-id
              cancel-button-id
              dispatched-event
-             dispatched-data]}]
+             dispatched-data
+             keep-open]}]
   (let [dialog (setup-modal-dialog-panel panel-id)
         ok-button (goog.ui.decorate (dom/get-element ok-button-id))]
     (when title-id
@@ -129,8 +130,9 @@
     (set! (.panel-id dialog) panel-id)
     (. ok-button (setEnabled true))
     (events/listen ok-button "action"
-                   #(do (. dialog (setVisible false))
-                        (dispatch/fire dispatched-event dispatched-data)))
+                   #(do
+                      (when-not keep-open (. dialog (setVisible false)))
+                      (dispatch/fire dispatched-event dispatched-data)))
     (events/listen dialog "afterhide"
                    #(dispatch/fire :dialog-closed panel-id))
     (if cancel-button-id
