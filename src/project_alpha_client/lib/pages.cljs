@@ -17,6 +17,7 @@
             [clojure.browser.dom   :as dom]
             [goog.events :as events]
             [goog.events.EventType :as event-type]
+            [goog.Timer :as timer]
             [goog.style :as style])
   (:use [project-alpha-client.lib.logging :only [loginfo]]))
 
@@ -25,7 +26,15 @@
   page (atom nil))
 
 
+(defn reload-url
+  "reloads the page (page is loaded from server)"
+  [url]
+  (js/eval (str "window.location.href='" url "';")))
+
+
 (defn rewrite-url
+  "only rewrite the url in the address line (page is already
+   loaded and has been enabled only)"
   [url]
   (loginfo (str "url rewritten to: " url))
   (js/eval (str "window.history.pushState('', 'project-alpha', '" url "');")))
@@ -39,7 +48,7 @@
     (swap! page #(when (not= % new-page)
                    (loginfo (str "switched to page " new-page))
                    (rewrite-url new-url)
-                   (dispatch/fire :page-switched {:from page :to new-page})
+                   (dispatch/fire :page-switched {:from @page :to new-page})
                    new-page))))
 
 
@@ -47,6 +56,16 @@
   "returns the currently active page"
   []
   @page)
+
+
+(defn switch-to-page-deferred
+  "like switch to page but defers execution
+   by 10ms to enforce queued events to be
+   processed."
+  [new-page]
+  (timer/callOnce #(switch-to-page new-page) 10))
+
+
 
 
 (comment

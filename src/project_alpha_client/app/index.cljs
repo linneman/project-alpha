@@ -23,7 +23,8 @@
         [project-alpha-client.lib.auth :only [authenticated? registered?]]
         [project-alpha-client.lib.utils :only [init-alpha-button
                                                set-alpha-button-enabled
-                                               is-alpha-button-enabled]]))
+                                               is-alpha-button-enabled
+                                               get-element]]))
 
 
 ;;; the index page (client side equivalent to index.html)
@@ -35,10 +36,9 @@
 (def logout-button (init-alpha-button "logout-button" :logout-button-clicked))
 
 ;;; button panes
-(def login-pane (dom/get-element "login-button-pane"))
-(def register-pane (dom/get-element "register-button-pane"))
-(def logout-pane (dom/get-element "logout-button-pane"))
-
+(def login-pane (get-element "login-button-pane" index-pane))
+(def register-pane (get-element "register-button-pane" index-pane))
+(def logout-pane (get-element "logout-button-pane" index-pane))
 
 ;;; auth states
 (defn- set-logged-out-state
@@ -61,7 +61,7 @@
   (style/showElement login-pane false)
   (style/showElement logout-pane true)
   (style/showElement register-pane false)
-  (pages/switch-to-page :profile)
+  (pages/switch-to-page-deferred :status)
   )
 
 
@@ -147,6 +147,7 @@
   []
   (style/setOpacity index-pane 1) ;; important for first load only
   (style/showElement index-pane true)
+  (nav/disable-nav-pane)
   (loginfo "index page enabled")
   (update-status)
   )
@@ -155,5 +156,5 @@
 (defn- disable-index-page
   "hides the index-page, activates the status"
   []
-  (style/showElement index-pane false)
-  )
+  (when index-pane
+    (style/showElement index-pane false)))

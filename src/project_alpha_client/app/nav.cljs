@@ -28,7 +28,26 @@
 
 
 ;;; the index page (client side equivalent to index.html)
-(def nav-pane (dom/get-element "index-pane"))
+(def nav-pane (dom/get-element "nav-pane"))
+
+
+(defn enable-nav-pane
+  "shows the status-page"
+  []
+  (style/setOpacity nav-pane 1) ;; important for first load only
+  (style/showElement nav-pane true)
+  (loginfo "nav pane enabled")
+  )
+
+
+(defn disable-nav-pane
+  "hides the nav-pane"
+  []
+  (when nav-pane
+    (style/showElement nav-pane false)
+    (loginfo "nav pane disabled")))
+
+
 
 
 (def button-spec
@@ -60,7 +79,7 @@
 
 (def nav-status-reactor (dispatch/react-to
                          #{:nav-status-clicked}
-                           #(pages/switch-to-page :index)))
+                           #(pages/switch-to-page :status)))
 
 (def nav-profile-reactor (dispatch/react-to
                          #{:nav-profile-clicked}
@@ -68,8 +87,18 @@
 
 (def nav-logout-reactor (dispatch/react-to
                          #{:nav-logout-clicked}
-                         (fn [] (send-logout-request) (pages/switch-to-page :index))))
+                         (fn []
+                           (send-logout-request))))
 
 ;(dispatch/delete-reaction nav-status-reactor)
 ;(dispatch/delete-reaction nav-status-reactor)
 ;(dispatch/delete-reaction nav-logout-reactor)
+
+
+(def logout-reactor (dispatch/react-to
+                    #{:changed-login-state}
+                    (fn [evt data]
+                      (let [{:keys [state name]} data]
+                        (condp = state
+                          :logout  (pages/switch-to-page :index)
+                          nil)))))

@@ -19,42 +19,48 @@
                                                get-modal-dialog
                                                open-modal-dialog]]))
 
+;;; the login pane
+(def login-pane (dom/get-element "login-pane"))
 
-;; instantiate login dialog and confirmation button
-(let [[dialog ok-button cancel-button]
-      (get-modal-dialog
-       :panel-id "login"
-       :title-id "login-dialog-title"
-       :ok-button-id "confirm-login"
-       :dispatched-event :login-dialog-confirmed)]
-  (def login-dialog dialog)
-  (def confirm-login-button ok-button))
+(when login-pane
+
+  ;; instantiate login dialog and confirmation button
+  (let [[dialog ok-button cancel-button]
+        (get-modal-dialog
+         :panel-id "login"
+         :title-id "login-dialog-title"
+         :ok-button-id "confirm-login"
+         :dispatched-event :login-dialog-confirmed)]
+    (def login-dialog dialog)
+    (def confirm-login-button ok-button))
 
 
-;;; instantiate login failed dialog
-(let [[dialog ok-button cancel-button]
-      (get-modal-dialog
-       :panel-id "login-failed"
-       :title-id "login-failed-dialog-title"
-       :ok-button-id "confirm-login-failed")]
-  (def login-failed-dialog dialog)
-  (def confirm-login-button ok-button))
+  ;; instantiate login failed dialog
+  (let [[dialog ok-button cancel-button]
+        (get-modal-dialog
+         :panel-id "login-failed"
+         :title-id "login-failed-dialog-title"
+         :ok-button-id "confirm-login-failed")]
+    (def login-failed-dialog dialog)
+    (def confirm-login-button ok-button))
+
+
+  ;; instantiate login user not confirmed dialog
+  (let [[dialog ok-button cancel-button]
+        (get-modal-dialog
+         :panel-id "login-user-not-confirmed"
+         :title-id "login-user-not-confirmed-title"
+         :ok-button-id "confirm-login-user-not-confirmed")]
+    (def login-user-not-confirmed dialog)
+    (def login-not-confirmed-button ok-button))
+  )
+
 
 
 (defn- open-login-failed-dialog
   "opens the login failed dialog"
   []
   (open-modal-dialog login-failed-dialog))
-
-
-;;; instantiate login user not confirmed dialog
-(let [[dialog ok-button cancel-button]
-      (get-modal-dialog
-       :panel-id "login-user-not-confirmed"
-       :title-id "login-user-not-confirmed-title"
-       :ok-button-id "confirm-login-user-not-confirmed")]
-  (def login-user-not-confirmed dialog)
-  (def login-not-confirmed-button ok-button))
 
 
 (defn- open-login-user-not-confirmed-dialog

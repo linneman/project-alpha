@@ -15,6 +15,7 @@
             [project-alpha-client.lib.dispatch :as dispatch]
             [clojure.browser.event :as event]
             [clojure.browser.dom   :as dom]
+            [goog.dom :as gdom]
             [goog.ui.Dialog :as Dialog]
             [goog.ui.Button :as Button]
             [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
@@ -35,6 +36,16 @@
   (let [[page-html page]
         (first (re-seq #"([a-zA-Z]*)\.html$" (js* "document.URL")))]
     (keyword page)))
+
+
+(defn get-element
+  "similar to dom/get-element but the search can be
+   restricted to a given node (2nd argument) If no
+   node is specified the document object is searched."
+  ([element] (get-element element (gdom/getDocument)))
+  ([element node]
+      (gdom/findNode node
+                     (fn [e] (= (.id e) element)))))
 
 
 (defn send-request

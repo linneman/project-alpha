@@ -1,0 +1,11 @@
+/* CSS
+   The use and distribution terms for this software are covered
+   by the Eclipse Public License 1.0
+
+   2011/12 Otto Linnemann
+*/
+
+#status-pane {
+  /* display:none; */
+  opacity:0;
+}

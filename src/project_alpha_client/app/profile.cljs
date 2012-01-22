@@ -23,25 +23,26 @@
   (:use [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.utils :only [send-request]]))
 
-;;; the profile page (client side equivalent to index.html)
+;;; the profile page (client side equivalent to profile.html)
 (def profile-pane (dom/get-element "profile-pane"))
 
-(def tabpane (goog.ui.TabPane. (dom/get-element "tabpane1")))
-(. tabpane (addPage (TabPane/TabPage. (dom/get-element "page1"))))
-(. tabpane (addPage (TabPane/TabPage. (dom/get-element "page2"))))
-(. tabpane (addPage (TabPane/TabPage. (dom/get-element "page3"))))
+(when profile-pane
 
-(def editor (editor/create "editMe" "toolbar"))
+  (def tabpane (goog.ui.TabPane. (dom/get-element "tabpane1")))
+  (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page1"))))
+  (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page2"))))
+  (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page3"))))
 
-(events/listen editor goog.editor.Field.EventType.DELAYEDCHANGE
-               (fn [e]
-                 (loginfo (json/generate {"text" (. editor (getCleanContents))}))
-                 (send-request "/profile"
-                               (json/generate {"text" (. editor (getCleanContents))})
-                               (fn [e] nil)
-                               "POST")))
+  (def editor (editor/create "editMe" "toolbar"))
 
-
+  (events/listen editor goog.editor.Field.EventType.DELAYEDCHANGE
+                 (fn [e]
+                   (loginfo (json/generate {"text" (. editor (getCleanContents))}))
+                   (send-request "/profile"
+                                 (json/generate {"text" (. editor (getCleanContents))})
+                                 (fn [e] nil)
+                                 "POST")))
+  )
 
 (def site-enabled-reactor (dispatch/react-to
                            #{:page-switched}
@@ -50,18 +51,22 @@
                                (enable-profile-page)
                                (disable-profile-page)))))
 
-
 (defn- enable-profile-page
-  "shows the profile-page"
+  "shows or reloads the profile-page"
   []
-  (style/setOpacity profile-pane 1) ;; important for first load only
-  (style/showElement profile-pane true)
-  (loginfo "profile page enabled")
-  )
+  (if profile-pane
+    (do
+      (style/setOpacity profile-pane 1) ;; important for first load only
+      (style/showElement profile-pane true)
+      (nav/enable-nav-pane)
+      (loginfo "profile page enabled"))
+    (do
+      (pages/reload-url "/profile.html")
+      (loginfo "profile page reloaded"))))
 
 
 (defn- disable-profile-page
   "hides the index-page, activates the status"
   []
-  (style/showElement profile-pane false)
-  )
+  (when profile-pane
+    (style/showElement profile-pane false)))
