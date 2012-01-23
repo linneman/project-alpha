@@ -25,6 +25,8 @@
 (def email-authentication-required true)
 (def confirm-email-msg-path "resources/templates/confirm_email_msg.txt")
 (def confirm-email-subj-path "resources/templates/confirm_email_subj.txt")
+(def reset-pw-email-msg-path "resources/templates/reset_pw_email_msg.txt")
+(def reset-pw-email-subj-path "resources/templates/reset_pw_email_subj.txt")
 
 
 ;;; --- Connection parameters to SQL database, currently MySQL ---

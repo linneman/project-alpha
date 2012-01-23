@@ -12,6 +12,7 @@
 (ns project-alpha-client.lib.login
   (:require [clojure.browser.dom :as dom]
             [goog.events :as events]
+            [goog.style :as style]
             [project-alpha-client.lib.json :as json]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
@@ -35,6 +36,20 @@
     (def confirm-login-button ok-button))
 
 
+  (let [[dialog ok-button cancel-button]
+        (get-modal-dialog
+         :panel-id "pw-forgotten-form"
+         :title-id "pw-forgotten-dialog-title"
+         :ok-button-id "confirm-pw-forgotten"
+         :dispatched-event :pw-forotten-dialog-confirmed
+         :keep-open true)]
+    (def pw-forgotten-dialog dialog)
+    (def confirm-pw-forgotten-button ok-button)
+    (def progress_pane (dom/get-element "send_pw_reminder_progress"))
+    (style/showElement progress_pane false)
+    (style/setOpacity progress_pane 1))
+
+
   ;; instantiate login failed dialog
   (let [[dialog ok-button cancel-button]
         (get-modal-dialog
@@ -53,7 +68,28 @@
          :ok-button-id "confirm-login-user-not-confirmed")]
     (def login-user-not-confirmed dialog)
     (def login-not-confirmed-button ok-button))
-  )
+
+
+  ;; instantiate dialog which instructs the user to check the email
+  ;; password reset
+  (let [[dialog ok-button cancel-button]
+        (get-modal-dialog
+         :panel-id "reset_pw_advice_dialog"
+         :title-id "reset_pw_advice_title"
+         :ok-button-id "reset_pw_advice_button")]
+    (def reset-pw-advice-dialog dialog))
+
+
+  ;; instantiate error dialog about user for pw reset does not exist
+  (let [[dialog ok-button cancel-button]
+        (get-modal-dialog
+         :panel-id "user_not_existing_dialog"
+         :title-id "user_not_existing_title"
+         :ok-button-id "user_not_existing_button")]
+    (def user_not_existing_dialog dialog))
+
+  )   ; (when login-pane
+
 
 
 
@@ -68,6 +104,17 @@
   []
   (open-modal-dialog login-user-not-confirmed))
 
+
+(defn- open-reset-pw-advice-dialog
+  "opens the reset password process advice dialog"
+  []
+  (open-modal-dialog reset-pw-advice-dialog))
+
+
+(defn- open-user_not_existing_dialog
+  "opens the user unknown after password reset req dialog"
+  []
+  (open-modal-dialog user_not_existing_dialog))
 
 
 ;;; clojurescript based event processing
@@ -105,6 +152,12 @@
   (open-modal-dialog login-dialog))
 
 
+(defn open-pw-forgotten-dialog
+  "opens the dialog to send a password reset request via email"
+  []
+  (open-modal-dialog pw-forgotten-dialog))
+
+
 (defn send-logout-request
   "sends logout indication to server and change
    to logout state when positive response arrives."
@@ -116,3 +169,39 @@
                             (dispatch/fire :changed-login-state
                                            {:state :logout}))))
                 "POST"))
+
+
+(defn set-progress-pane-visible
+  "crossfades progress message over content of
+   pw reminder dialog indicating the wating
+   for server response."
+  [visible]
+  (style/showElement progress_pane visible))
+
+
+(def pw-forgotten-confirm-reactor
+  (dispatch/react-to
+   #{:pw-forotten-dialog-confirmed}
+   (fn [evt data]
+     (let [name (.value (dom/get-element "pw-reminder-name"))]
+       (set-progress-pane-visible true)
+       (send-request "/reset_pw_req"
+                     (json/generate {"name" name})
+                     (fn [ajax-evt]
+                       (let [resp (. (.target ajax-evt) (getResponseText))]
+                         (dispatch/fire :pw-forgotten-resp
+                                        {:name name :resp resp})))
+                     "POST")))))
+
+
+(def pw-forgotten-resp-reactor
+  (dispatch/react-to
+   #{:pw-forgotten-resp}
+   (fn [evt data]
+     (let [{:keys [name resp]} data]
+       (set-progress-pane-visible false)
+       (. pw-forgotten-dialog (setVisible false))
+       (condp = resp
+         "OK" (do (dispatch/fire :changed-login-state {:state :registered})
+                  (open-reset-pw-advice-dialog))
+         (open-user_not_existing_dialog))))))

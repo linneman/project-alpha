@@ -34,7 +34,7 @@
    side rendering via switch-to-page function."
   []
   (let [[page-html page]
-        (first (re-seq #"([a-zA-Z]*)\.html$" (js* "document.URL")))]
+        (first (re-seq #"([a-zA-Z_]*)\.html$" (js* "document.URL")))]
     (keyword page)))
 
 

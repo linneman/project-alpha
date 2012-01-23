@@ -17,7 +17,9 @@
             [goog.style :as style]
             [goog.events :as events]
             [project-alpha-client.lib.dispatch :as dispatch])
-  (:use [project-alpha-client.lib.login :only [open-login-dialog send-logout-request]]
+  (:use [project-alpha-client.lib.login :only [open-login-dialog
+                                               open-pw-forgotten-dialog
+                                               send-logout-request]]
         [project-alpha-client.lib.register :only [open-register-dialog]]
         [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.auth :only [authenticated? registered?]]
@@ -34,11 +36,13 @@
 (def login-button (init-alpha-button "login-button" :login-button-clicked))
 (def register-button (init-alpha-button "register-button" :register-button-clicked))
 (def logout-button (init-alpha-button "logout-button" :logout-button-clicked))
+(def forgot-password-button (init-alpha-button "forgot-password-button" :forgot-password-button-clicked))
 
 ;;; button panes
 (def login-pane (get-element "login-button-pane" index-pane))
 (def register-pane (get-element "register-button-pane" index-pane))
 (def logout-pane (get-element "logout-button-pane" index-pane))
+(def forgot-password-pane (get-element "forgot-password-pane" index-pane))
 
 ;;; auth states
 (defn- set-logged-out-state
@@ -46,14 +50,16 @@
   []
   (style/showElement login-pane true)
   (style/showElement logout-pane false)
-  (style/showElement register-pane true))
+  (style/showElement register-pane true)
+  (style/showElement forgot-password-pane true))
 
 (defn- set-registered-state
   "user is still not logged in but already registered"
   []
   (style/showElement login-pane true)
   (style/showElement logout-pane false)
-  (style/showElement register-pane false))
+  (style/showElement register-pane false)
+  (style/showElement forgot-password-pane true))
 
 (defn- set-login-state
   "user is logged in"
@@ -61,15 +67,15 @@
   (style/showElement login-pane false)
   (style/showElement logout-pane true)
   (style/showElement register-pane false)
-  (pages/switch-to-page-deferred :status)
-  )
+  (style/showElement forgot-password-pane false)
+  (pages/switch-to-page-deferred :status))
 
 
 (def button-states (atom []))
 
 (defn- save-button-states
   []
-  (let [buttons [login-button logout-button register-button]]
+  (let [buttons [login-button logout-button register-button forgot-password-button]]
     (reset! button-states (doall (map #(vector (identity %) (is-alpha-button-enabled %)) buttons))))
   )
 
@@ -117,6 +123,7 @@
                           #{:login-button-clicked
                             :logout-button-clicked
                             :register-button-clicked
+                            :forgot-password-button-clicked
                             :dialog-opened
                             :dialog-closed}
                           (fn [evt data]
@@ -124,6 +131,7 @@
                               :login-button-clicked (open-login-dialog)
                               :logout-button-clicked (send-logout-request)
                               :register-button-clicked (open-register-dialog)
+                              :forgot-password-button-clicked (open-pw-forgotten-dialog)
                               :dialog-closed (enable-buttons)
                               :dialog-opened (disable-buttons)))))
 

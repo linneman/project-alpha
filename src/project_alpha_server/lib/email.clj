@@ -42,6 +42,14 @@
         subj (slurp setup/confirm-email-subj-path)]
     (sendmail to-address subj (str msg url))))
 
+(defn send-reset-passwd-mail
+  "sends the user with the specified address an email
+   with the url for allowing to reset the password."
+  [to-address url]
+  (let [msg (slurp setup/reset-pw-email-msg-path)
+        subj (slurp setup/reset-pw-email-subj-path)]
+    (sendmail to-address subj (str msg url))))
+
 ; (send-confirm-mail "linneman@gmx.de" "/confirm/abcdef")
 
 

@@ -18,7 +18,8 @@
         [ring.util.response :only [response]]
         [project-alpha-server.lib.model]
         [project-alpha-server.lib.crypto :only [get-secret-key]]
-        [project-alpha-server.lib.email :only [send-confirm-mail]]
+        [project-alpha-server.lib.email :only [send-confirm-mail
+                                               send-reset-passwd-mail]]
         [swank.core :only [break]]))
 
 
@@ -64,6 +65,35 @@
                 cookies (assoc cookies "authenticated" {:value "true"})]
             (-> (response "OK") (assoc :session session) (assoc :cookies cookies)))))
       (response "USER ALREADY REGISTERED, HACKER ACTIVITY?"))))
+
+
+
+(defn reset-pw-req
+  "utility function for processing the POST request for
+   resetting the password and sending therefore a new
+   confirmation email."
+  [ring-args]
+  (let [params (:params ring-args)
+        name (params "name")
+        cat (fn [url method]
+              (let [URL (java.net.URL. url)
+                    host (.getHost URL)
+                    port (.getPort URL)
+                    protocol (.getProtocol URL)]
+                (.toString (java.net.URL. protocol host port method))))
+        session (:session ring-args)
+        cookies (:cookies ring-args)
+        userdata (find-user-by-name-or-email name)]
+    (if (not (empty? userdata))
+      (let [[{email :email}] userdata
+            [{key :confirmation_link}] userdata
+            session (assoc session :registered true)
+            cookies (assoc cookies "registered" {:value "true"})
+            confirmation_link (str "/reset_pw_conf?key=" (codec/url-encode key))]
+        (send-reset-passwd-mail email (cat setup/host-url confirmation_link))
+        (-> (response "OK") (assoc :session session) (assoc :cookies cookies)))
+      (response "NOT OK"))))
+
 
 
 (defn confirm
