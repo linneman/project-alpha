@@ -102,10 +102,11 @@
   (let [params (:params ring-args)
         key (:key params)
         user (find-user :confirmation_link key)
+        [{name :name}] user
         session (:session ring-args)
         cookies (:cookies ring-args)]
     (if (not (empty? user))
-      (let [session (assoc session :authenticated true)
+      (let [session (assoc session :authenticated true :name name)
             cookies (assoc cookies "authenticated" {:value "true"})]
         (update-user {:confirmed 1} {:confirmation_link key})
         (-> (response (forward-url url))
@@ -127,8 +128,8 @@
         user (check-user-password password name)]
     (if (and user (or (:confirmed user)
                       (not setup/email-authentication-required)))
-      (let [session (assoc session :authenticated true)
-            cookies (assoc cookies "authenticated" {:value "true"})]
+      (let [session (assoc session :registered true :authenticated true)
+            cookies (assoc cookies "registered" {:value "true"} "authenticated" {:value "true"})]
         (-> (response "OK")
             (assoc :session session)
             (assoc :cookies cookies)
@@ -150,6 +151,17 @@
         cookies (assoc cookies "authenticated" {:value "false"})]
     (-> (response "OK")
         (assoc :session session) (assoc :cookies cookies))))
+
+
+(defn set-password
+  "set new password"
+    [ring-args]
+    (let [params (:params ring-args)
+          session (:session ring-args)
+          name (:name session)
+          password (params "password")]
+      (change-user-password password {:name name})
+    "OK"))
 
 
 (defn wrap-authentication

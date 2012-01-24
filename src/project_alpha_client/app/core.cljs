@@ -14,6 +14,7 @@
   (:require [project-alpha-client.app.index :as index]
             [project-alpha-client.app.profile :as profile]
             [project-alpha-client.app.status :as status]
+            [project-alpha-client.app.reset-password :as reset-password]
             [project-alpha-client.lib.pages :as pages])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.utils :only [current-url-keyword]]))

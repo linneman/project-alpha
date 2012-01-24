@@ -20,6 +20,7 @@
             [goog.style :as style]
             [goog.events :as events]
             [goog.object :as object]
+            [goog.dom :as gdom]
             [goog.ui.Component :as Component]
             [goog.Timer :as timer])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
@@ -47,6 +48,10 @@
     (style/showElement progress_pane false)
     (style/setOpacity progress_pane 1)
     )
+
+  ;; by default dialog is configured for registration incl. email and pseudonym fields
+  ;; if password-only-enabled is true email and pseudonym fields are not displayed
+  (def password-only-enabled (atom false))
 
 
   ;; instantiate dialog which instructs the user to check the email for confirmation
@@ -155,6 +160,19 @@
     (set! (.color (.style (dom/get-element "password-repeat"))) "green")
     )
 
+
+  (defn- reset-dialog
+    []
+    (set! (.value (dom/get-element "name")) "")
+    (set! (.value (dom/get-element "email")) "")
+    (set! (.value (dom/get-element "password")) "")
+    (set! (.value (dom/get-element "password-repeat")) "")
+    (clear-name-error)
+    (clear-email-error)
+    (clear-password-error)
+    (clear-password-repeat-error))
+
+
   (defn- update-confirm-button-state []
     (if (empty? @reg-form-status)
       (do (. confirm-button (setEnabled true)) true)
@@ -170,7 +188,7 @@
           value (.value target-elem)]
       (loginfo (str "focus out event triggered for: " target-id))
       (cond
-       (= target-id "name")
+       (and (= target-id "name") (not @password-only-enabled))
        (do
          (loginfo (str "name->" value))
          (clear-name-error)
@@ -179,7 +197,7 @@
                              (do
                                (loginfo (pr-str "User " value " exists already!"))
                                (set-name-error "name_not_available_error")))))
-       (= target-id "email")
+       (and (= target-id "email") (not @password-only-enabled))
        (do
          (loginfo (str "email->" value))
          (clear-email-error)
@@ -296,15 +314,17 @@
        (if (check-all-reg-fields)
          (let [name (.value (dom/get-element "name"))
                email (.value (dom/get-element "email"))
-               password (.value (dom/get-element "password"))]
+               password (.value (dom/get-element "password"))
+               url (if @password-only-enabled "/set_password" "/register")
+               serv-resp-event (if @password-only-enabled :password-resp :register-resp)]
            (set-progress-pane-visible true)
-           (send-request "/register"
+           (send-request url
                          (json/generate {"name" name
                                          "email" email
                                          "password" password})
                          (fn [ajax-evt]
                            (let [resp (. (.target ajax-evt) (getResponseText))]
-                             (dispatch/fire :register-resp
+                             (dispatch/fire serv-resp-event
                                             {:name name :email email :resp resp})))
                          "POST"))))))
 
@@ -322,11 +342,69 @@
            (open-registration-failed-dialog))))))
 
 
+  (def set-password-resp-reactor
+    (dispatch/react-to
+     #{:password-resp}
+     (fn [evt data]
+       (let [{:keys [name resp]} data]
+         (set-progress-pane-visible false)
+         (. dialog (setVisible false))
+         (condp = resp
+           "OK" (do (dispatch/fire :changed-login-state {:state :login}))
+           (open-registration-failed-dialog))))))
+
+
+  (defn- set-name-and-email-enabled
+    "enables the name and the email field when flag is true
+     for new user registration. disables these fields when
+     flag is false for reset of the passoword for existing
+     user."
+    [enabled-flag]
+    (let [a (gdom/getElementsByTagNameAndClass undefined "name_and_email")]
+      (amap a idx _ (style/showElement (aget a idx) enabled-flag))))
+
+
+  (defn- setup-password-change-dialog
+    "reconfigures the registration dialog to password
+     redefinition (only password fields are visible)"
+    []
+    (reset! password-only-enabled true)
+    (. dialog (setTitle
+               (goog.dom.getTextContent (dom/get-element "reset-password-title"))))
+    (set-name-and-email-enabled false))
+
+
+  (defn- setup-register-dialog
+    "reconfigures the registration dialog for complete
+     user registration"
+    []
+    (reset! password-only-enabled false)
+    (. dialog (setTitle
+               (goog.dom.getTextContent (dom/get-element "register-dialog-title"))))
+    (set-name-and-email-enabled true))
+
+
   ;; exports
   (defn open-register-dialog
     "opens the register new user dialog"
     []
+    (reset-dialog)
+    (setup-register-dialog)
     (open-modal-dialog dialog))
+
+
+  ;; exports
+  (defn open-newpassword-dialog
+    "opens the register new user dialog"
+    []
+    (reset-dialog)
+    (setup-password-change-dialog)
+    (open-modal-dialog dialog))
+
+
+  ;; sample
+  ; (set-name-and-email-enabled false)
+  ; (set-name-and-email-enabled true)
 
   ) ;; (when register-pane
 

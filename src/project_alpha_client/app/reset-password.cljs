@@ -20,7 +20,8 @@
             [goog.ui.Button :as Button]
             [goog.ui.TabPane :as TabPane]
             [project-alpha-client.lib.dispatch :as dispatch])
-  (:use [project-alpha-client.lib.logging :only [loginfo]]
+  (:use [project-alpha-client.lib.register :only [open-newpassword-dialog]]
+        [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.utils :only [send-request]]))
 
 ;;; the reset password page (client side equivalent to index.html)
@@ -30,7 +31,6 @@
 (def site-enabled-reactor (dispatch/react-to
                            #{:page-switched}
                            (fn [evt data]
-                             (loginfo (str "status-reactor, from: " (:from data) " to: "(:to data)))
                              (if (= (:to data) :reset_pw)
                                (enable-reset-password-page)
                                (disable-reset-password-page)))))
@@ -43,6 +43,7 @@
       (style/setOpacity reset-password-pane 1) ;; important for first load only
       (style/showElement reset-password-pane true)
       (nav/enable-nav-pane)
+      (open-newpassword-dialog)
       (loginfo "reset password page enabled"))
     (do
       (pages/reload-url "/reset_pw.html")
