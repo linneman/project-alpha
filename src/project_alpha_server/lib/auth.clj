@@ -102,11 +102,11 @@
   (let [params (:params ring-args)
         key (:key params)
         user (find-user :confirmation_link key)
-        [{name :name}] user
+        [{id :id}] user
         session (:session ring-args)
         cookies (:cookies ring-args)]
     (if (not (empty? user))
-      (let [session (assoc session :authenticated true :name name)
+      (let [session (assoc session :authenticated true :id id)
             cookies (assoc cookies "authenticated" {:value "true"})]
         (update-user {:confirmed 1} {:confirmation_link key})
         (-> (response (forward-url url))
@@ -158,9 +158,9 @@
     [ring-args]
     (let [params (:params ring-args)
           session (:session ring-args)
-          name (:name session)
+          id (:id session)
           password (params "password")]
-      (change-user-password password {:name name})
+      (change-user-password password {:id id})
     "OK"))
 
 
