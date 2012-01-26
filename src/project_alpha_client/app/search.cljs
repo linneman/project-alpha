@@ -5,11 +5,11 @@
 ;;; The use and distribution terms for this software are covered by
 ;;; the Eclipse Public License 1.0, the same as clojure
 ;;;
-;;; functions for the status page
+;;; functions for the search page
 ;;;
 ;;; 2011-11-23, Otto Linnemann
 
-(ns project-alpha-client.app.status
+(ns project-alpha-client.app.search
   (:require [project-alpha-client.lib.pages :as pages]
             [project-alpha-client.app.nav :as nav]
             [project-alpha-client.lib.json :as json]
@@ -24,33 +24,33 @@
         [project-alpha-client.lib.utils :only [send-request]]))
 
 ;;; the profile page (client side equivalent to index.html)
-(def status-pane (dom/get-element "status-pane"))
+(def search-pane (dom/get-element "search-pane"))
 
 
 (def site-enabled-reactor (dispatch/react-to
                            #{:page-switched}
                            (fn [evt data]
-                             (if (= (:to data) :status)
-                               (enable-status-page)
-                               (disable-status-page)))))
+                             (if (= (:to data) :search)
+                               (enable-search-page)
+                               (disable-search-page)))))
 
-(defn- enable-status-page
-  "shows the status-page"
+(defn- enable-search-page
+  "shows the search-page"
   []
-  (if status-pane
+  (if search-pane
     (do
-      (style/setOpacity status-pane 1) ;; important for first load only
-      (style/showElement status-pane true)
+      (style/setOpacity search-pane 1) ;; important for first load only
+      (style/showElement search-pane true)
       (nav/enable-nav-pane)
-      (loginfo "status page enabled"))
+      (loginfo "search page enabled"))
     (do
-      (pages/reload-url "/status.html")
-      (loginfo "status page reloaded"))))
+      (pages/reload-url "/search.html")
+      (loginfo "search page reloaded"))))
 
 
-(defn- disable-status-page
-  "hides the status-page, activates the status"
+(defn- disable-search-page
+  "hides the search-page, activates the search"
   []
-  (when status-pane
-    (style/showElement status-pane false)
-    (loginfo "status page disabled")))
+  (when search-pane
+    (style/showElement search-pane false)
+    (loginfo "search page disabled")))

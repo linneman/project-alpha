@@ -53,9 +53,9 @@
 (def button-spec
   {:status  { :dom-id-str "nav-status-button"  :action :nav-status-clicked }
    :profile { :dom-id-str "nav-profile-button" :action :nav-profile-clicked }
-   :contact { :dom-id-str "nav-contact-button" :action :nav-contact-clicked }
+   :search  { :dom-id-str "nav-search-button" :action :nav-search-clicked }
    :logout  { :dom-id-str "nav-logout-button"  :action :nav-logout-clicked }
-   :impress { :dom-id-str "nav-impress-button" :action :nav-impress-clicked }})
+   :imprint { :dom-id-str "nav-imprint-button" :action :nav-imprint-clicked }})
 
 
 (def button-group (radio/init-radio-button-group button-spec))
@@ -71,9 +71,9 @@
 (def nav-button-reactor (dispatch/react-to
                          #{:nav-status-clicked
                            :nav-profile-clicked
-                           :nav-contact-clicked
+                           :nav-search-clicked
                            :nav-logout-clicked
-                           :nav-impress-clicked}
+                           :nav-imprint-clicked}
                            (fn [evt data] (loginfo evt))))
 ;(dispatch/delete-reaction nav-button-reactor)
 
@@ -84,6 +84,14 @@
 (def nav-profile-reactor (dispatch/react-to
                          #{:nav-profile-clicked}
                            #(pages/switch-to-page :profile)))
+
+(def nav-search-reactor (dispatch/react-to
+                         #{:nav-search-clicked}
+                           #(pages/switch-to-page :search)))
+
+(def nav-imprint-reactor (dispatch/react-to
+                         #{:nav-imprint-clicked}
+                           #(pages/switch-to-page :imprint)))
 
 (def nav-logout-reactor (dispatch/react-to
                          #{:nav-logout-clicked}
