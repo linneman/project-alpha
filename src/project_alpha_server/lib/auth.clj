@@ -125,10 +125,11 @@
         cookies (:cookies ring-args)
         name (params "name")
         password (params "password")
-        user (check-user-password password name)]
+        user (check-user-password password name)
+        {id :id} user]
     (if (and user (or (:confirmed user)
                       (not setup/email-authentication-required)))
-      (let [session (assoc session :registered true :authenticated true)
+      (let [session (assoc session :registered true :authenticated true :id id)
             cookies (assoc cookies "registered" {:value "true"} "authenticated" {:value "true"})]
         (-> (response "OK")
             (assoc :session session)
@@ -137,6 +138,15 @@
       (if user
         (response "NOT CONFIRMED")
         (response "NOT OK")))))
+
+(defn test-login
+  []
+  (let [params {"password" "sonne" "name" "otto"}
+        session {:id 78 :authenticated false :registered true}
+        ring-args {:session session :params params}]
+    (login ring-args)))
+
+; (test-login)
 
 
 (defn logout

@@ -21,9 +21,12 @@
         [ring.middleware.cookies :only [wrap-cookies]]
         [ring.middleware.multipart-params :only [wrap-multipart-params]]
         [project-alpha-server.lib.model]
+        [project-alpha-server.app.model]
         [project-alpha-server.lib.auth]
         [clojure.data.json :only [json-str write-json read-json]]
         [clojure.pprint :only [pprint]]
+        [project-alpha-server.lib.utils]
+        [clojure.data.json :only [json-str write-json read-json]]
         ))
 
 
@@ -127,7 +130,8 @@
   (GET "/status" _ "server-running")
   (GET "/session" args (str "<body>" args "</body>"))
   (GET "/counter" args (session-counter args))
-  (POST "/profile" {params :params session :session} (do (println (params "text")) "OK"))
+  (POST "/profile" {params :params session :session} (do (update-profile (:id session) (json2clj-hash params)) "OK"))
+  (GET "/profile" {session :session} (json-str (dissoc (get-profile (:id session)) :modified)))
   (route/resources "/")
   (route/not-found "Page not found"))
 
@@ -139,6 +143,7 @@
       json-params/wrap-json-params
       wrap-multipart-params
       handler/api))
+
 
 (defonce server (jetty/run-jetty #'app
                                  {:port 3000 :join? false}))

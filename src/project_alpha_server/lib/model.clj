@@ -28,7 +28,9 @@
 (db/defdb db db-con)
 
 
+
 ;;; --- utility functions ---
+
 
 (defn sqlreq
   "sends an sql request to the database
@@ -40,6 +42,7 @@
       [req]
       (doall rs))))
 
+
 (defn sqltact
   "trigger sql transaction"
   [transaction]
@@ -47,10 +50,12 @@
     (jdbc/transaction (transaction)
      )))
 
+
 (defn create-table
   "Create table with given spec"
   [table & spec]
   (sqltact #(apply jdbc/create-table (conj spec table))))
+
 
 (defn drop-table
   "Drop the specified table"
@@ -60,6 +65,34 @@
      (try
        (clojure.java.jdbc/drop-table table)
        (catch Exception _)))))
+
+
+(defn update-when-not-modified
+  "updates fields only when modification date on
+   db is older then specified modification date
+   (keyword :modified in fields).
+   This is required for caching strategies e.g.
+   of json data which is posted to the http server
+   very often."
+  [entity fields where]
+  (let [modified (or (:modified fields) (java.util.Date.))]
+    (sql/update entity
+                (sql/set-fields fields)
+                (sql/where where)
+                (sql/where { :modified [< modified] }))))
+
+
+(defn insert-or-update-when-not-modified
+  "update entity with the given id when date on database
+   older then specified modification date (keyword :modified),
+   creates element if it does not exist yet."
+  [entity id fields]
+  (let [fields (assoc fields :id id)]
+    (if (empty? (sql/select entity (sql/where {:id id})))
+      (sql/insert entity (sql/values (assoc fields :modified (java.util.Date.))))
+      (update-when-not-modified entity fields {:id id}))))
+
+
 
 
 

@@ -37,36 +37,66 @@
 
   (events/listen editor goog.editor.Field.EventType.DELAYEDCHANGE
                  (fn [e]
-                   (loginfo (json/generate {"text" (. editor (getCleanContents))}))
+                   ; (loginfo (json/generate {"text" (. editor (getCleanContents))}))
                    (send-request "/profile"
                                  (json/generate {"text" (. editor (getCleanContents))})
                                  (fn [e] nil)
                                  "POST")))
+
+  (defn request-profile-data
+    []
+    (send-request "/profile"
+                  ""
+                  (fn [ajax-evt]
+                    (let [resp (. (.target ajax-evt) (getResponseText))]
+                                        ; (loginfo resp)
+                      (dispatch/fire :get-my-profile-resp
+                                     (json/parse resp))))))
+
+  (defn update-content
+    [data]
+    (. editor (setHtml false (data "text") true)))
+
+
+  (def my-profile-resp-reactor (dispatch/react-to
+                                #{:get-my-profile-resp}
+                                (fn [evt data]
+                                  (update-content data)
+                                  )))
+
+  (def site-enabled-reactor (dispatch/react-to
+                             #{:page-switched}
+                             (fn [evt data]
+                               (if (= (:to data) :profile)
+                                 (enable-profile-page)
+                                 (disable-profile-page)))))
+
+  (defn- enable-profile-page
+    "shows or reloads the profile-page"
+    []
+    (if profile-pane
+      (do
+        (request-profile-data)
+        (style/setOpacity profile-pane 1) ;; important for first load only
+        (style/showElement profile-pane true)
+        (nav/enable-nav-pane)
+        (loginfo "profile page enabled"))
+      (do
+        (pages/reload-url "/profile.html")
+        (loginfo "profile page reloaded"))))
+
+
+  (defn- disable-profile-page
+    "hides the index-page, activates the status"
+    []
+    (when profile-pane
+      (style/showElement profile-pane false)))
+
+
+  ; (dispatch/delete-reaction my-profile-resp-reactor)
+  ; (request-profile-data)
+
+  ; (. editor (setHtml false "Hallo Welt" true))
+
   )
 
-(def site-enabled-reactor (dispatch/react-to
-                           #{:page-switched}
-                           (fn [evt data]
-                             (if (= (:to data) :profile)
-                               (enable-profile-page)
-                               (disable-profile-page)))))
-
-(defn- enable-profile-page
-  "shows or reloads the profile-page"
-  []
-  (if profile-pane
-    (do
-      (style/setOpacity profile-pane 1) ;; important for first load only
-      (style/showElement profile-pane true)
-      (nav/enable-nav-pane)
-      (loginfo "profile page enabled"))
-    (do
-      (pages/reload-url "/profile.html")
-      (loginfo "profile page reloaded"))))
-
-
-(defn- disable-profile-page
-  "hides the index-page, activates the status"
-  []
-  (when profile-pane
-    (style/showElement profile-pane false)))
