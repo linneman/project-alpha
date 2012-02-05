@@ -37,6 +37,8 @@
    :profiles
    [:id :integer "PRIMARY KEY"]
    [:text "text"]
+   [:user_sex "varchar(12)"]
+   [:user_interest_sex "varchar(12)"]
    [:modified "timestamp"]
    ))
 

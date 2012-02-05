@@ -48,6 +48,32 @@
                      (fn [e] (= (.id e) element)))))
 
 
+(defn get-button-group-value
+  "reads a button group with given name specifiers and returns
+   a hash map for all selected entries."
+  [button-group-name]
+  (let [rb (gdom/findNodes (gdom/getDocument)
+                           (fn [e] (= (.name e) button-group-name)))
+        harray (map #(if (.checked %) (hash-map (.name %) (.value %))) rb)]
+    (apply merge harray)))
+
+
+(defn set-button-group-value
+  "sets button group to specified value."
+  [button-group-name value-set]
+  (let [rb (gdom/findNodes (gdom/getDocument)
+                           (fn [e] (= (.name e) button-group-name)))]
+    (doseq [b rb] (set! (.checked b) (contains? value-set (.value b))))
+    ))
+
+
+(comment
+  "usage illustration"
+  (get-button-group-value "user_sex")
+  (set-button-group-value "user_sex" #{"male"}))
+
+
+
 (defn send-request
   "send XHTTP request as string"
   ([url str] (send-request url str (fn [e] nil) "GET"))

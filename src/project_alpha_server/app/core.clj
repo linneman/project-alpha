@@ -130,7 +130,7 @@
   (GET "/status" _ "server-running")
   (GET "/session" args (str "<body>" args "</body>"))
   (GET "/counter" args (session-counter args))
-  (POST "/profile" {params :params session :session} (do (update-profile (:id session) (json2clj-hash params)) "OK"))
+  (POST "/profile" {params :params session :session} (do (println (json2clj-hash params)) (update-profile (:id session) (json2clj-hash params)) "OK"))
   (GET "/profile" {session :session} (json-str (dissoc (get-profile (:id session)) :modified)))
   (route/resources "/")
   (route/not-found "Page not found"))
