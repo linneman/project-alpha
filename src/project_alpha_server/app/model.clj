@@ -39,6 +39,7 @@
    [:text "text"]
    [:user_sex "varchar(12)"]
    [:user_interest_sex "varchar(12)"]
+   [:user_age :integer]
    [:modified "timestamp"]
    ))
 
@@ -102,8 +103,11 @@
 (defn update-profile
   "queues new profile data for db storage"
   [id fields]
-  (let [h {id (assoc fields :modified (java.util.Date.))}]
-    (swap! profile-cache merge h)))
+  (swap! profile-cache
+         #(let [merged-fields (if % (merge (% id) fields) fields)
+                mf-and-modified (assoc merged-fields
+                                  :modified (java.util.Date.))]
+            {id mf-and-modified})))
 
 
 (defn find-profile
