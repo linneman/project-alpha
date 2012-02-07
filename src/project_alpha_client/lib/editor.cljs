@@ -46,6 +46,7 @@
                    EditorCommand/OUTDENT
                    EditorCommand/JUSTIFY_LEFT
                    EditorCommand/JUSTIFY_CENTER
+                   EditorCommand/JUSTIFY_RIGHT
                    EditorCommand/SUBSCRIPT
                    EditorCommand/SUPERSCRIPT
                    EditorCommand/STRIKE_THROUGH
