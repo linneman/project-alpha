@@ -139,36 +139,36 @@
                                 :dialog-closed (enable-buttons)
                                 :dialog-opened (disable-buttons)))))
 
-  (def site-enabled-reactor (dispatch/react-to
-                             #{:page-switched}
-                             (fn [evt data]
-                               (if (= (:to data) :index)
-                                 (enable-index-page)
-                                 (disable-index-page)))))
-
-
-  ;;; initialize state according to cookie setup
-  ;;; when site is loaded directly via
-  ;;; goog.require('project_alpha_client.app.index')
-  ;;;
-  ;;; (update-status)
-
-
-  (defn- enable-index-page
-    "shows the index-page and updates the status"
-    []
-    (style/setOpacity index-pane 1) ;; important for first load only
-    (style/showElement index-pane true)
-    (nav/disable-nav-pane)
-    (loginfo "index page enabled")
-    (update-status)
-    )
-
-
-  (defn- disable-index-page
-    "hides the index-page, activates the status"
-    []
-    (when index-pane
-      (style/showElement index-pane false)))
-
   )  ; (when index-pane
+
+
+(def site-enabled-reactor (dispatch/react-to
+                           #{:page-switched}
+                           (fn [evt data]
+                             (if (= (:to data) :index)
+                               (enable-index-page)
+                               (disable-index-page)))))
+
+
+;;; initialize state according to cookie setup
+;;; when site is loaded directly via
+;;; goog.require('project_alpha_client.app.index')
+;;;
+;;; (update-status)
+
+(defn- enable-index-page
+  "shows the index-page and updates the status"
+  []
+  (style/setOpacity index-pane 1) ;; important for first load only
+  (style/showElement index-pane true)
+  (nav/disable-nav-pane)
+  (loginfo "index page enabled")
+  (update-status)
+  )
+
+
+(defn- disable-index-page
+  "hides the index-page, activates the status"
+  []
+  (when index-pane
+    (style/showElement index-pane false)))

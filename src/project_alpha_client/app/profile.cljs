@@ -51,13 +51,16 @@
   (dorun
    (map #(. ageSelect (addItem (goog.ui.MenuItem. (:sel-string %))))
         age-ranges))
+  (. ageSelect (setSelectedIndex -1))
   (. ageSelect (render (dom/get-element "user-age")))
 
 
   (defn- get-selected-age
     "retrieves age from selection field"
     []
-    (:age (second (nth idx-age-ranges (. ageSelect (getSelectedIndex))))))
+    (let [idx (. ageSelect (getSelectedIndex))]
+      (when (>= idx 0)
+        { "user_age" (:age (second (nth idx-age-ranges idx))) })))
 
   ; (get-selected-age)
 
@@ -105,7 +108,7 @@
     (merge
      (get-button-group-value "user_sex")
      (get-button-group-value "user_interest_sex")
-     {"user_age" (get-selected-age)}))
+     (get-selected-age)))
 
 
   (defn post-disabled-page-content
@@ -158,6 +161,8 @@
                                      (json/parse resp))))))
 
   (defn update-content
+    "update the displayed profile page content
+     which is triggered after an ajax get request."
     [data]
     (. editor (setHtml false (data "text") true))
     (set-button-group-value "user_sex" (set [(data "user_sex")]))
@@ -171,41 +176,38 @@
                                   (update-content data)
                                   )))
 
-  (def site-enabled-reactor (dispatch/react-to
-                             #{:page-switched}
-                             (fn [evt data]
-                               (if (= (:to data) :profile)
-                                 (enable-profile-page)
-                                 (disable-profile-page)))))
-
-  (defn- enable-profile-page
-    "shows or reloads the profile-page"
-    []
-    (if profile-pane
-      (do
-        (request-profile-data)
-        (style/setOpacity profile-pane 1) ;; important for first load only
-        (style/showElement profile-pane true)
-        (nav/enable-nav-pane)
-        (loginfo "profile page enabled"))
-      (do
-        (pages/reload-url "/profile.html")
-        (loginfo "profile page reloaded"))))
+  ) ; (when profile-pane
 
 
-  (defn- disable-profile-page
-    "hides the index-page, activates the status"
-    []
-    (when profile-pane
-      (post-disabled-page-content @active-pane-idx) ; do not forget to post last active page data
-      (style/showElement profile-pane false)))
+(def site-enabled-reactor (dispatch/react-to
+                           #{:page-switched}
+                           (fn [evt data]
+                             (if (= (:to data) :profile)
+                               (enable-profile-page)
+                               (disable-profile-page)))))
+
+(defn- enable-profile-page
+  "shows or reloads the profile-page"
+  []
+  (if profile-pane
+    (do
+      (request-profile-data)
+      (style/setOpacity profile-pane 1) ;; important for first load only
+      (style/showElement profile-pane true)
+      (nav/enable-nav-pane)
+      (loginfo "profile page enabled"))
+    (do
+      (pages/reload-url "/profile.html")
+      (loginfo "profile page reloaded"))))
 
 
-  ; (dispatch/delete-reaction my-profile-resp-reactor)
-  ; (request-profile-data)
+(defn- disable-profile-page
+  "hides the index-page, activates the status"
+  []
+  (when profile-pane
+    (post-disabled-page-content @active-pane-idx) ; do not forget to post last active page data
+    (style/showElement profile-pane false)))
 
-  ; (. editor (setHtml false "Hallo Welt" true))
 
-
-  )
-
+; (dispatch/delete-reaction my-profile-resp-reactor)
+; (request-profile-data)
