@@ -76,7 +76,7 @@
        with user data as argument."
     [name function]
     (send-request (str "/user/" (goog.string.urlEncode name)) nil
-                  (fn [e] (let [text (. (.target e) (getResponseText))
+                  (fn [e] (let [text (. (. e -target) (getResponseText))
                                 data (json/parse text)]
                             (if (not-empty data) (function data))))))
 
@@ -101,7 +101,7 @@
     [dom-error-id-string]
     (swap! reg-form-status assoc :name dom-error-id-string)
     (copy-id-text dom-error-id-string "register_message_name")
-    (set! (.color (.style (dom/get-element "name"))) "red")
+    (set! (. (. (dom/get-element "name") -style) -color) "red")
     )
 
   (defn- clear-name-error
@@ -109,7 +109,7 @@
     []
     (swap! reg-form-status dissoc :name)
     (clear-id-text "register_message_name")
-    (set! (.color (.style (dom/get-element "name"))) "green")
+    (set! (. (. (dom/get-element "name") -style) -color) "green")
     )
 
   (defn- set-email-error
@@ -117,7 +117,7 @@
     [dom-error-id-string]
     (swap! reg-form-status assoc :email dom-error-id-string)
     (copy-id-text dom-error-id-string "register_message_email")
-    (set! (.color (.style (dom/get-element "email"))) "red")
+    (set! (. (. (dom/get-element "email") -style) -color) "red")
     )
 
   (defn- clear-email-error
@@ -125,7 +125,7 @@
     []
     (swap! reg-form-status dissoc :email)
     (clear-id-text "register_message_email")
-    (set! (.color (.style (dom/get-element "email"))) "green")
+    (set! (. (. (dom/get-element "email") -style) -color) "green")
     )
 
   (defn- set-password-error
@@ -133,7 +133,7 @@
     [dom-error-id-string]
     (swap! reg-form-status assoc :password dom-error-id-string)
     (copy-id-text dom-error-id-string "register_message_password")
-    (set! (.color (.style (dom/get-element "password"))) "red")
+    (set! (. (. (dom/get-element "password") -style) -color) "red")
     )
 
   (defn- clear-password-error
@@ -141,7 +141,7 @@
     []
     (swap! reg-form-status dissoc :password)
     (clear-id-text "register_message_password")
-    (set! (.color (.style (dom/get-element "password"))) "green")
+    (set! (. (. (dom/get-element "password") -style) -color) "green")
     )
 
   (defn- set-password-repeat-error
@@ -149,7 +149,7 @@
     [dom-error-id-string]
     (swap! reg-form-status assoc :password-repeat dom-error-id-string)
     (copy-id-text dom-error-id-string "register_message_password_repeat")
-    (set! (.color (.style (dom/get-element "password-repeat"))) "red")
+    (set! (. (. (dom/get-element "password-repeat") -style) -color) "red")
     )
 
   (defn- clear-password-repeat-error
@@ -157,16 +157,16 @@
     []
     (swap! reg-form-status dissoc :password-repeat)
     (clear-id-text "register_message_password_repeat")
-    (set! (.color (.style (dom/get-element "password-repeat"))) "green")
+    (set! (. (. (dom/get-element "password-repeat") -style) -color) "green")
     )
 
 
   (defn- reset-dialog
     []
-    (set! (.value (dom/get-element "name")) "")
-    (set! (.value (dom/get-element "email")) "")
-    (set! (.value (dom/get-element "password")) "")
-    (set! (.value (dom/get-element "password-repeat")) "")
+    (set! (. (dom/get-element "name") -value) "")
+    (set! (. (dom/get-element "email") -value) "")
+    (set! (. (dom/get-element "password") -value) "")
+    (set! (. (dom/get-element "password-repeat") -value) "")
     (clear-name-error)
     (clear-email-error)
     (clear-password-error)
@@ -182,10 +182,10 @@
   (defn- updateRegisterText
     "validates registration form"
     [e]
-    (let [target (.target e)
-          target-id (.id target)
+    (let [target (. e -target)
+          target-id (. target -id)
           target-elem (dom/get-element target-id)
-          value (.value target-elem)]
+          value (. target-elem -value)]
       (loginfo (str "focus out event triggered for: " target-id))
       (cond
        (and (= target-id "name") (not @password-only-enabled))
@@ -221,7 +221,7 @@
        (do
          (loginfo (str "password-repeat->" value))
          (clear-password-repeat-error)
-         (if (not= value (.value (dom/get-element "password")))
+         (if (not= value (. (dom/get-element "password") -value))
            (do
              (loginfo (pr-str "Password " value " do not match!"))
              (set-password-repeat-error "password_mismatch_error"))
@@ -259,10 +259,10 @@
 
   (defn- trigger-polling-when-entered-last-field
     [e]
-    (let [target (.target e)
-          target-id (.id target)
+    (let [target (. e -target)
+          target-id (. target -id)
           target-elem (dom/get-element target-id)
-          value (.value target-elem)]
+          value (. target-elem -value)]
       (if
           (= target-id "password-repeat")
         (start-polling-all-reg-field-checks)
@@ -312,9 +312,9 @@
      #{:registration-dialog-confirmed}
      (fn [evt data]
        (if (check-all-reg-fields)
-         (let [name (.value (dom/get-element "name"))
-               email (.value (dom/get-element "email"))
-               password (.value (dom/get-element "password"))
+         (let [name (. (dom/get-element "name") -value)
+               email (. (dom/get-element "email") -value)
+               password (. (dom/get-element "password") -value)
                url (if @password-only-enabled "/set_password" "/register")
                serv-resp-event (if @password-only-enabled :password-resp :register-resp)]
            (set-progress-pane-visible true)
@@ -323,7 +323,7 @@
                                          "email" email
                                          "password" password})
                          (fn [ajax-evt]
-                           (let [resp (. (.target ajax-evt) (getResponseText))]
+                           (let [resp (. (. ajax-evt -target) (getResponseText))]
                              (dispatch/fire serv-resp-event
                                             {:name name :email email :resp resp})))
                          "POST"))))))

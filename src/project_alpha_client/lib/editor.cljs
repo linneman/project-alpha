@@ -64,5 +64,5 @@
     (. myField (registerPlugin (goog.editor.plugins.HeaderFormatter.)))
     (. myField (registerPlugin (goog.editor.plugins.LinkDialogPlugin.)))
     (. myField (registerPlugin (goog.editor.plugins.LinkBubble.)))
-    (. myField (makeEditable))
+    ; (. myField (makeEditable)) causes NS_ERROR_FAILER Exception of FS when not displayed!
     myField))

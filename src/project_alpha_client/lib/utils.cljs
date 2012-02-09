@@ -45,7 +45,7 @@
   ([element] (get-element element (gdom/getDocument)))
   ([element node]
       (gdom/findNode node
-                     (fn [e] (= (.id e) element)))))
+                     (fn [e] (= (. e -id) element)))))
 
 
 (defn get-button-group-value
@@ -53,8 +53,8 @@
    a hash map for all selected entries."
   [button-group-name]
   (let [rb (gdom/findNodes (gdom/getDocument)
-                           (fn [e] (= (.name e) button-group-name)))
-        harray (map #(if (.checked %) (hash-map (.name %) (.value %))) rb)]
+                           (fn [e] (= (. e -name) button-group-name)))
+        harray (map #(if (. % -checked) (hash-map (. % -name) (. % -value))) rb)]
     (apply merge harray)))
 
 
@@ -62,8 +62,8 @@
   "sets button group to specified value."
   [button-group-name value-set]
   (let [rb (gdom/findNodes (gdom/getDocument)
-                           (fn [e] (= (.name e) button-group-name)))]
-    (doseq [b rb] (set! (.checked b) (contains? value-set (.value b))))
+                           (fn [e] (= (. e -name) button-group-name)))]
+    (doseq [b rb] (set! (. b -checked) (contains? value-set (. b -value))))
     ))
 
 
@@ -153,7 +153,7 @@
       (. dialog (setTitle
                  (goog.dom.getTextContent (dom/get-element title-id)))))
     (. dialog (setButtonSet null))
-    (set! (.panel-id dialog) panel-id)
+    (set! (. dialog -panel-id) panel-id)
     (. ok-button (setEnabled true))
     (events/listen ok-button "action"
                    #(do
@@ -173,7 +173,7 @@
   "Opens the given dialog and fires the event :dialog-opened"
   [dialog]
   (. dialog (setVisible true))
-  (dispatch/fire :dialog-opened (.panel-id dialog)))
+  (dispatch/fire :dialog-opened (. dialog -panel-id)))
 
 
 (defn init-alpha-button

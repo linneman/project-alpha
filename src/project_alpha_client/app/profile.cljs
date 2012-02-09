@@ -97,7 +97,8 @@
      that the text is lost when the browser
      tab is closed."
     []
-    {"text" (. editor (getCleanContents))})
+    (let [text (. editor (getCleanContents))]
+      (if text {"text" text})))
 
 
   (defn get-age-and-sex-content
@@ -111,14 +112,29 @@
      (get-selected-age)))
 
 
-  (defn post-disabled-page-content
+  (defn get-page-id-str
+    "returns the dom-id str for the tabe pane page
+     with given index which is starting from 0."
+    [idx]
+    (let [page (. tabpane (getPage idx))
+          elem (. page (getContentElement))]
+      (. elem -id)))
+
+
+  (defn update-tab-panes
     "post everything of the profiles pane
      which does not belong to the text edit pane
-     which is handled differently."
+     which is handled differently.
+     furthermore enable and disable the editor according
+     to the active pane due to a problem in firefox."
     [selected-page-idx]
-    (let [id-str-left (.id (. (. tabpane (getPage @active-pane-idx))
-                              (getContentElement)))]
-      (if (= id-str-left "page1") ; page one (age and sex)
+    (let [id-str-left (get-page-id-str @active-pane-idx)
+          id-str-active (get-page-id-str selected-page-idx)]
+      (if (= id-str-active "page2") ; firefox does not support to active when not displayed
+        (when (. editor (isUneditable)) (. editor (makeEditable)))
+        (when-not (. editor (isUneditable)) (. editor (makeUneditable)))
+        )
+      (if (= id-str-left "page1") ; post page one content (age and sex) when left
         (do
           (send-request "/profile"
                         (json/generate (get-age-and-sex-content))
@@ -136,18 +152,17 @@
                                  (fn [e] nil)
                                  "POST")))
 
-
   (events/listen tabpane goog.ui.TabPane.Events.CHANGE
-                 (fn [e] (let [idx (. (.page e) (getIndex))
-                               id-str (.id (. (. tabpane (getPage idx))
-                                              (getContentElement)))]
+                 (fn [e] (let [idx (. (. e -page) (getIndex))
+                               id-str (. (. (. tabpane (getPage idx))
+                                              (getContentElement)) -id)]
                            (dispatch/fire :profile-tab-changed idx))))
 
 
   (def profile-tab-changed-reactor (dispatch/react-to
                                 #{:profile-tab-changed}
                                 (fn [evt data]
-                                  (post-disabled-page-content data)
+                                  (update-tab-panes data)
                                   )))
 
   (defn request-profile-data
@@ -155,7 +170,7 @@
     (send-request "/profile"
                   ""
                   (fn [ajax-evt]
-                    (let [resp (. (.target ajax-evt) (getResponseText))]
+                    (let [resp (. (. ajax-evt -target) (getResponseText))]
                                         ; (loginfo resp)
                       (dispatch/fire :get-my-profile-resp
                                      (json/parse resp))))))
@@ -205,7 +220,7 @@
   "hides the index-page, activates the status"
   []
   (when profile-pane
-    (post-disabled-page-content @active-pane-idx) ; do not forget to post last active page data
+    (update-tab-panes @active-pane-idx) ; do not forget to post last active page data
     (style/showElement profile-pane false)))
 
 

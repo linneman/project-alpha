@@ -123,12 +123,12 @@
   (dispatch/react-to
    #{:login-dialog-confirmed}
    (fn [evt data]
-     (let [name (.value (dom/get-element "login-name"))
-           password (.value (dom/get-element "login-password"))]
+     (let [name (. (dom/get-element "login-name") -value)
+           password (. (dom/get-element "login-password") -value)]
        (send-request "/login"
                      (json/generate {"name" name "password" password})
                      (fn [ajax-evt]
-                       (let [resp (. (.target ajax-evt) (getResponseText))]
+                       (let [resp (. (. ajax-evt -target) (getResponseText))]
                          (dispatch/fire :login-resp
                                         {:name name :resp resp})))
                      "POST")))))
@@ -163,7 +163,7 @@
    to logout state when positive response arrives."
   []
   (send-request "/logout" ""
-                (fn [e] (let [xhr (.target e)
+                (fn [e] (let [xhr (. e -target)
                               resp (. xhr (getResponseText))]
                           (if (= resp "OK")
                             (dispatch/fire :changed-login-state
@@ -183,12 +183,12 @@
   (dispatch/react-to
    #{:pw-forotten-dialog-confirmed}
    (fn [evt data]
-     (let [name (.value (dom/get-element "pw-reminder-name"))]
+     (let [name (. (dom/get-element "pw-reminder-name") -value)]
        (set-progress-pane-visible true)
        (send-request "/reset_pw_req"
                      (json/generate {"name" name})
                      (fn [ajax-evt]
-                       (let [resp (. (.target ajax-evt) (getResponseText))]
+                       (let [resp (. (. ajax-evt -target) (getResponseText))]
                          (dispatch/fire :pw-forgotten-resp
                                         {:name name :resp resp})))
                      "POST")))))
