@@ -47,7 +47,11 @@
         key (codec/base64-encode (get-secret-key {}))
         confirmation_link (str "/confirm?key=" (codec/url-encode key))
         session (:session ring-args)
-        cookies (:cookies ring-args)]
+        cookies (:cookies ring-args)
+        cookies (assoc cookies
+                  "ring-session" (merge (cookies "ring-session")
+                                        {:max-age setup/cookie-max-age}))]
+    (println "registering, cookies: " cookies)
     (if (and (empty? (find-user-by-name name))
              (empty? (find-user-by-email email)))
       (do
@@ -58,11 +62,13 @@
          :confirmation_link key)
         (if setup/email-authentication-required
           (let [session (assoc session :registered true)
-                cookies (assoc cookies "registered" {:value "true"})]
+                cookies (assoc cookies
+                          "registered" {:value "true" :max-age setup/cookie-max-age})]
             (send-confirm-mail email (cat setup/host-url confirmation_link))
             (-> (response "OK") (assoc :session session) (assoc :cookies cookies)))
           (let [session (assoc session :authenticated true)
-                cookies (assoc cookies "authenticated" {:value "true"})]
+                cookies (assoc cookies
+                          "authenticated" {:value "true" :max-age setup/cookie-max-age})]
             (-> (response "OK") (assoc :session session) (assoc :cookies cookies)))))
       (response "USER ALREADY REGISTERED, HACKER ACTIVITY?"))))
 
@@ -87,8 +93,11 @@
     (if (not (empty? userdata))
       (let [[{email :email}] userdata
             [{key :confirmation_link}] userdata
+            cookies (assoc cookies
+                      "ring-session" (merge (cookies "ring-session")
+                                            {:max-age setup/cookie-max-age})
+                      "registered" {:value "true" :max-age setup/cookie-max-age})
             session (assoc session :registered true)
-            cookies (assoc cookies "registered" {:value "true"})
             confirmation_link (str "/reset_pw_conf?key=" (codec/url-encode key))]
         (send-reset-passwd-mail email (cat setup/host-url confirmation_link))
         (-> (response "OK") (assoc :session session) (assoc :cookies cookies)))
@@ -107,7 +116,11 @@
         cookies (:cookies ring-args)]
     (if (not (empty? user))
       (let [session (assoc session :authenticated true :id id)
-            cookies (assoc cookies "authenticated" {:value "true"})]
+            cookies (assoc cookies
+                      "ring-session" (merge (cookies "ring-session")
+                                            {:max-age setup/cookie-max-age})
+                      "registered" {:value "true" :max-age setup/cookie-max-age}
+                      "authenticated" {:value "true" :max-age setup/cookie-max-age})]
         (update-user {:confirmed 1} {:confirmation_link key})
         (-> (response (forward-url url))
             (assoc :session session)
@@ -130,7 +143,11 @@
     (if (and user (or (:confirmed user)
                       (not setup/email-authentication-required)))
       (let [session (assoc session :registered true :authenticated true :id id)
-            cookies (assoc cookies "registered" {:value "true"} "authenticated" {:value "true"})]
+            cookies (assoc cookies
+                      "ring-session" (merge (cookies "ring-session")
+                                            {:max-age setup/cookie-max-age})
+                      "registered" {:value "true" :max-age setup/cookie-max-age}
+                      "authenticated" {:value "true" :max-age setup/cookie-max-age})]
         (-> (response "OK")
             (assoc :session session)
             (assoc :cookies cookies)
@@ -158,7 +175,10 @@
   (let [session (:session ring-args)
         cookies (:cookies ring-args)
         session (assoc session :authenticated false)
-        cookies (assoc cookies "authenticated" {:value "false"})]
+        cookies (assoc cookies
+                  "ring-session" (merge (cookies "ring-session")
+                                        {:max-age setup/cookie-max-age})
+                  "authenticated" {:value "false"})]
     (-> (response "OK")
         (assoc :session session) (assoc :cookies cookies))))
 

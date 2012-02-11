@@ -13,6 +13,7 @@
             [compojure.route :as route]
             [compojure.handler :as handler]
             [net.cgrand.enlive-html :as html]
+            [project-alpha-server.local-settings :as setup]
             )
   (:use [compojure.core :only [GET POST PUT DELETE]]
         [ring.util.response :only [response]]
@@ -139,12 +140,10 @@
 (def app
   (-> main-routes
       (wrap-authentication login-get-uri [login-post-uri register-get-uri register-post-uri "/user" "/confirm" "/reset_pw_req" "/reset_pw_conf"])
-      (wrap-session {:store (db-session-store) :cookie-attrs {:max-age (* 30 24 3600)}})
-      wrap-cookies
+      (wrap-session {:store (db-session-store) :cookie-attrs {:max-age setup/cookie-max-age}})
       json-params/wrap-json-params
       wrap-multipart-params
       handler/api))
-
 
 (defonce server (jetty/run-jetty #'app
                                  {:port 3000 :join? false}))

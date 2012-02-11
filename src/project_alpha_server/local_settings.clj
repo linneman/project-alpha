@@ -8,6 +8,8 @@
 (ns project-alpha-server.local-settings)
 
 (def host-url "http://localhost:3000/")
+(def cookie-max-age (* 30 24 3600))
+
 
 ;;; --- Definitions for send mail, currently only GMail has been tested ---
 
