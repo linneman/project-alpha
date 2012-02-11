@@ -11,23 +11,53 @@
       <table>
 	<tr>
 	  <th>Ich bin</th>
-	  <td></td>
-	  <td></td><td><input type="radio" name="user_sex" value="female">eine Frau</td>
-	  <td></td><td><input type="radio" name="user_sex" value="male">ein Mann</td>
+	  <td><input type="radio" name="user_sex" value="female">eine Frau</td>
+	  <td><input type="radio" name="user_sex" value="male">ein Mann</td>
 	</tr>
 	<tr>
 	  <th>und suche</th>
-	  <td></td>
-	  <td></td><td><input type="radio" name="user_interest_sex" value="female">eine Frau</td>
-	  <td></td><td><input type="radio" name="user_interest_sex" value="male">einen Mann</td>
+	  <td><input type="radio" name="user_interest_sex" value="female">eine Frau</td>
+	  <td><input type="radio" name="user_interest_sex" value="male">einen Mann</td>
 	</tr>
 	<tr>
 	  <th>Ich bin</th>
-	  <td></td>
-	  <td></td><td><label id="user-age"></td><td> Jahre alt</td>
+	  <td><div id="user-age" class="profile-select-field" title="Das Alter sollte grob passen!"></div></td><td> Jahre alt</td>
+	</tr>
+	<tr>
+	  <th>Ich leben in</th>
+	  <td> <div id="user-open-zip-button" class="profile-select-field goog-flat-button goog-flat-button-disabled" title="Dient zur groben Zuordnung Ihres Standortes, damit Sie nicht soweit fahren müssen!">PLZ Gebiet</div>
+</td>
 	</tr>
       </table>
     </p>
+
+    <div id="user-zip" class="goog-menu">
+      <div class="goog-submenu">0
+	<div class="goog-menu">
+	  <div class="goog-menuitem">01 Dresden, Riesa, Meißen, Bischofswerda</div>
+	  <div class="goog-menuitem">02 Görlitz, Bautzen, Hoyerswerda, Zittau</div>
+	  <div class="goog-menuitem">03 Cottbus, Finsterwalde, Forst (Lausitz), Spremberg</div>
+	  <div class="goog-menuitem">04 Leipzig, Altenburg, Eilenburg, Torgau</div>
+	  <div class="goog-menuitem">06 Halle (Saale), Dessau-Roßlau, Quedlinburg, Zeitz</div>
+	  <div class="goog-menuitem">07 Gera, Jena, Saalfeld/Saale, Greiz</div>
+	  <div class="goog-menuitem">08 Plauen, Zwickau, Aue, Klingenthal</div>
+	  <div class="goog-menuitem">09 Chemnitz, Annaberg-Buchholz, Zschopau, Freiberg</div>
+	</div>
+      </div>
+      <div class="goog-submenu">1
+	<div class="goog-menu">
+	  <div class="goog-menuitem">10 Berlin Innenstadt</div>
+	  <div class="goog-menuitem">12 Südliches und südöstliches Berlin</div>
+	  <div class="goog-menuitem">13 nördliches Berlin</div>
+	  <div class="goog-menuitem">14 Potsdam und südwestliches Berlin, Rathenow, Luckenwalde, Brandenburg an der Havel</div>
+	  <div class="goog-menuitem">15 Frankfurt (Oder), Eisenhüttenstadt, Fürstenwalde/Spree, Königs Wusterhausen</div>
+	  <div class="goog-menuitem">16 Oranienburg, Eberswalde, Pritzwalk, Schwedt/Oder</div>
+	  <div class="goog-menuitem">17 Neubrandenburg, Greifswald, Neustrelitz, Usedom</div>
+	  <div class="goog-menuitem">18 Rostock, Stralsund, Güstrow, Bergen auf Rügen</div>
+	  <div class="goog-menuitem">19 Schwerin, Ludwigslust, Wittenberge, Parchim</div>
+	</div>
+      </div>
+    </div>
   </div>
 
   <div id="page2">
@@ -63,5 +93,7 @@
       goog.require('project_alpha_client.app.profile');
     </script>
   </div>
+
+
 
 </div>

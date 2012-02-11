@@ -21,7 +21,11 @@
             [goog.ui.Button :as Button]
             [goog.ui.TabPane :as TabPane]
             [goog.ui.Select :as Select]
+            [goog.ui.Menu :as Menu]
+            [goog.ui.SubMenu :as SubMenu]
+            [goog.ui.PopupMenu :as PopupMenu]
             [goog.ui.MenuItem :as MenuItem]
+            [goog.positioning.Corner :as Corner]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.utils :only [send-request get-button-group-value
@@ -47,12 +51,16 @@
     (zipmap (range 0 (count age-ranges)) age-ranges))
 
 
+  ;;; definition of the age selection pane
   (def ageSelect (goog.ui.Select. "..."))
   (dorun
    (map #(. ageSelect (addItem (goog.ui.MenuItem. (:sel-string %))))
         age-ranges))
   (. ageSelect (setSelectedIndex -1))
   (. ageSelect (render (dom/get-element "user-age")))
+  ;; adjust the width of the outer button pane
+  (set! (. (. (. ageSelect (getElement)) -style) -width)
+        (. (dom/get-element "user-open-zip-button") -clientWidth))
 
 
   (defn- get-selected-age
@@ -89,6 +97,17 @@
 
   (def editor (editor/create "editMe" "toolbar"))
 
+  (def zipMenuDiv (dom/get-element "user-zip"))
+  (def zipMenu (goog.ui.PopupMenu.))
+  (def zipMenuButtonDiv (dom/get-element "user-open-zip-button"))
+  (def zipMenuButton (goog.ui.decorate zipMenuButtonDiv))
+  (. zipMenuButton (setEnabled true))
+
+  (. zipMenu (decorate zipMenuDiv))
+  (. zipMenu (attach
+              zipMenuButtonDiv
+              goog.positioning.Corner.BOTTOM_START))
+  (events/listen zipMenu "action" (fn [e] (loginfo (. (. e -target) (getCaption))) ))
 
   (defn get-text-content
     "reads the text field of the profile

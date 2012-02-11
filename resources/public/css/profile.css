@@ -25,5 +25,31 @@
 }
 
 #page1 table tr {
-   height: 2em;
+   height: 3.5em;
+}
+
+#page1 table tr th {
+   color: #663300;
+   text-align: right;
+}
+
+#page1 table tr td {
+   color: #336633;
+   padding-left: 40px;
+}
+
+#page1 * .profile-select-field {
+    color: green;
+    text-align: center;
+    font-family: "Chunkfive", serif;
+    font-size: 0.9em;
+    width: 150px;
+
+    margin: 2px;
+    border: 1px solid #000;
+    padding: 2px 6px;
+    background-color: #EEEEEE;
+    cursor: pointer;
+    outline: none;
+    -moz-outline: none;
 }
