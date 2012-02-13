@@ -40,6 +40,9 @@
    [:user_sex "varchar(12)"]
    [:user_interest_sex "varchar(12)"]
    [:user_age :integer]
+   [:user_zip "varchar(5)"]
+   [:user_lat :double]
+   [:user_lon :double]
    [:modified "timestamp"]
    ))
 

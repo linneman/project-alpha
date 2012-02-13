@@ -19,7 +19,7 @@
 
 #page1 table {
    font-size:1.5em;
-   width: 600px;
+   width: 700px;
    padding-top: 20px;
    padding-left: 40px;
 }
@@ -52,4 +52,10 @@
     cursor: pointer;
     outline: none;
     -moz-outline: none;
+}
+
+#page1 table * .last-col {
+    // color:red;
+    width: 40%;
+    font-size: 0.7em;
 }

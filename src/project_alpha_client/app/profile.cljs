@@ -15,6 +15,8 @@
             [project-alpha-client.lib.json :as json]
             [project-alpha-client.lib.editor :as editor]
             [clojure.browser.dom :as dom]
+            [clojure.string :as string]
+            [goog.dom :as gdom]
             [goog.dom :as gdom]
             [goog.style :as style]
             [goog.events :as events]
@@ -36,6 +38,7 @@
 
 (when profile-pane
 
+  ;;; --- age selection helpers ---
 
   (def age-ranges
     (for [k (range 15 70 5)]
@@ -82,8 +85,8 @@
                         idx-age-ranges)]
       (. ageSelect (setSelectedIndex (first (first entry))))))
 
-  ; (set-selected-age 25)
 
+  ; --- the tab and the editor pane ---
 
   (def tabpane (goog.ui.TabPane. (dom/get-element "tabpane1")))
   (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page1"))))
@@ -94,10 +97,34 @@
   ;;; unfortunately we do not have an event for this
   (def active-pane-idx (atom (. tabpane (getSelectedIndex))))
 
-
   (def editor (editor/create "editMe" "toolbar"))
 
+
+  ; --- selection of the zip code ---
+
+  (defn split-zip-from-cities
+    "reads comma (resp. space) separated list string
+       with the zip code as first entry and a number
+       of locations (cities) as the following entries
+       and retursn zip and cities splitted"
+    [zip-str]
+    (let [zip (first (re-seq #"^[0-9]+" zip-str))
+          cities (string/trim (first  (re-seq #"[^0-9]+" zip-str)))]
+      [zip cities]))
+
+
   (def zipMenuDiv (dom/get-element "user-zip"))
+
+  ;; builds the hash with zip codes as key and city list
+  ;; as values before the construction of the zipMenu
+  (def zip-cities-hash
+    (apply merge (map (fn [loc-str]
+                        (let [[zip cities] (split-zip-from-cities
+                                            (. loc-str -textContent))]
+                          {zip cities}))
+                      (gdom/findNodes zipMenuDiv
+                                      (fn [e] (= "goog-menuitem" (. e -className)))))))
+
   (def zipMenu (goog.ui.PopupMenu.))
   (def zipMenuButtonDiv (dom/get-element "user-open-zip-button"))
   (def zipMenuButton (goog.ui.decorate zipMenuButtonDiv))
@@ -107,7 +134,56 @@
   (. zipMenu (attach
               zipMenuButtonDiv
               goog.positioning.Corner.BOTTOM_START))
-  (events/listen zipMenu "action" (fn [e] (loginfo (. (. e -target) (getCaption))) ))
+  (events/listen zipMenu "action"
+                 (fn [e] (dispatch/fire :zip-menu-changed-reactor
+                                        (. (. e -target) (getCaption))) ))
+
+
+  (def zip-menu-changed-reactor (dispatch/react-to
+                                #{:zip-menu-changed-reactor}
+                                (fn [evt data]
+                                  (zip-menu-changed data)
+                                  )))
+
+
+  ;;; for storing last selected zip code
+  (def current-zip-code (atom {}))
+
+  (defn update-zip-code
+    "called whenever zip view needs to be updated"
+    [zip]
+    (let [cities (zip-cities-hash zip)]
+      (reset! current-zip-code zip)
+      (. zipMenuButton (setCaption (str "PLZ Gebiet " zip)))
+      (set! (. (dom/get-element "user-zip-city-list") -textContent) cities)))
+
+
+  (defn zip-menu-changed
+    "called when zip code was changed by user"
+    [data]
+    (let [[zip cities] (split-zip-from-cities data)]
+      (update-zip-code zip)))
+
+
+  (defn get-zip-code
+    "reads out the selected zip code (for ajax post)
+     sets longitude and latitude to invalid values
+     to indicate that these values need to be updated
+     on the server."
+    []
+    (when-not (empty? @current-zip-code)
+      {"user_zip" @current-zip-code
+       "user_lon" 360
+       "user_lat" 360}))
+
+
+  (comment
+    (dispatch/delete-reaction
+     zip-menu-changed-reactor)
+    )
+
+
+  ; --- getters for ajax POST ---
 
   (defn get-text-content
     "reads the text field of the profile
@@ -128,7 +204,8 @@
     (merge
      (get-button-group-value "user_sex")
      (get-button-group-value "user_interest_sex")
-     (get-selected-age)))
+     (get-selected-age)
+     (get-zip-code)))
 
 
   (defn get-page-id-str
@@ -139,6 +216,8 @@
           elem (. page (getContentElement))]
       (. elem -id)))
 
+
+  ; --- update functions trigger by ajax GET ---
 
   (defn update-tab-panes
     "post everything of the profiles pane
@@ -162,6 +241,8 @@
           (loginfo "age-and-sex profile data updated")))
       (reset! active-pane-idx selected-page-idx)))
 
+
+  ; --- ajax event handling ---
 
   (events/listen editor goog.editor.Field.EventType.DELAYEDCHANGE
                  (fn [e]
@@ -201,7 +282,8 @@
     (. editor (setHtml false (data "text") true))
     (set-button-group-value "user_sex" (set [(data "user_sex")]))
     (set-button-group-value "user_interest_sex" (set [(data "user_interest_sex")]))
-    (set-selected-age (data "user_age")))
+    (set-selected-age (data "user_age"))
+    (update-zip-code (data "user_zip")))
 
 
   (def my-profile-resp-reactor (dispatch/react-to
@@ -212,6 +294,8 @@
 
   ) ; (when profile-pane
 
+
+; --- site enabling and disabling ---
 
 (def site-enabled-reactor (dispatch/react-to
                            #{:page-switched}
