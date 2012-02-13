@@ -170,10 +170,15 @@
     (clear-name-error)
     (clear-email-error)
     (clear-password-error)
-    (clear-password-repeat-error))
+    (clear-password-repeat-error)
+    (reset! reg-form-status {:name "undefined"
+                         :email "undefined"
+                         :password "undefined"
+                         :password-repeat "undefined"}))
 
 
   (defn- update-confirm-button-state []
+    (loginfo (pr-str "@reg-form-status: " @reg-form-status))
     (if (empty? @reg-form-status)
       (do (. confirm-button (setEnabled true)) true)
       (do (. confirm-button (setEnabled false)) false)))
@@ -237,7 +242,7 @@
     (dorun (map
             #(updateRegisterText
               (goog.events.Event. "focusout" (dom/get-element %)))
-            ["name" "email" "password" "password-repeat"]))
+            ["password" "password-repeat"]))
     (update-confirm-button-state))
 
 
