@@ -50,13 +50,6 @@
 	<![endif]-->
   </head>
 
-  <div id="global-scripts">
-    <script type="text/javascript" src="goog/base.js"></script>
-    <script type="text/javascript" src="project_alpha.js"></script>
-    <script type="text/javascript">
-	goog.require('project_alpha_client.lib.repl');
-    </script>
-  </div>
 
   <body>
 
@@ -67,9 +60,12 @@
     <div id="content_pane">
     </div>
 
-    <div id="layout-scripts">
+    <div id="global-scripts">
+      <script type="text/javascript" src="goog/base.js"></script>
+      <script type="text/javascript" src="project_alpha.js"></script>
       <script type="text/javascript">
 	goog.require('project_alpha_client.app.core');
+	goog.require('project_alpha_client.lib.repl');
       </script>
     </div>
 
