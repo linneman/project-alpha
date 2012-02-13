@@ -152,7 +152,7 @@
     (when title-id
       (. dialog (setTitle
                  (goog.dom.getTextContent (dom/get-element title-id)))))
-    (. dialog (setButtonSet null))
+    (. dialog (setButtonSet js/null))
     (set! (. dialog -panel-id) panel-id)
     (. ok-button (setEnabled true))
     (events/listen ok-button "action"

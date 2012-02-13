@@ -10,8 +10,7 @@
 ;;; 2011-11-23, Otto Linnemann
 
 (ns project-alpha-client.app.playground
-  (:require [project-alpha-client.json :as json]
-            [project-alpha-client.editor :as editor]
+  (:require [project-alpha-client.lib.json :as json]
             [project-alpha-client.lib.dispatch :as dispatch]
             [clojure.browser.event :as event]
             [clojure.browser.dom   :as dom]
@@ -27,8 +26,7 @@
             [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
             [goog.ui.Dialog :as Dialog]
             [goog.Timer :as timer])
-  (:use [project-alpha-client.logging :only [loginfo]]
-        [project-alpha-client.utils :only [send-request validate-email copy-id-text clear-id-text]]))
+  (:use [project-alpha-client.lib.logging :only [loginfo]]))
 
 
 (def current-url (js* "document.URL"))
