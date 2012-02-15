@@ -55,7 +55,37 @@
 }
 
 #page1 table * .last-col {
-    // color:red;
     width: 40%;
     font-size: 0.7em;
+}
+
+#page3 #five-questions-tab {
+    width:100%;
+    border: 1px solid black;
+    border-collapse:collapse;
+}
+
+#page3 #five-questions-tab * {
+    border-bottom: 1px solid black;
+}
+
+#page3 #five-questions-tab .sel {
+    width:100px;
+    text-align:center;
+}
+
+#page3 #five-questions-tab .bar {
+    border-right: 1px solid black;
+}
+
+#page3 #five-questions-tab #first-row {
+    background-color:#B77;
+}
+
+#page3 #five-questions-tab #odd-row {
+    background-color:#9B9;
+}
+
+#page3 #five-questions-tab #even-row {
+    background-color:#99B;
 }
