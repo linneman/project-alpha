@@ -7,6 +7,7 @@
 
 #profile-pane {
   /* display:none; */
+  position:relative;
   opacity:0;
 }
 
@@ -88,4 +89,29 @@
 
 #page3 #five-questions-tab #even-row {
     background-color:#99B;
+}
+
+
+
+#profile_request_progress {
+    position:absolute;
+    width:100%;
+    height:100%;
+    background-color:#E0E0E0;
+    top:0px;
+    left:0px;
+    opacity:1;
+}
+
+#profile_request_progress h3 {
+    text-align:center;
+    margin-top:15%;
+}
+
+#profile_request_progress img {
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:32px;
+    height:32px;
 }

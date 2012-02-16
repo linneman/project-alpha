@@ -207,8 +207,16 @@
      (get-selected-age)
      (get-zip-code)))
 
+  (defn- get-questionnaire-answers
+    "reads the answers of the list of questions
+     on the 3td pane."
+    []
+    (apply merge
+           (let [quest-nr-list (take 10  (iterate inc 1))]
+             (map #(get-button-group-value (str "question_" %)) quest-nr-list))))
 
-  (defn get-page-id-str
+
+  (defn- get-page-id-str
     "returns the dom-id str for the tabe pane page
      with given index which is starting from 0."
     [idx]
@@ -219,7 +227,14 @@
 
   ; --- update functions trigger by ajax GET ---
 
-  (defn update-tab-panes
+  (defn- post-as-json
+    [hash-to-post]
+    (send-request "/profile"
+                        (json/generate hash-to-post)
+                        (fn [e] nil)
+                        "POST"))
+
+  (defn- update-tab-panes
     "post everything of the profiles pane
      which does not belong to the text edit pane
      which is handled differently.
@@ -234,11 +249,13 @@
         )
       (if (= id-str-left "page1") ; post page one content (age and sex) when left
         (do
-          (send-request "/profile"
-                        (json/generate (get-age-and-sex-content))
-                        (fn [e] nil)
-                        "POST")
-          (loginfo "age-and-sex profile data updated")))
+          (post-as-json (get-age-and-sex-content))
+          (loginfo "age-and-sex profile data posted")))
+      (if (= id-str-left "page3") ; post questionaire when page left
+        (do
+          (post-as-json (get-questionnaire-answers))
+          (loginfo "questionnaire data posted"))
+        )
       (reset! active-pane-idx selected-page-idx)))
 
 
@@ -247,10 +264,7 @@
   (events/listen editor goog.editor.Field.EventType.DELAYEDCHANGE
                  (fn [e]
                    ; (loginfo (json/generate {"text" (. editor (getCleanContents))}))
-                   (send-request "/profile"
-                                 (json/generate (get-text-content))
-                                 (fn [e] nil)
-                                 "POST")))
+                   (post-as-json (get-text-content))))
 
   (events/listen tabpane goog.ui.TabPane.Events.CHANGE
                  (fn [e] (let [idx (. (. e -page) (getIndex))
@@ -265,7 +279,7 @@
                                   (update-tab-panes data)
                                   )))
 
-  (defn request-profile-data
+  (defn- request-profile-data
     []
     (send-request "/profile"
                   ""
@@ -275,21 +289,36 @@
                       (dispatch/fire :get-my-profile-resp
                                      (json/parse resp))))))
 
-  (defn update-content
-    "update the displayed profile page content
-     which is triggered after an ajax get request."
+
+  (defn- update-questionnaire
+    "updates the displayed questionnaire answer list"
     [data]
-    (. editor (setHtml false (data "text") true))
+    (let [quest-nr-list (take 10  (iterate inc 1))]
+      (dorun (map
+              (fn [elem]
+                (let [key (str "question_" elem)
+                      val (set [(str (data key))])]
+                  (set-button-group-value key val))) quest-nr-list))))
+
+
+  (defn- update-content
+    "update the displayed profile page content
+     which is triggered after an ajax get request. Disables
+     progress pane afterwords."
+    [data]
+    (when-let [txt (data "text")] (. editor (setHtml false txt true)))
     (set-button-group-value "user_sex" (set [(data "user_sex")]))
     (set-button-group-value "user_interest_sex" (set [(data "user_interest_sex")]))
     (set-selected-age (data "user_age"))
-    (update-zip-code (data "user_zip")))
+    (update-zip-code (data "user_zip"))
+    (update-questionnaire data)
+    (style/showElement (dom/get-element "profile_request_progress") false))
 
 
   (def my-profile-resp-reactor (dispatch/react-to
                                 #{:get-my-profile-resp}
                                 (fn [evt data]
-                                  (update-content data)
+                                  (when data (update-content data))
                                   )))
 
   ) ; (when profile-pane
