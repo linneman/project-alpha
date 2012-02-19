@@ -277,7 +277,9 @@
         (do
           (post-as-json {"fav_books"
                          (get-fav-list "user_fav_auth_" "user_fav_book_")})
-          (loginfo "favorite book list posted")))
+          (post-as-json {"fav_movies"
+                         (get-fav-list "user_fav_director_" "user_fav_movie_")})
+          (loginfo "favorite lists posted")))
       (reset! active-pane-idx selected-page-idx)))
 
 
@@ -353,6 +355,7 @@
     (update-zip-code (data "user_zip"))
     (update-questionnaire data)
     (update-fav-list (data "user_fav_books") "user_fav_auth_" "user_fav_book_")
+    (update-fav-list (data "user_fav_movies") "user_fav_director_" "user_fav_movie_")
     (style/showElement (dom/get-element "profile_request_progress") false))
 
 

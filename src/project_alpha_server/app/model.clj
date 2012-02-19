@@ -64,6 +64,7 @@
   "Delete users table"
   (drop-table :profiles))
 
+;; --- favorite books ---
 
 (defn create-books
   "create favourite book list"
@@ -95,6 +96,40 @@
   (drop-table :user_fav_books))
 
 
+;; --- favorite movies ---
+;; field names are the same as favorite books for
+;; common treatment
+
+(defn create-movies
+  "create favourite movie list"
+  []
+  (create-table
+   :movies
+   [:id :integer "PRIMARY KEY" "AUTO_INCREMENT"]
+   [:author "varchar(255)"]
+   [:title "varchar(255)"]
+   [:isbn "varchar(13)"]))
+
+(defn drop-movies
+  "delete fav movies table"
+  []
+  (drop-table :movies))
+
+(defn create-user-fav-movies
+  "creates relation table user-fav-movies"
+  []
+  (create-table
+   :user_fav_movies
+   [:user_id :integer]
+   [:book_id :integer]
+   [:rank :smallint]))
+
+(defn drop-user_fav-movies
+  "deletes relation table user-fav-movies"
+  []
+  (drop-table :user_fav_movies))
+
+
 (comment usage illustration
 
   (create-profiles)
@@ -102,7 +137,13 @@
   (create-books)
   (drop-books)
   (create-user-fav-books)
-  (drop-user_fav-books))
+  (drop-user_fav-books)
+
+  (create-movies)
+  (drop-movies)
+  (create-user-fav-movies)
+  (drop-user_fav-movies)
+  )
 
 
 ;; --- information retrieval ---
@@ -111,9 +152,12 @@
 ; --- profiles ( internals ) ---
 
 (declare user_fav_books)
+(declare user_fav_movies)
 
 (sql/defentity profiles
-  (sql/has-many user_fav_books {:fk :user_id}))
+  (sql/has-many user_fav_books {:fk :user_id})
+  (sql/has-many user_fav_movies {:fk :user_id}))
+
 
 (sql/defentity books
   (sql/has-many user_fav_books))
@@ -124,9 +168,18 @@
   (sql/has-one books {:fk :id}))
 
 
+(sql/defentity movies
+  (sql/has-many user_fav_movies))
+
+(sql/defentity user_fav_movies
+  (sql/pk :book_id)
+  (sql/has-one profiles {:fk :user_id})
+  (sql/has-one movies {:fk :id}))
+
 
 (def profile-cache (atom {}))
 (declare write-user-fav-books)
+(declare write-user-fav-movies)
 
 (defn- flush-profile-cache
   "flushes the profile cache. This function is
@@ -134,8 +187,10 @@
   [h]
   (doseq [[id fields] h]
     (let [fav-books (map json2clj-hash (:fav_books fields))
-          fields (dissoc fields :fav_books)]
+          fav-movies (map json2clj-hash (:fav_movies fields))
+          fields (dissoc fields :fav_books :fav_movies)]
       (write-user-fav-books id fav-books) ; no modification date check here
+      (write-user-fav-movies id fav-movies) ; no modification date check here
       (insert-or-update-when-not-modified profiles id fields))))
 
 
@@ -176,15 +231,6 @@
             {id mf-and-modified})))
 
 
-(defn find-profile-old
-  "finds profile with given keys in db.
-   for request to update user profile data
-   use get-profile instead in order to
-   take into account the cache."
-  [& {:as args}]
-  (sql/select profiles (sql/where args)))
-
-
 (defn find-profile
   "finds profile with given keys in db.
    for request to update user profile data
@@ -197,18 +243,26 @@
                  (sql/select user_fav_books
                              (sql/fields :books.author :books.title :rank)
                              (sql/with books)
-                             (sql/where {:user_id (:id profile)}))]
-             (assoc profile :user_fav_books fav-book-list)))
+                             (sql/where {:user_id (:id profile)}))
+                 fav-movie-list
+                 (sql/select user_fav_movies
+                             (sql/fields :movies.author :movies.title :rank)
+                             (sql/with movies)
+                             (sql/where {:user_id (:id profile)}))
+                 ]
+             (assoc profile
+               :user_fav_books fav-book-list
+               :user_fav_movies fav-movie-list)))
          _profiles)))
 
 
 (comment usage illustration
 
-         (find-profile2 :id 88)
-         (find-profile2 :id 3))
+         (find-profile :id 88)
+         (find-profile :id 3))
 
 
-(comment sql usage illustration
+(comment some sql usage illustration
 
   (def a (sqlreq "SELECT * FROM `profiles` WHERE id=88;"))
   (def a (sqlreq
@@ -262,9 +316,7 @@
   )
 
 
-; --- user books ---
-
-
+;; --- user books ---
 
 (defn add-book
   "add book which match given keys with fields"
@@ -309,6 +361,56 @@
           (println "insert new book id: " book-id " -> " book-entry)
           (update-user-fav-book-entry user-id book-id rank))
         (update-user-fav-book-entry user-id (:id book-db-entry) rank)))))
+
+
+;; --- user movies ---
+
+;; these are the same functions as for books
+;; on the server we keep them separate
+
+(defn add-movie
+  "add movie which match given keys with fields"
+  [what]
+  (sql/insert movies
+              (sql/values what)))
+
+(defn delete-movie
+  "delete movies which match given keys with fields"
+  [& {:as args}]
+  (sql/delete movies (sql/where args)))
+
+(defn- update-user-fav-movie-entry
+  "helper function: updates a user-movie relation
+   table entry."
+  [user-id movie-id rank]
+  (let [fav-entry {:user_id user-id :rank rank}
+        fav-db-entry (first (sql/select user_fav_movies (sql/where fav-entry)))]
+    (if (not fav-db-entry)
+      (do
+        (println "new fav entry: " (assoc fav-entry :rank rank))
+        (sql/insert user_fav_movies (sql/values (assoc fav-entry :book_id movie-id))))
+      (sql/update user_fav_movies
+              (sql/set-fields {:book_id movie-id})
+              (sql/where fav-entry)))))
+
+(defn write-user-fav-movies
+  "insert the favorite movie list for the user with the
+   given id into the table fav_movie if the movie is not
+   already listed there and updates the relation table
+   user_fav_movies."
+  [user-id fav-movie-list]
+  (doseq [movie fav-movie-list]
+    (let [movie-entry (select-keys movie [:author :title])
+          rank (:rank movie)
+          movie-db-entry (first (sql/select
+                                movies
+                                (sql/where (select-keys movie [:author :title]))))]
+      (if (not movie-db-entry)
+        (let [movie-db-entry (sql/insert movies (sql/values movie-entry))
+              movie-id (:GENERATED_KEY movie-db-entry)]
+          (println "insert new movie id: " movie-id " -> " movie-entry)
+          (update-user-fav-movie-entry user-id movie-id rank))
+        (update-user-fav-movie-entry user-id (:id movie-db-entry) rank)))))
 
 
 (comment
