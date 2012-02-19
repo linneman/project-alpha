@@ -92,6 +92,8 @@
   (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page1"))))
   (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page2"))))
   (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page3"))))
+  (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page4"))))
+  (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page5"))))
 
   ;;; atom for rembering last active tabpane page
   ;;; unfortunately we do not have an event for this
@@ -212,7 +214,7 @@
      on the 3td pane."
     []
     (apply merge
-           (let [quest-nr-list (take 10  (iterate inc 1))]
+           (let [quest-nr-list (range 1 11)]
              (map #(get-button-group-value (str "question_" %)) quest-nr-list))))
 
 
@@ -223,6 +225,21 @@
     (let [page (. tabpane (getPage idx))
           elem (. page (getContentElement))]
       (. elem -id)))
+
+  (defn- get-fav-list
+    "reads the entries of the favorite book list on the 4th pane."
+    [author-dom-str title-dom-str]
+    (let [idx (range 1 4)
+          fav_auth_keys (map #(str author-dom-str %) idx)
+          fav_auth_vals (map #(. (dom/get-element %) -value) fav_auth_keys)
+          fav_title_keys (map #(str title-dom-str %) idx)
+          fav_title_vals (map #(. (dom/get-element %) -value) fav_title_keys)
+          data (vec (map
+                     #(hash-map "author" %1 "title" %2 "rank" %3)
+                     fav_auth_vals fav_title_vals idx))]
+      data))
+
+  ;(get-fav-books)
 
 
   ; --- update functions trigger by ajax GET ---
@@ -256,6 +273,11 @@
           (post-as-json (get-questionnaire-answers))
           (loginfo "questionnaire data posted"))
         )
+      (if (= id-str-left "page4")
+        (do
+          (post-as-json {"fav_books"
+                         (get-fav-list "user_fav_auth_" "user_fav_book_")})
+          (loginfo "favorite book list posted")))
       (reset! active-pane-idx selected-page-idx)))
 
 
@@ -293,12 +315,30 @@
   (defn- update-questionnaire
     "updates the displayed questionnaire answer list"
     [data]
-    (let [quest-nr-list (take 10  (iterate inc 1))]
+    (let [quest-nr-list (range 1 11)]
       (dorun (map
               (fn [elem]
                 (let [key (str "question_" elem)
                       val (set [(str (data key))])]
                   (set-button-group-value key val))) quest-nr-list))))
+
+
+  (defn- update-fav-list
+    "updates the displayed entries of the favorite book
+   list on the 4th pane."
+    [data author-dom-str title-dom-str]
+    (let [idx (range 1 4)
+          fav_auth_keys (map #(str author-dom-str %) idx)
+          fav_auth_vals (map #(dom/get-element %) fav_auth_keys)
+          fav_title_keys (map #(str title-dom-str %) idx)
+          fav_title_vals (map #(dom/get-element %) fav_title_keys)
+          rank-book (apply merge
+                           (map #(hash-map (% "rank")
+                                           {:author (% "author") :title (% "title")})
+                                data))]
+      (doseq [[auth title idx] (map list fav_auth_vals fav_title_vals idx)]
+        (set! (. auth -value) (:author (rank-book idx)))
+        (set! (. title -value) (:title (rank-book idx))))))
 
 
   (defn- update-content
@@ -312,6 +352,7 @@
     (set-selected-age (data "user_age"))
     (update-zip-code (data "user_zip"))
     (update-questionnaire data)
+    (update-fav-list (data "user_fav_books") "user_fav_auth_" "user_fav_book_")
     (style/showElement (dom/get-element "profile_request_progress") false))
 
 

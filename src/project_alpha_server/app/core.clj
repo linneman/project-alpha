@@ -14,6 +14,7 @@
             [compojure.handler :as handler]
             [net.cgrand.enlive-html :as html]
             [project-alpha-server.local-settings :as setup]
+            [swank.swank]
             )
   (:use [compojure.core :only [GET POST PUT DELETE]]
         [ring.util.response :only [response]]
@@ -24,9 +25,8 @@
         [project-alpha-server.lib.model]
         [project-alpha-server.app.model]
         [project-alpha-server.lib.auth]
-        [clojure.data.json :only [json-str write-json read-json]]
-        [clojure.pprint :only [pprint]]
         [project-alpha-server.lib.utils]
+        [clojure.pprint :only [pprint]]
         [clojure.data.json :only [json-str write-json read-json]]
         ))
 
@@ -150,6 +150,7 @@
 
 (defn -main [& args]
   (.start server)
+  (swank.swank/start-server :port 4005)
   )
 
 ; (.start server)
