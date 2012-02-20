@@ -5,18 +5,8 @@
    2011/12 Otto Linnemann
 */
 
-#profile-pane {
-  /* display:none; */
-  position:relative;
-  opacity:0;
-}
 
-#editMe {
-    width: 600px;
-    height: 300px;
-    background-color: white;
-    border: 1px solid grey;
-}
+/* index page 1 (sex, age, location) */
 
 #page1 table {
    font-size:1.5em;
@@ -60,6 +50,36 @@
     font-size: 0.7em;
 }
 
+
+/* index page 2 (personal writing) */
+
+#page2 {
+    padding-top:20px;
+    padding-left:60px;
+}
+
+#profile-pane {
+  /* display:none; */
+  position:relative;
+  opacity:0;
+}
+
+#editMe {
+    width: 600px;
+    height: 300px;
+    background-color: white;
+    border: 1px solid grey;
+}
+
+
+/* index page 3 (questionnaire) */
+
+#page3 {
+    padding-top:20px;
+    padding-left:60px;
+    padding-right:60px;
+}
+
 #page3 #five-questions-tab {
     width:100%;
     border: 1px solid black;
@@ -92,6 +112,49 @@
 }
 
 
+/* index page 4 (favorites) */
+
+#page4 #fav_books, #page4 #fav_movies {
+    width:100%;
+    font-size: 1.0em;
+}
+
+#page4 * .author-col {
+    width:30%;
+}
+
+#page4 * .title-col {
+    width:70%;
+}
+
+#page4 {
+  padding-top: 20px;
+}
+
+#page4 #fav_books * .user_fav_auth_field,
+#page4 #fav_movies * .user_fav_director_field {
+ width:90%;
+ font-size: 1.0em;
+}
+
+#page4 #fav_books * .user_fav_book_field,
+#page4 #fav_movies * .user_fav_movie_field {
+ width:100%;
+ font-size: 1.0em;
+}
+
+#page4 .fav_diag_frame {
+    background-color:#BBCFBB;
+    margin-top:10px;
+    margin-bottom:15px;
+    margin-left:20px;
+    margin-right:20px;
+    padding-top:1px;
+    padding-bottom:25px;
+    padding-left:20px;
+    padding-right:20px;
+    border-radius:10px;
+}
 
 #profile_request_progress {
     position:absolute;
