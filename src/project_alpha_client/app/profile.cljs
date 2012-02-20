@@ -339,8 +339,9 @@
                                            {:author (% "author") :title (% "title")})
                                 data))]
       (doseq [[auth title idx] (map list fav_auth_vals fav_title_vals idx)]
-        (set! (. auth -value) (:author (rank-book idx)))
-        (set! (. title -value) (:title (rank-book idx))))))
+        (when rank-book
+          (set! (. auth -value) (:author (rank-book idx)))
+          (set! (. title -value) (:title (rank-book idx)))))))
 
 
   (defn- update-content
