@@ -39,3 +39,14 @@
    :port 8889
    :user "project-alpha"
    :password "test"})
+
+
+;;; --- Conection to German zip location database, currently MySQL ----
+;;; taken from http://opengeodb.org
+
+(def sql-connection-opengeodb-de
+  {:db "opengeodb_de"
+   :host "localhost"
+   :port 8889
+   :user "project-alpha"
+   :password "test"})

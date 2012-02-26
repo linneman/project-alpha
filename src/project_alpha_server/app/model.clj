@@ -17,6 +17,7 @@
             [ring.util.codec :as codec]
             [project-alpha-server.local-settings :as setup])
   (:use [project-alpha-server.lib.model]
+        [project-alpha-server.app.zip-de]
         [ring.middleware.session.store :only [SessionStore]]
         [project-alpha-server.lib.crypto :only
          [get-secret-key get-encrypt-pass-and-salt decrypt-pass]]
@@ -52,7 +53,8 @@
    [:user_sex "varchar(12)"]
    [:user_interest_sex "varchar(12)"]
    [:user_age :integer]
-   [:user_zip "varchar(5)"]
+   [:user_country_code "varchar(3)"]
+   [:user_zip "varchar(10)"]
    [:user_lat :double]
    [:user_lon :double]
    [:modified "timestamp"]
@@ -188,7 +190,9 @@
   (doseq [[id fields] h]
     (let [fav-books (map json2clj-hash (:fav_books fields))
           fav-movies (map json2clj-hash (:fav_movies fields))
-          fields (dissoc fields :fav_books :fav_movies)]
+          fields (dissoc fields :fav_books :fav_movies)
+          zip (:user_zip fields)
+          fields (if zip (merge fields (get-location-for-zip zip)) fields)]
       (write-user-fav-books id fav-books) ; no modification date check here
       (write-user-fav-movies id fav-movies) ; no modification date check here
       (insert-or-update-when-not-modified profiles id fields))))

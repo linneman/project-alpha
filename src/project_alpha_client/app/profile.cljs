@@ -174,7 +174,8 @@
      on the server."
     []
     (when-not (empty? @current-zip-code)
-      {"user_zip" @current-zip-code
+      {"user_country_code" "de"
+       "user_zip" @current-zip-code
        "user_lon" 360
        "user_lat" 360}))
 
