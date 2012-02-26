@@ -183,7 +183,7 @@
 (declare write-user-fav-books)
 (declare write-user-fav-movies)
 
-(defn- flush-profile-cache
+(defn flush-profile-cache
   "flushes the profile cache. This function is
    frequently invoked by a timer."
   [h]
