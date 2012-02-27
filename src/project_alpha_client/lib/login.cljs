@@ -69,6 +69,14 @@
     (def login-user-not-confirmed dialog)
     (def login-not-confirmed-button ok-button))
 
+  ;; instantiate wrong account dialog
+  (let [[dialog ok-button cancel-button]
+        (get-modal-dialog
+         :panel-id "login-wrong-account"
+         :title-id "login-wrong-account-title"
+         :ok-button-id "confirm-wrong-account-confirmed")]
+    (def login-wrong-account dialog)
+    (def login-wrong-account-button ok-button))
 
   ;; instantiate dialog which instructs the user to check the email
   ;; password reset
@@ -103,6 +111,12 @@
   "opens the user is not confirmed dialog"
   []
   (open-modal-dialog login-user-not-confirmed))
+
+
+(defn- open-login-user-wrong-account-dialog
+  "opens the user is not confirmed dialog"
+  []
+  (open-modal-dialog login-wrong-account))
 
 
 (defn- open-reset-pw-advice-dialog
@@ -141,6 +155,7 @@
        (condp = resp
          "OK" (dispatch/fire :changed-login-state {:state :login :name name})
          "NOT CONFIRMED" (open-login-user-not-confirmed-dialog)
+         "WRONG ACCOUNT" (open-login-user-wrong-account-dialog)
          (open-login-failed-dialog))))))
 
 
