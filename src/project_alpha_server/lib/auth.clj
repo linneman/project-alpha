@@ -180,9 +180,11 @@
         cookies (assoc cookies
                   "ring-session" (merge (cookies "ring-session")
                                         {:max-age setup/cookie-max-age})
-                  "authenticated" {:value "false"})]
+                  "registered" {:value "true" :max-age setup/cookie-max-age}
+                  "authenticated" {:value "false" :max-age setup/cookie-max-age})]
     (-> (response "OK")
-        (assoc :session session) (assoc :cookies cookies))))
+        (assoc :session session)
+        (assoc :cookies cookies))))
 
 
 (defn set-password
