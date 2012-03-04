@@ -18,7 +18,7 @@
             [project-alpha-server.local-settings :as setup])
   (:use [ring.middleware.session.store :only [SessionStore]]
         [project-alpha-server.lib.crypto :only
-         [get-secret-key get-encrypt-pass-and-salt decrypt-pass]]))
+         [get-secret-key get-encrypt-pass-and-salt hash-password]]))
 
 ;; The database connection
 ;; argument for sql requests
@@ -209,9 +209,8 @@
   (let [users (find-user-by-name-or-email login)]
     (if (empty? users)
       false
-      (let [[user] users
-            pass-decrypted (decrypt-pass (:password user) (:salt user))]
-        (if (= 0 (compare pass-entered pass-decrypted))
+      (let [[user] users]
+        (if (= 0 (compare (:password user) (hash-password pass-entered (:salt user))))
           user
           nil)))))
 

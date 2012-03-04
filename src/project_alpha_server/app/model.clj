@@ -20,7 +20,7 @@
         [project-alpha-server.app.zip-de]
         [ring.middleware.session.store :only [SessionStore]]
         [project-alpha-server.lib.crypto :only
-         [get-secret-key get-encrypt-pass-and-salt decrypt-pass]]
+         [get-secret-key get-encrypt-pass-and-salt]]
         [clojure.data.json :only [json-str write-json read-json]]
         [project-alpha-server.lib.utils])
   (:import [java.text DateFormat SimpleDateFormat]

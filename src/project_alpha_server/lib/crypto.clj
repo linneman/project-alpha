@@ -7,6 +7,7 @@
 ;;;
 ;;; taken from, many thanks to:
 ;;; https://github.com/mmcgrana/ring/blob/master/ring-core/src/ring/middleware/session/cookie.clj
+;;; password hashing function (hash-password) from Joerg Ramb
 
 
 (ns project-alpha-server.lib.crypto
@@ -72,6 +73,7 @@
     (.init cipher Cipher/DECRYPT_MODE secret-key iv-spec)
     (String. (.doFinal cipher (byte-array data)))))
 
+
 (defn get-secret-key
   "Get a valid secret key from a map of options, or create a random one from
   scratch."
@@ -83,33 +85,36 @@
     (secure-random-bytes 16)))
 
 
+(defn hash-password [password salt]
+  "returns strong password hash according to recommendation
+   from Joerg Ramb. Many thanks!"
+  (assert (> (count salt) 10))          ;would like to have >64 bit of salt
+  (assert (> (count password) 5))       ;come on, how low can we go?
+  (let [md (java.security.MessageDigest/getInstance "SHA-512")
+        encoder (sun.misc.BASE64Encoder.)]
+    (.update md (.getBytes salt "UTF-8")) ;assume text salt
+    (.encode encoder
+             (loop [mangle (.getBytes password "UTF-8")
+                    passes 10]         ; paranoid, but are we paranoid enough?
+               (if (= 0 passes)
+                 mangle
+                 (recur (.digest md mangle) (dec passes)))))))
+
+
 (defn get-encrypt-pass-and-salt
   "returns a map with the encrypted password and
    a salt string used for encryption"
   [password]
   (let [salt (codec/base64-encode (get-secret-key {}))
-        salt-bytes (.getBytes salt)
-        enc-password (codec/base64-encode
-                      (encrypt
-                       salt-bytes
-                       (byte-array (concat salt-bytes (.getBytes password)))))]
+        enc-password (hash-password password salt)]
     {:password (String. enc-password) :salt salt}))
-
-(defn decrypt-pass
-  "inverse of get-encrypt-pass-and-salt"
-  [enc-password-base64 salt]
-  (let [salt-bytes (.getBytes salt)
-        enc-password (codec/base64-decode enc-password-base64)
-        salt-and-pass (decrypt salt-bytes enc-password)
-        [salt pass] (.split salt-and-pass "==")]
-    pass))
 
 
 (comment
   usage illustration
 
   (def enc (get-encrypt-pass-and-salt "secret"))
-  (decrypt-pass (:password enc) (:salt enc)))
+)
 
 
 ; (use 'swank.core)
