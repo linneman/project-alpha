@@ -404,6 +404,8 @@
     []
     (reset-dialog)
     (setup-password-change-dialog)
+    (reset! reg-form-status {:password "undefined"
+                             :password-repeat "undefined"})
     (open-modal-dialog dialog))
 
 
