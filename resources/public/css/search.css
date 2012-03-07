@@ -9,3 +9,34 @@
   /* display:none; */
   opacity:0;
 }
+
+#search-pane #search-result-table {
+    width:100%;
+    border: 1px solid black;
+    border-collapse:collapse;
+}
+
+#search-pane #search-result-table * {
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
+}
+
+#search-pane #search-result-table #prototype-row {
+    display:none;
+}
+
+
+#search-pane #search-result-controller {
+    width:100%;
+    border: 1px solid black;
+    border-collapse:collapse;
+}
+
+#search-pane #search-result-controller * {
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
+}
+
+#search-pane #search-result-controller #prototype-row {
+    display:none;
+}
