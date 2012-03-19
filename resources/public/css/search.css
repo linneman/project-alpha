@@ -40,3 +40,8 @@
 #search-pane #search-result-controller #prototype-row {
     display:none;
 }
+
+
+.default-button {
+    font-weight: bold;
+}

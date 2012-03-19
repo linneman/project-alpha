@@ -19,6 +19,8 @@
             [goog.style :as style]
             [goog.events :as events]
             [goog.ui.Button :as Button]
+            [goog.ui.ButtonRenderer :as ButtonRenderer]
+            [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
             [goog.ui.TabPane :as TabPane]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
@@ -27,6 +29,221 @@
 ;;; the profile page (client side equivalent to index.html)
 (def search-pane (dom/get-element "search-pane"))
 
+
+(when search-pane
+
+  (defn htmlcoll2array
+    "Transforms a HTMLCollection into a clojure array"
+    [htmlcol]
+    (loop [index 0 row-array []]
+      (if-let [row (. htmlcol (item index))]
+        (recur (inc index) (conj row-array row))
+        row-array)))
+
+
+  (defn clear-table
+    "Removes all rows except the prototype-row from an html
+   table with a given dom id string."
+    [table-id-str]
+    (let [table (dom/get-element table-id-str)
+          table-body (gdom/getFirstElementChild table)
+          rows (htmlcoll2array (gdom/getChildren table-body))]
+      (doseq [row rows]
+        (when-not (= "prototype-row" (. row -id))
+          (gdom/removeNode row)))))
+
+
+  (defn render-table
+    "Renders an html table with the given dom id string and
+   an array of table rows where each table row is in turn
+   an array of column elements. The html table is expected
+   to have one prototype row which is cloned for each new
+   row which is added to the array"
+    [table-id-str data-arr]
+    (let [table (dom/get-element table-id-str)
+          table-body (gdom/getFirstElementChild table)
+          prototype-row (get-element "prototype-row" table-body)
+          data-arr (map vector (iterate inc 1) data-arr)]
+      (doseq [[row-idx row-data] data-arr]
+        (let [row-data (map vector (iterate inc 1) row-data)
+              new-row (. prototype-row (cloneNode true))]
+          (set! (. new-row -id) (str "row" row-idx))
+          ; (println "row-elem: " new-row)
+          (doseq [[col-idx col-data] row-data]
+            (let [col-elem (get-element (str "col" col-idx) new-row)]
+              ; (println "col-id-str: " (str "col" col-idx) "col-elem: " col-elem)
+              (if (string? col-data)
+                (set! (. col-elem -innerHTML) col-data)
+                (. col-data (render col-elem)))))
+          (gdom/appendChild table-body new-row)))))
+
+
+  (defn new-page-crtl-button
+    "creates instance of new page controller button with
+   given label. When given an event parameter is given
+   it will be attached to this button within the field
+   evt-params."
+    ([label] (new-page-crtl-button label nil))
+    ([label params]
+       (let [button (goog.ui.Button. label (FlatButtonRenderer/getInstance))]
+         (set! (. button -evt-params) params)
+         (events/listen button "action"
+                        #(do
+                           (comment
+                             (loginfo (str "button in table: "
+                                           (. button -table-controller)
+                                           " with data: " (pr-str (. button -evt-params))
+                                           " pressed!")))
+                           (dispatch/fire (. button -table-controller)
+                                          (. button -evt-params))))
+         button)))
+
+
+  (defn create-page-crtl-button-groups
+    "instantiates vector of buttons where each button refers to
+   a group of search results presented in a row. The number of
+   buttons are specified with the first argument. Not all of
+   them are necessarily used later on. The second argument
+   specifies the number of rows in the corresponding search
+   result table. The last argument specifies the starting index.
+   If not specified the first search result starts with the
+   index one."
+    ([nr-buttons nr-rows] (create-page-crtl-button-groups nr-buttons nr-rows 1))
+    ([nr-buttons nr-rows start-idx]
+       (let [start-indices (take nr-buttons
+                                 (iterate #(+ % nr-rows) start-idx))]
+         (map
+          (fn [start-idx]
+            (let [label (str start-idx ".." (+ start-idx nr-rows -1))]
+              (new-page-crtl-button label {:start-idx start-idx})))
+          start-indices))))
+
+
+  (defn create-page-crtl-buttons
+    "instantiates page controll buttons where first element
+   to be displayed starts at given index. When first element
+   is not in displayed range a '<' button is appended for
+   jumping back. If last element is not in the range of
+   specified elements (nr-buttons, nr-rows) a button with
+   the label '>' is rendered on the right hand side for
+   jumping to next result group."
+    [start-idx last-idx nr-buttons nr-rows]
+    (let [first-entries (when (> start-idx 1)
+                          (let [next-start-idx (- start-idx nr-rows)
+                                next-start-idx (if (< next-start-idx 1) 1 next-start-idx)
+                                nav {:render-crtl true
+                                     :start-idx next-start-idx :last-idx last-idx
+                                     :nr-buttons nr-buttons :nr-rows nr-rows}]
+                            [(new-page-crtl-button "<" nav)]))
+          last-entries (when (> (- last-idx start-idx -1)
+                                (* (- nr-buttons (count first-entries))
+                                   nr-rows))
+                         (let [next-start-idx (+ start-idx nr-rows)
+                               next-start-idx (if (> next-start-idx last-idx)
+                                                last-idx next-start-idx)
+                               nav {:render-crtl true
+                                    :start-idx next-start-idx :last-idx last-idx
+                                    :nr-buttons nr-buttons :nr-rows nr-rows}]
+                           [(new-page-crtl-button ">" nav)]))
+          nr-normal-buttons (Math.ceil (/ (- last-idx start-idx -1) nr-rows))
+          delta-nr-buttons (- nr-buttons (+ nr-normal-buttons
+                                            (count first-entries)
+                                            (count last-entries)))
+          nr-normal-buttons (if (< delta-nr-buttons 0)
+                              (+ nr-normal-buttons delta-nr-buttons)
+                              nr-normal-buttons)]
+      (concat first-entries
+              (create-page-crtl-button-groups nr-normal-buttons nr-rows
+                                              start-idx)
+              last-entries)))
+
+
+  (defn render-table-controller
+    "renders page control buttons within table with given dom-id-str
+   start at start-idx. The number of rows controlled by each
+   button is specified by argument nr-rows. The table shall
+   defined a distinctive prototype-row where the number of
+   buttons to be rendered is taken from. Refer also to render-table
+   for more detailed information about table rendering."
+    [table-id-str start-idx last-idx nr-rows]
+    (let [table (dom/get-element table-id-str)
+          table-body (gdom/getFirstElementChild table)
+          prototype-row (get-element "prototype-row" table-body)
+          nr-buttons (count (htmlcoll2array (. prototype-row -cells)))
+          crtlButtons (create-page-crtl-buttons start-idx last-idx nr-buttons nr-rows)]
+      (when-let [buttons (. table -crtlButtons)] (map #(. % (dispose))) buttons)
+      (dorun (map #(set! (. % -table-controller) table-id-str) crtlButtons)) ; backward ref
+      (set! (. table -crtlButtons) crtlButtons)
+      (clear-table table-id-str)
+      (render-table table-id-str (vector crtlButtons))
+      table))
+
+
+  (defn get-table-controller-reactor
+    [table-controller rendered-table]
+    (dispatch/react-to
+     #{table-controller}
+     (fn [evt data]
+       (loginfo (str "received page-crtl event: " (pr-str data)))
+       (when (:render-crtl data)
+         (render-table-controller table-controller
+                                  (:start-idx data)
+                                  (:last-idx data)
+                                  (:nr-rows data))))))
+
+
+  (comment
+
+    (clear-table "search-result-table")
+    (render-table "search-result-table"
+                  [["Karl" "100km" "57%"]
+                   ["Anton" "70km" "68%"]])
+
+
+    (def x (create-page-crtl-button-groups 5 5))
+    (def x (create-page-crtl-button-groups 5 5 26))
+
+    (def y (create-page-crtl-buttons 1 1 5 5))
+    (def y (create-page-crtl-buttons 1 6 5 5))
+    (def y (create-page-crtl-buttons 1 10 5 5))
+    (def y (create-page-crtl-buttons 1 11 5 5))
+    (def y (create-page-crtl-buttons 1 15 5 5))
+    (def y (create-page-crtl-buttons 1 16 5 5))
+    (def y (create-page-crtl-buttons 1 20 5 5))
+    (def y (create-page-crtl-buttons 1 21 5 5))
+    (def y (create-page-crtl-buttons 1 25 5 5))
+
+    (def y (create-page-crtl-buttons 1 26 5 5))
+    (def y (create-page-crtl-buttons 2 5 5 5))
+
+    (def y (create-page-crtl-buttons 2 25 5 5))
+
+    (filter #(not-empty %) y)
+    (render-table "search-result-controller" (vector x))
+    (render-table "search-result-controller" (vector y))
+
+    (map #(. % (dispose)) x)
+    (map #(. % (dispose)) y)
+
+    (clear-table "search-result-controller")
+
+    (def x (render-table-controller "search-result-controller" 1 25 5))
+
+    (def x (render-table-controller "search-result-controller" 6 38 5))
+
+    (def reactor (get-table-controller-reactor
+                  "search-result-controller"
+                  "search-result-table"))
+
+    ) ; end of usage illustration
+
+
+  ) ; (when search-pane
+
+
+
+
+; --- site enabling and disabling ---
 
 (def site-enabled-reactor (dispatch/react-to
                            #{:page-switched}
@@ -55,65 +272,3 @@
   (when search-pane
     (style/showElement search-pane false)
     (loginfo "search page disabled")))
-
-
-
-(defn htmlcoll2array
-  "Transforms a HTMLCollection into a clojure array"
-  [htmlcol]
-  (loop [index 0 row-array []]
-    (if-let [row (. htmlcol (item index))]
-      (recur (inc index) (conj row-array row))
-      row-array)))
-
-
-(defn clear-table
-  "Removes all rows except the prototype-row from an html
-   table with a given dom id string."
-  [table-id-str]
-  (let [table (dom/get-element "search-result-table")
-        table-body (gdom/getFirstElementChild table)
-        rows (htmlcoll2array (gdom/getChildren table-body))]
-    (doseq [row rows]
-      (when-not (= "prototype-row" (. row -id))
-        (gdom/removeNode row)))))
-
-
-(defn render-table
-  "Renders an html table with the given dom id string and
-   an array of table rows where each table row is in turn
-   an array of column elements. The html table is expected
-   to have one prototype row which is cloned for each new
-   row which is added to the array"
-  [table-id-str data-arr]
-  (let [table (dom/get-element table-id-str)
-        table-body (gdom/getFirstElementChild table)
-        prototype-row (get-element "prototype-row" table-body)
-        data-arr (map vector (iterate inc 1) data-arr)]
-    (doseq [[row-idx row-data] data-arr]
-      (let [row-data (map vector (iterate inc 1) row-data)
-            new-row (. prototype-row (cloneNode true))]
-        (set! (. new-row -id) (str "row" row-idx))
-            ; (println "row-elem: " new-row)
-        (doseq [[col-idx col-data] row-data]
-          (let [col-elem (get-element (str "col" col-idx) new-row)]
-            ; (println "col-id-str: " (str "col" col-idx) "col-elem: " col-elem)
-            (set! (. col-elem -innerHTML) col-data)
-            ))
-        (gdom/appendChild table-body new-row)))))
-
-
-(comment
-
-  (clear-table "search-result-table")
-  (render-table "search-result-table"
-                [["Karl" "100km" "57%"]
-                 ["Anton" "70km" "68%"]])
-
-  (render-table "search-result-controller"
-                [["1..5" "6..10" "11..15" "16..20" ">>"]])
-
-
-)
-
-
