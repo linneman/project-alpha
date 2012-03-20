@@ -115,7 +115,7 @@
          (map
           (fn [start-idx]
             (let [label (str start-idx ".." (+ start-idx nr-rows -1))]
-              (new-page-crtl-button label {:start-idx start-idx})))
+              (new-page-crtl-button label {:start-idx start-idx :nr-rows nr-rows})))
           start-indices))))
 
 
@@ -129,7 +129,7 @@
    jumping to next result group."
     [start-idx last-idx nr-buttons nr-rows]
     (let [first-entries (when (> start-idx 1)
-                          (let [next-start-idx (- start-idx nr-rows)
+                          (let [next-start-idx (- start-idx (* nr-rows (- nr-buttons 2)))
                                 next-start-idx (if (< next-start-idx 1) 1 next-start-idx)
                                 nav {:render-crtl true
                                      :start-idx next-start-idx :last-idx last-idx
@@ -138,7 +138,7 @@
           last-entries (when (> (- last-idx start-idx -1)
                                 (* (- nr-buttons (count first-entries))
                                    nr-rows))
-                         (let [next-start-idx (+ start-idx nr-rows)
+                         (let [next-start-idx (+ start-idx (* nr-rows (- nr-buttons 2)))
                                next-start-idx (if (> next-start-idx last-idx)
                                                 last-idx next-start-idx)
                                nav {:render-crtl true
@@ -180,16 +180,24 @@
 
 
   (defn get-table-controller-reactor
-    [table-controller rendered-table]
+    [table-controller rendered-table data-array]
     (dispatch/react-to
      #{table-controller}
      (fn [evt data]
-       (loginfo (str "received page-crtl event: " (pr-str data)))
-       (when (:render-crtl data)
-         (render-table-controller table-controller
-                                  (:start-idx data)
-                                  (:last-idx data)
-                                  (:nr-rows data))))))
+       (let [last-idx (count data-array)
+             first-row-idx (dec (:start-idx data))
+             last-row-idx (+ first-row-idx (:nr-rows data))
+             last-row-idx (if (> last-row-idx last-idx) last-idx last-row-idx)]
+         (loginfo (str "received page-crtl event: " (pr-str data)))
+         (when (:render-crtl data)
+           (render-table-controller table-controller
+                                    (:start-idx data)
+                                    (:last-idx data)
+                                    (:nr-rows data)))
+         (clear-table rendered-table)
+         ;(println "first: " first-row-idx "last: " last-row-idx)
+         (render-table rendered-table (subvec data-array first-row-idx last-row-idx))
+         ))))
 
 
   (comment
@@ -233,9 +241,60 @@
 
     (def reactor (get-table-controller-reactor
                   "search-result-controller"
-                  "search-result-table"))
+                  "search-result-table"
+                  (create-test-data)))
 
-    ) ; end of usage illustration
+    (dispatch/delete-reaction reactor)
+
+    (def a [["Karl" "100km" "57%"]
+              ["Anton" "70km" "68%"]])
+
+    (defn create-test-data
+      []
+      (let [first-names ["Paul" "Lisa" "Andreas" "Paula" "Gert" "Gerda" "Patrick" "Sabine"
+                      "Gustav" "Monika" "Olaf" "Andrea" "Ottmar" "Patricia" "Heiner"
+                      "Anna" "Sebastian" "Gudrun" "Christoph" "Silke" "Max" "Sandy"]
+            second-names ["Müller" "Schmidt" "Bauer" "Schuhmacher" "Stein" "Pfennig"
+                       "Bäcker" "Schuster" "Bleichert" "Schulz" "Ludwig" "Mai"
+                       "Röhl" "Richter" "Hofer" "Kling" "Hauser" "Kaindl" "Kiefer"]]
+        (for [first-name first-names second-name second-names]
+          [(str first-name " " second-name)
+           (str (rand-int 100) "km")
+           (str (rand-int 100) "%")])))
+
+
+    (def a (create-test-data))
+
+    (count a)
+    (apply sorted-map (interleave (map #(second %) a)
+                                  (map #(vector (first %) (nth % 2)) a)))
+
+    (sort #(compare (first %1) (first %2)) a)
+
+    (defn unitstr2num [string] (apply js/Number (re-seq #"-?[\d.]+" string)))
+    (unitstr2num "123%")
+
+    (def sort-by-name (partial sort #(compare (first %1) (first %2))))
+    (def sort-by-dist (partial sort #(compare
+                                      (unitstr2num (second %1))
+                                      (unitstr2num (second %2)))))
+    (def sort-by-match (partial sort #(compare
+                                      (unitstr2num (nth %2 2))
+                                      (unitstr2num (nth %1 2)))))
+
+    (sort-by-name a)
+    (sort-by-dist a)
+    (sort-by-match a)
+
+    (* 2 (js/Number "10km"))
+    (map #(vector a) a)
+
+
+    ; end of usage illustration
+    )
+
+
+
 
 
   ) ; (when search-pane
