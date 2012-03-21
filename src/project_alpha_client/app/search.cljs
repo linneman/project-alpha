@@ -179,25 +179,93 @@
       table))
 
 
+
+  (defn update-table-contoller-button-state
+    "disables the button state of the controll
+     button which belongs to the currently displayed
+     content beginning at rendered-start-idx and
+     enables all other buttons."
+    [table-controller rendered-start-idx]
+    (let [table (dom/get-element table-controller)
+          buttons (. table -crtlButtons)]
+      (dorun
+       (map #(let [{:keys [start-idx nr-rows render-crtl]} (. % -evt-params)]
+               (if (and (>= rendered-start-idx start-idx)
+                        (< rendered-start-idx (+ start-idx nr-rows))
+                        (not render-crtl))
+                 (. % (setEnabled false))
+                 (. % (setEnabled true)))) buttons))))
+
+
+  ;(def a (update-table-contoller-button-state "search-result-controller" 15))
+  ;(def b (first a))
+  ;(. b -evt-params)
+
+
   (defn get-table-controller-reactor
+    "creates event reactor for the controlling a
+     search result table using the given table
+     controller and a data-array with all content
+     to be displayed."
     [table-controller rendered-table data-array]
     (dispatch/react-to
      #{table-controller}
      (fn [evt data]
-       (let [last-idx (count data-array)
-             first-row-idx (dec (:start-idx data))
+       (let [start-idx (:start-idx data)
+             last-idx (count data-array)
+             first-row-idx (dec start-idx)
              last-row-idx (+ first-row-idx (:nr-rows data))
              last-row-idx (if (> last-row-idx last-idx) last-idx last-row-idx)]
          (loginfo (str "received page-crtl event: " (pr-str data)))
          (when (:render-crtl data)
            (render-table-controller table-controller
-                                    (:start-idx data)
+                                    start-idx
                                     (:last-idx data)
                                     (:nr-rows data)))
          (clear-table rendered-table)
          ;(println "first: " first-row-idx "last: " last-row-idx)
          (render-table rendered-table (subvec data-array first-row-idx last-row-idx))
+         (update-table-contoller-button-state table-controller start-idx)
          ))))
+
+
+  (defn init-search-result-table
+    "creates a search result table object which controlls
+     two DOM html tables, one for the search results to
+     be rendered with the dom id string specified in
+     table-content the other the search controll buttons
+     for skipping to next or previous entries. Both tables
+     shall provide one table row with id 'prototype' which
+     is copied for each new rendered line within the content
+     table. The data is given within the corresponding element
+     as two dimensional vector. The outer or first index
+     specifies the table rows while the innter or second index
+     correspond to the result columns. The nr-rows specifies
+     the number of search results which should be displayed in
+     one page (rendering step). The functions also registers
+     all event handlers for switching to the approriate result
+     page selected by the user and returns an object which
+     is used for later release."
+    [table-controller table-content data nr-rows]
+    (let [last-idx (count data)
+          crtl-reactor (get-table-controller-reactor table-controller table-content data)
+          table (render-table-controller table-controller 1 last-idx nr-rows)
+          buttons (. table -crtlButtons)
+          button (first buttons)]
+      (dispatch/fire (. button -table-controller)
+                     (. button -evt-params))
+      {:crtl-reactor crtl-reactor :table-controller table-controller
+       :table-content table-content}))
+
+
+  (defn release-search-result-table
+    "releases search result table objects and cleans the
+     content and the controller table."
+    [{:keys [crtl-reactor table-controller table-content]} result-table-obj]
+    (dispatch/delete-reaction crtl-reactor)
+    (when-let [buttons (. table-controller -crtlButtons)] (map #(. % (dispose))) buttons)
+    (clear-table table-controller)
+    (clear-table table-content))
 
 
   (comment
@@ -246,6 +314,14 @@
 
     (dispatch/delete-reaction reactor)
 
+
+    (def result-table
+      (init-search-result-table "search-result-controller"
+                                "search-result-table" (create-test-data) 5))
+
+    (release-search-result-table result-table)
+
+
     (def a [["Karl" "100km" "57%"]
               ["Anton" "70km" "68%"]])
 
@@ -290,14 +366,9 @@
     (map #(vector a) a)
 
 
-    ; end of usage illustration
-    )
+    ) ; end of usage illustration
 
-
-
-
-
-  ) ; (when search-pane
+) ; (when search-pane
 
 
 
