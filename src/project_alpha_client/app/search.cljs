@@ -15,6 +15,7 @@
             [project-alpha-client.lib.json :as json]
             [project-alpha-client.lib.editor :as editor]
             [clojure.browser.dom :as dom]
+            [clojure.string :as string]
             [goog.dom :as gdom]
             [goog.style :as style]
             [goog.events :as events]
@@ -42,23 +43,37 @@
 
 
   (defn clear-table
-    "Removes all rows except the prototype-row from an html
+      "Removes all rows except the prototype-row from an html
    table with a given dom id string."
-    [table-id-str]
-    (let [table (dom/get-element table-id-str)
-          table-body (gdom/getFirstElementChild table)
-          rows (htmlcoll2array (gdom/getChildren table-body))]
-      (doseq [row rows]
-        (when-not (= "prototype-row" (. row -id))
-          (gdom/removeNode row)))))
+      [table-id-str]
+      (let [table (dom/get-element table-id-str)
+            table-body (gdom/getFirstElementChild table)
+            rows (htmlcoll2array (gdom/getChildren table-body))]
+        (doseq [row rows]
+          (let [cells (htmlcoll2array (gdom/getChildren row))
+                first-cell (first cells)
+                tag-name (. first-cell -tagName)]
+            (when-not (or (= "prototype-row" (. row -id))
+                          (= (string/upper-case tag-name) "TH"))
+              (dorun (map #(when-let [obj (. % -rendered)] (. obj (dispose))) cells))
+              (gdom/removeNode row)
+              )))))
 
+  (defn- function? [f] (= "function" (goog.typeOf f)))
 
   (defn render-table
     "Renders an html table with the given dom id string and
    an array of table rows where each table row is in turn
    an array of column elements. The html table is expected
    to have one prototype row which is cloned for each new
-   row which is added to the array"
+   row which is added to the array.
+   The column elements must either be strings which are
+   rendered directly or it possible to provide a render
+   function which invoked with the enclosing cell as
+   argument. In the later case the enclosing cell gets
+   a reference to the rendered object within the field
+   'rendered' which is used for later clean-up (function
+   clear-table)."
     [table-id-str data-arr]
     (let [table (dom/get-element table-id-str)
           table-body (gdom/getFirstElementChild table)
@@ -72,9 +87,11 @@
           (doseq [[col-idx col-data] row-data]
             (let [col-elem (get-element (str "col" col-idx) new-row)]
               ; (println "col-id-str: " (str "col" col-idx) "col-elem: " col-elem)
-              (if (string? col-data)
-                (set! (. col-elem -innerHTML) col-data)
-                (. col-data (render col-elem)))))
+              (cond
+               (string? col-data) (set! (. col-elem -innerHTML) col-data)
+               (function? col-data) (set! (. col-elem -rendered) (col-data col-elem))
+               true (. col-data (render col-elem)) ; when-not string or function, render obj.
+               )))
           (gdom/appendChild table-body new-row)))))
 
 
@@ -325,21 +342,31 @@
     (def a [["Karl" "100km" "57%"]
               ["Anton" "70km" "68%"]])
 
+
+    (defn render-id-button
+      [label parent-element]
+      (let [button (goog.ui.Button. label (FlatButtonRenderer/getInstance))]
+        (. button (render parent-element))
+        ))
+
     (defn create-test-data
       []
       (let [first-names ["Paul" "Lisa" "Andreas" "Paula" "Gert" "Gerda" "Patrick" "Sabine"
-                      "Gustav" "Monika" "Olaf" "Andrea" "Ottmar" "Patricia" "Heiner"
-                      "Anna" "Sebastian" "Gudrun" "Christoph" "Silke" "Max" "Sandy"]
-            second-names ["Müller" "Schmidt" "Bauer" "Schuhmacher" "Stein" "Pfennig"
-                       "Bäcker" "Schuster" "Bleichert" "Schulz" "Ludwig" "Mai"
-                       "Röhl" "Richter" "Hofer" "Kling" "Hauser" "Kaindl" "Kiefer"]]
-        (for [first-name first-names second-name second-names]
-          [(str first-name " " second-name)
-           (str (rand-int 100) "km")
-           (str (rand-int 100) "%")])))
+                         "Gustav" "Monika" "Olaf" "Andrea" "Ottmar" "Patricia" "Heiner"
+                         "Anna" "Sebastian" "Gudrun" "Christoph" "Silke" "Max" "Sandy"]
+            second-names ["Mueller" "Schmidt" "Bauer" "Schuhmacher" "Stein" "Pfennig"
+                          "Baecker" "Schuster" "Bleichert" "Schulz" "Ludwig" "Mai"
+                          "Roehl" "Richter" "Hofer" "Kling" "Hauser" "Kaindl" "Kiefer"]
+            name-array (for [first-name first-names second-name second-names]
+                         (str first-name " " second-name))]
+        (map #(vector %1 (str (rand-int 100) "km")
+                      (str (rand-int 100) "%")
+                      (partial render-id-button (str "id-" %2)))
+             name-array (iterate inc 1))))
 
 
     (def a (create-test-data))
+
 
     (count a)
     (apply sorted-map (interleave (map #(second %) a)
@@ -358,13 +385,15 @@
                                       (unitstr2num (nth %2 2))
                                       (unitstr2num (nth %1 2)))))
 
-    (sort-by-name a)
-    (sort-by-dist a)
-    (sort-by-match a)
+    (def b (sort-by-name a))
+    (def b (sort-by-dist a))
+    (def b (sort-by-match a))
 
-    (* 2 (js/Number "10km"))
-    (map #(vector a) a)
+    (def result-table
+      (init-search-result-table "search-result-controller"
+                                "search-result-table" b 10))
 
+    (release-search-result-table result-table)
 
     ) ; end of usage illustration
 
