@@ -334,7 +334,7 @@
 
     (def result-table
       (init-search-result-table "search-result-controller"
-                                "search-result-table" (create-test-data) 5))
+                                "search-result-table" (create-test-data) 10))
 
     (release-search-result-table result-table)
 
@@ -342,10 +342,22 @@
     (def a [["Karl" "100km" "57%"]
               ["Anton" "70km" "68%"]])
 
+    (def details-reactor (dispatch/react-to
+                          #{:show-user-details}
+                          (fn [evt data]
+                            (loginfo (str "detail button pressed for user id: " data)))))
 
     (defn render-id-button
-      [label parent-element]
+      [label event evt-data parent-element]
       (let [button (goog.ui.Button. label (FlatButtonRenderer/getInstance))]
+        (events/listen button "action"
+                       #(do
+                          (comment
+                            (loginfo (str "button in table: "
+                                          (. button -table-controller)
+                                          " with data: " (pr-str (. button -evt-params))
+                                          " pressed!")))
+                          (dispatch/fire event evt-data)))
         (. button (render parent-element))
         ))
 
@@ -361,7 +373,7 @@
                          (str first-name " " second-name))]
         (map #(vector %1 (str (rand-int 100) "km")
                       (str (rand-int 100) "%")
-                      (partial render-id-button (str "id-" %2)))
+                      (partial render-id-button (str "id-" %2) :show-user-details (str %2)))
              name-array (iterate inc 1))))
 
 
