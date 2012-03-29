@@ -25,7 +25,8 @@
             [goog.ui.TabPane :as TabPane]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
-        [project-alpha-client.lib.utils :only [send-request get-element]]))
+        [project-alpha-client.lib.utils :only [send-request get-element
+                                               init-alpha-button]]))
 
 ;;; the profile page (client side equivalent to index.html)
 (def search-pane (dom/get-element "search-pane"))
@@ -95,7 +96,7 @@
           (gdom/appendChild table-body new-row)))))
 
 
-  (defn new-page-crtl-button
+  (defn- new-page-crtl-button
     "creates instance of new page controller button with
    given label. When given an event parameter is given
    it will be attached to this button within the field
@@ -116,7 +117,7 @@
          button)))
 
 
-  (defn create-page-crtl-button-groups
+  (defn- create-page-crtl-button-groups
     "instantiates vector of buttons where each button refers to
    a group of search results presented in a row. The number of
    buttons are specified with the first argument. Not all of
@@ -136,7 +137,7 @@
           start-indices))))
 
 
-  (defn create-page-crtl-buttons
+  (defn- create-page-crtl-buttons
     "instantiates page controll buttons where first element
    to be displayed starts at given index. When first element
    is not in displayed range a '<' button is appended for
@@ -175,7 +176,7 @@
               last-entries)))
 
 
-  (defn render-table-controller
+  (defn- render-table-controller
     "renders page control buttons within table with given dom-id-str
    start at start-idx. The number of rows controlled by each
    button is specified by argument nr-rows. The table shall
@@ -197,7 +198,7 @@
 
 
 
-  (defn update-table-contoller-button-state
+  (defn- update-table-contoller-button-state
     "disables the button state of the controll
      button which belongs to the currently displayed
      content beginning at rendered-start-idx and
@@ -219,7 +220,7 @@
   ;(. b -evt-params)
 
 
-  (defn get-table-controller-reactor
+  (defn- get-table-controller-reactor
     "creates event reactor for the controlling a
      search result table using the given table
      controller and a data-array with all content
@@ -285,13 +286,179 @@
     (clear-table table-content))
 
 
+  (defn render-table-button
+    "renders a button inside a table with given
+       label. Dispatches given event and data when
+       the button is clicked. The parameter parent-
+       element specifies the enclosing element where
+       the button is rendered in, here the table
+       cell."
+    [label event evt-data parent-element]
+    (let [button (goog.ui.Button. label (FlatButtonRenderer/getInstance))]
+      (events/listen button "action"
+                     #(dispatch/fire event evt-data))
+      (. button (render parent-element))
+      (set! (. button -evt-params) evt-data)
+      button
+      ))
+
+
+  (defn- init-table-sort-buttons
+    [table-id-str event]
+    (let [table (dom/get-element table-id-str)
+          table-body (gdom/getFirstElementChild table)
+          header-row (get-element "header-row" table-body)
+          cells (htmlcoll2array (. header-row -cells))
+          buttons (map
+                   #(when (re-seq #"^sort" (. % -id))
+                      (let [txt (. % -innerText)]
+                        (set! (. % -innerText) "")
+                        (render-table-button txt event (. % -id) %)))
+                   cells)
+          buttons (doall (filter identity buttons))]
+      (set! (. table -sortButtons) buttons)
+      buttons
+      ))
+
+
+  (defn- release-table-sort-buttons
+    [table-id-str]
+    (let [table (dom/get-element table-id-str)
+          table-body (gdom/getFirstElementChild table)
+          header-row (get-element "header-row" table-body)
+          cells (htmlcoll2array (. header-row -cells))
+          header-txt (doall
+                      (map
+                       #(when-let [child-elem (. % -firstChild)]
+                          (when (= "DIV" (. child-elem -tagName))
+                            (. child-elem -innerText)))
+                       cells))]
+      (dorun (map #(. % (dispose)) (. table -sortButtons))) ; remove sort buttons
+      (dorun (map #(set! (. %1 -innerText) %2) cells header-txt)) ; restore orig. header
+      ))
+
+
+  (defn- get-sort-reactor
+    "instantiates an event handler for sorting a search
+     result table (sort-reactor). This function is used
+     within init-sortable-search-result-table."
+    [sort-buttons search-result-table-atom
+     table-controller table-content data nr-rows evt-sort-function-hashes]
+    (dispatch/react-to
+     #{:sort-search-results}
+     (fn [evt evt-data]
+       (loginfo (str "sort-by-xxx clicked: " evt-data))
+       (dorun
+        (map #(if (= (. % -evt-params) evt-data)
+                (. % (setEnabled false))
+                (. % (setEnabled true))) sort-buttons))
+       (release-search-result-table @search-result-table-atom)
+       (let [sorted-data ((evt-sort-function-hashes evt-data) data)]
+         (reset! search-result-table-atom
+                 (init-search-result-table table-controller
+                                           table-content sorted-data nr-rows)))
+       )))
+
+
+  (defn init-sortable-search-result-table
+    "creates a sortable search result table object which
+     controlls two DOM html tables, one for the search results
+     to be rendered with the dom id string specified in
+     table-content the other the search controll buttons
+     for skipping to next or previous entries. Both tables
+     shall provide one table row with id 'prototype' which
+     is copied for each new rendered line within the content
+     table. The data is given within the corresponding element
+     as two dimensional vector. The outer or first index
+     specifies the table rows while the innter or second index
+     correspond to the result columns. The nr-rows specifies
+     the number of search results which should be displayed in
+     one page (rendering step). The functions also registers
+     all event handlers for switching to the approriate result
+     page selected by the user and returns an object which
+     is used for later release."
+    [table-controller table-content data nr-rows evt-sort-function-hashes]
+    (let [search-result-table (init-search-result-table table-controller
+                                                        table-content data nr-rows)
+          search-result-table-atom (atom search-result-table)
+          sort-buttons (init-table-sort-buttons table-content :sort-search-results)
+          sort-reactor (get-sort-reactor
+                        sort-buttons search-result-table-atom
+                        table-controller
+                        table-content
+                        data
+                        nr-rows
+                        evt-sort-function-hashes)]
+      (dispatch/fire :sort-search-results (first (keys evt-sort-function-hashes)))
+      {:search-result-table-atom search-result-table-atom
+       :sort-buttons sort-buttons
+       :sort-reactor sort-reactor}))
+
+
+  (defn release-sortable-search-result-table
+    "releases sortable search result table objects and cleans the
+     content and the controller table."
+    [{:keys [search-result-table-atom sort-buttons sort-reactor]} sortable-result-table-obj]
+    (release-table-sort-buttons (@search-result-table-atom :table-content))
+    (dispatch/delete-reaction sort-reactor)
+    (release-search-result-table @search-result-table-atom)
+    )
+
+
   (comment
 
-    (clear-table "search-result-table")
-    (render-table "search-result-table"
-                  [["Karl" "100km" "57%"]
-                   ["Anton" "70km" "68%"]])
+    (defn unitstr2num [string] (apply js/Number (re-seq #"-?[\d.]+" string)))
+    (defn german-date-str-to-ms
+      [datestr]
+      (let [[day month year] (map js/Number (. datestr (split ".")))]
+        (. (js/Date. year month day) (getTime))))
 
+    (def sortable-result-table
+      (init-sortable-search-result-table
+       "search-result-controller"
+       "search-result-table" (create-test-data) 10
+       {"sort-by-date" (partial sort #(compare
+                                       (german-date-str-to-ms (first %1))
+                                       (german-date-str-to-ms (first %2))))
+        "sort-by-name" (partial sort #(compare (second %1) (second %2)))
+        "sort-by-dist" (partial sort #(compare
+                                      (unitstr2num (nth %1 2))
+                                      (unitstr2num (nth %2 2))))
+        "sort-by-match" (partial sort #(compare
+                                      (unitstr2num (nth %2 3))
+                                      (unitstr2num (nth %1 3))))}))
+
+    (release-sortable-search-result-table sortable-result-table)
+
+    )
+
+
+  (comment "usage illustration"
+
+    (def table (dom/get-element "search-result-table"))
+    (def table-body (gdom/getFirstElementChild table))
+    (def header-row (get-element "header-row" table-body))
+    (def cells (htmlcoll2array (. header-row -cells)))
+    (def first-cell (first cells))
+    (. first-cell -id)
+
+    (def y (first x))
+    (. y -evt-params)
+
+    (def x (init-table-sort-buttons "search-result-table" :sort-search-results))
+    (release-table-sort-buttons "search-result-table")
+
+    (def sort-reactor (dispatch/react-to
+                       #{:sort-search-results}
+                       (fn [evt data]
+                         (loginfo (str "sort-by-xxx clicked: " data))
+                         (dorun
+                          (map #(if (= (. % -evt-params) data)
+                                  (. % (setEnabled false))
+                                  (. % (setEnabled true))) x))
+                         )))
+
+    (dispatch/delete-reaction sort-reactor)
 
     (def x (create-page-crtl-button-groups 5 5))
     (def x (create-page-crtl-button-groups 5 5 26))
@@ -347,19 +514,6 @@
                           (fn [evt data]
                             (loginfo (str "detail button pressed for user id: " data)))))
 
-    (defn render-id-button
-      [label event evt-data parent-element]
-      (let [button (goog.ui.Button. label (FlatButtonRenderer/getInstance))]
-        (events/listen button "action"
-                       #(do
-                          (comment
-                            (loginfo (str "button in table: "
-                                          (. button -table-controller)
-                                          " with data: " (pr-str (. button -evt-params))
-                                          " pressed!")))
-                          (dispatch/fire event evt-data)))
-        (. button (render parent-element))
-        ))
 
     (defn create-test-data
       []
@@ -370,14 +524,19 @@
                           "Baecker" "Schuster" "Bleichert" "Schulz" "Ludwig" "Mai"
                           "Roehl" "Richter" "Hofer" "Kling" "Hauser" "Kaindl" "Kiefer"]
             name-array (for [first-name first-names second-name second-names]
-                         (str first-name " " second-name))]
-        (map #(vector %1 (str (rand-int 100) "km")
-                      (str (rand-int 100) "%")
-                      (partial render-id-button (str "id-" %2) :show-user-details (str %2)))
-             name-array (iterate inc 1))))
+                         (str first-name " " second-name))
+            dates ["12.02.2012" "11.11.2011" "10.09.2011" "01.08.2011" "27.09.2011" "31.12.2011" "01.05.2011"]]
+        (doall
+         (map #(vector %3 %1 (str (rand-int 100) "km")
+                       (str (rand-int 100) "%")
+                       (partial render-table-button (str "id-" %2) :show-user-details (str %2)))
+              name-array (iterate inc 1) (flatten (repeat dates))))))
 
 
     (def a (create-test-data))
+
+
+
 
 
     (count a)
@@ -387,16 +546,26 @@
     (sort #(compare (first %1) (first %2)) a)
 
     (defn unitstr2num [string] (apply js/Number (re-seq #"-?[\d.]+" string)))
+
+    (defn german-date-str-to-ms
+      [datestr]
+      (let [[day month year] (map js/Number (. datestr (split ".")))]
+        (. (js/Date. year month day) (getTime))))
+
+
     (unitstr2num "123%")
+    (german-date-str-to-ms "27.10.2011")
 
-    (def sort-by-name (partial sort #(compare (first %1) (first %2))))
+    (def sort-by-date (partial sort #(compare
+                                       (german-date-str-to-ms (first %1))
+                                       (german-date-str-to-ms (first %2)))))
+    (def sort-by-name (partial sort #(compare (second %1) (second %2))))
     (def sort-by-dist (partial sort #(compare
-                                      (unitstr2num (second %1))
-                                      (unitstr2num (second %2)))))
+                                      (unitstr2num (nth %1 2))
+                                      (unitstr2num (nth %2 2)))))
     (def sort-by-match (partial sort #(compare
-                                      (unitstr2num (nth %2 2))
-                                      (unitstr2num (nth %1 2)))))
-
+                                      (unitstr2num (nth %2 3))
+                                      (unitstr2num (nth %1 3)))))
     (def b (sort-by-name a))
     (def b (sort-by-dist a))
     (def b (sort-by-match a))
