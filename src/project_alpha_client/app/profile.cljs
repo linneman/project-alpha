@@ -31,7 +31,7 @@
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.utils :only [send-request get-button-group-value
-                                               set-button-group-value]]))
+                                               set-button-group-value get-element]]))
 
 ;;; the profile page (client side equivalent to profile.html)
 (def profile-pane (dom/get-element "profile-pane"))
@@ -88,12 +88,12 @@
 
   ; --- the tab and the editor pane ---
 
-  (def tabpane (goog.ui.TabPane. (dom/get-element "tabpane1")))
-  (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page1"))))
-  (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page2"))))
-  (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page3"))))
-  (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page4"))))
-  (. tabpane (addPage (TabPane/TabPage. (dom/get-element "page5"))))
+  (def tabpane (goog.ui.TabPane. (get-element "tabpane1" profile-pane)))
+  (. tabpane (addPage (TabPane/TabPage. (get-element "page1" profile-pane))))
+  (. tabpane (addPage (TabPane/TabPage. (get-element "page2" profile-pane))))
+  (. tabpane (addPage (TabPane/TabPage. (get-element "page3" profile-pane))))
+  (. tabpane (addPage (TabPane/TabPage. (get-element "page4" profile-pane))))
+  (. tabpane (addPage (TabPane/TabPage. (get-element "page5" profile-pane))))
 
   ;;; atom for rembering last active tabpane page
   ;;; unfortunately we do not have an event for this

@@ -8,28 +8,28 @@
 
 /* index page 1 (sex, age, location) */
 
-#page1 table {
+#profile-pane #page1 table {
    font-size:1.5em;
    width: 700px;
    padding-top: 20px;
    padding-left: 40px;
 }
 
-#page1 table tr {
+#profile-pane #page1 table tr {
    height: 3.5em;
 }
 
-#page1 table tr th {
+#profile-pane #page1 table tr th {
    color: #663300;
    text-align: right;
 }
 
-#page1 table tr td {
+#profile-pane #page1 table tr td {
    color: #336633;
    padding-left: 40px;
 }
 
-#page1 * .profile-select-field {
+#profile-pane #page1 * .profile-select-field {
     color: green;
     text-align: center;
     font-family: "Chunkfive", serif;
@@ -45,7 +45,7 @@
     -moz-outline: none;
 }
 
-#page1 table * .last-col {
+#profile-pane #page1 table * .last-col {
     width: 40%;
     font-size: 0.7em;
 }
@@ -53,7 +53,7 @@
 
 /* index page 2 (personal writing) */
 
-#page2 {
+#profile-pane #page2 {
     padding-top:20px;
     padding-left:60px;
 }
@@ -64,7 +64,7 @@
   opacity:0;
 }
 
-#editMe {
+#profile-pane #editMe {
     width: 600px;
     height: 300px;
     background-color: white;
@@ -74,76 +74,76 @@
 
 /* index page 3 (questionnaire) */
 
-#page3 {
+#profile-pane #page3 {
     padding-top:20px;
     padding-left:60px;
     padding-right:60px;
 }
 
-#page3 #five-questions-tab {
+#profile-pane #page3 #five-questions-tab {
     width:100%;
     border: 1px solid black;
     border-collapse:collapse;
 }
 
-#page3 #five-questions-tab * {
+#profile-pane #page3 #five-questions-tab * {
     border-bottom: 1px solid black;
 }
 
-#page3 #five-questions-tab .sel {
+#profile-pane #page3 #five-questions-tab .sel {
     width:100px;
     text-align:center;
 }
 
-#page3 #five-questions-tab .bar {
+#profile-pane #page3 #five-questions-tab .bar {
     border-right: 1px solid black;
 }
 
-#page3 #five-questions-tab #first-row {
+#profile-pane #page3 #five-questions-tab #first-row {
     background-color:#B77;
 }
 
-#page3 #five-questions-tab #odd-row {
+#profile-pane #page3 #five-questions-tab #odd-row {
     background-color:#9B9;
 }
 
-#page3 #five-questions-tab #even-row {
+#profile-pane #page3 #five-questions-tab #even-row {
     background-color:#99B;
 }
 
 
 /* index page 4 (favorites) */
 
-#page4 #fav_books, #page4 #fav_movies {
+#profile-pane #page4 #fav_books, #page4 #fav_movies {
     width:100%;
     font-size: 1.0em;
 }
 
-#page4 * .author-col {
+#profile-pane #page4 * .author-col {
     width:30%;
 }
 
-#page4 * .title-col {
+#profile-pane #page4 * .title-col {
     width:70%;
 }
 
-#page4 {
+#profile-pane #page4 {
   padding-top: 20px;
 }
 
 #page4 #fav_books * .user_fav_auth_field,
-#page4 #fav_movies * .user_fav_director_field {
+#profile-pane #page4 #fav_movies * .user_fav_director_field {
  width:90%;
  font-size: 1.0em;
 }
 
 #page4 #fav_books * .user_fav_book_field,
-#page4 #fav_movies * .user_fav_movie_field {
+#profile-pane #page4 #fav_movies * .user_fav_movie_field {
  width:100%;
  font-size: 1.0em;
 }
 
-#page4 .fav_diag_frame {
+#profile-pane #page4 .fav_diag_frame {
     background-color:#BBCFBB;
     margin-top:10px;
     margin-bottom:15px;
@@ -156,7 +156,7 @@
     border-radius:10px;
 }
 
-#profile_request_progress {
+#profile-pane #profile_request_progress {
     position:absolute;
     width:100%;
     height:100%;
@@ -166,12 +166,12 @@
     opacity:1;
 }
 
-#profile_request_progress h3 {
+#profile-pane #profile_request_progress h3 {
     text-align:center;
     margin-top:15%;
 }
 
-#profile_request_progress img {
+#profile-pane #profile_request_progress img {
     position:absolute;
     left:50%;
     top:50%;
