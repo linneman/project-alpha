@@ -55,39 +55,66 @@
                           (loginfo (str "detail button pressed for user id: " data)))))
 
 
-  ;; the result table object is initialized later one to avoid
+  ;; the result table objects are initialized when firstly clicked
   ;; too high initial delay
-  (def sortable-result-table-atom (atom nil))
+  (def result-table-atom (atom nil))
+  (def favorite-table-atom (atom nil))
 
-  (defn- render-result-pane [force-update]
+
+  (defn- render-table
+    [table-id controller-id data]
+    (init-sortable-search-result-table controller-id table-id data 10
+     {"sort-by-date" (partial sort #(compare
+                                     (german-date-str-to-ms (first %1))
+                                     (german-date-str-to-ms (first %2))))
+      "sort-by-name" (partial sort #(compare (second %1) (second %2)))
+      "sort-by-dist" (partial sort #(compare
+                                     (unitstr2num (nth %1 2))
+                                     (unitstr2num (nth %2 2))))
+      "sort-by-match" (partial sort #(compare
+                                      (unitstr2num (nth %2 3))
+                                      (unitstr2num (nth %1 3))))}))
+
+
+  (defn- request-result-pane [force-update]
     (when force-update
-      (when @sortable-result-table-atom
-        (release-sortable-search-result-table @sortable-result-table-atom))
-      (reset! sortable-result-table-atom nil))
-    (when-not @sortable-result-table-atom
-      (reset! sortable-result-table-atom
-              (init-sortable-search-result-table
-               "search-result-controller"
-               "search-result-table" (create-test-data) 10
-               {"sort-by-date" (partial sort #(compare
-                                               (german-date-str-to-ms (first %1))
-                                               (german-date-str-to-ms (first %2))))
-                "sort-by-name" (partial sort #(compare (second %1) (second %2)))
-                "sort-by-dist" (partial sort #(compare
-                                               (unitstr2num (nth %1 2))
-                                               (unitstr2num (nth %2 2))))
-                "sort-by-match" (partial sort #(compare
-                                                (unitstr2num (nth %2 3))
-                                                (unitstr2num (nth %1 3))))})))
-    (style/showElement (dom/get-element "search_request_progress") false))
+      (when @result-table-atom
+        (release-sortable-search-result-table @result-table-atom)
+        (reset! result-table-atom nil)))
+    (when-not @result-table-atom
+      (style/showElement (dom/get-element
+                          "search_request_progress") true)
+      (timer/callOnce ; later on XHTTP
+       (fn []
+         (reset! result-table-atom
+                 (render-table
+                  "search-result-table"
+                  "search-result-controller"
+                  (create-test-data)))
+         (style/showElement (dom/get-element
+                             "search_request_progress") false))
+       10)))
 
 
-  (defn- render-favorites-pane [force-update]
-    (style/showElement (dom/get-element "search_request_progress") false))
+  (defn- request-favorite-pane [force-update]
+    (when force-update
+      (when @favorite-table-atom
+        (release-sortable-search-result-table @favorite-table-atom)
+        (reset! favorite-table-atom nil)))
+    (when-not @favorite-table-atom
+      (style/showElement (dom/get-element
+                          "search_request_progress") true)
+      (timer/callOnce ; later on XHTTP
+       (fn []
+         (reset! favorite-table-atom
+                 (render-table
+                  "favorite-table"
+                  "favorite-controller"
+                  (take 15 (create-test-data))))
+         (style/showElement (dom/get-element
+                             "search_request_progress") false))
+       10)))
 
-
-  (defn- render-setup-pane []
-    (style/showElement (dom/get-element "search_request_progress") false))
 
 
   ; --- the tab pane ---
@@ -119,11 +146,10 @@
     "renders the selected pane. This is done when pane is clicked first
      to avoid too long initial delay"
     [pane-id-str]
-    (style/showElement (dom/get-element "search_request_progress") true)
     (condp = pane-id-str
-      "favorites" (render-favorites-pane false)
-      "search-results" (timer/callOnce #(render-result-pane false) 10) ; later on XHTTP
-      "search-setup" (render-setup-pane)))
+      "favorites" (request-favorite-pane false)
+      "search-results" (request-result-pane false)
+      "search-setup" (loginfo "search-setup")))
 
 
   (def search-tab-changed-reactor
@@ -141,8 +167,8 @@
   (comment use the method below to release resources
 
     (dispatch/delete-reaction search-tab-changed-reactor)
-    (release-sortable-search-result-table @sortable-result-table-atom)
-    (reset! sortable-result-table-atom nil)
+    (release-sortable-search-result-table @result-table-atom)
+    (reset! result-table-atom nil)
 
     )
 

@@ -307,10 +307,6 @@
                (. % (setEnabled true)))) buttons))))
 
 
-                                        ;(def a (update-table-contoller-button-state "search-result-controller" 15))
-                                        ;(def b (first a))
-                                        ;(. b -evt-params)
-
 
 (defn- get-table-controller-reactor
   "creates event reactor for the controlling a

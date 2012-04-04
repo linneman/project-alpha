@@ -4,16 +4,16 @@
 
   <div id="search-results">
     <h2>Kontakte finden</h2>
-    <table id="search-result-table" border cellpadding="3">
+    <table id="search-result-table" class="result-table">
       <tr id="header-row">
-	<th class="name" id="sort-by-date">Dabei seit</th>
+	<th class="date" id="sort-by-date">Dabei seit</th>
 	<th class="name" id="sort-by-name">Name</th>
 	<th class="dist" id="sort-by-dist">ungefäre Entfernung</th>
 	<th class="match" id="sort-by-match">Übereinstimmung</th>
 	<th class="details"></th>
       </tr>
       <tr id="prototype-row">
-	<td class="name" id="col1"></td>
+	<td class="date" id="col1"></td>
 	<td class="name" id="col2"></td>
 	<td class="dist" id="col3"></td>
 	<td class="match" id="col4"></td>
@@ -21,7 +21,7 @@
       </tr>
     </table>
 
-    <table id="search-result-controller">
+    <table id="search-result-controller" class="result-controller">
       <tr id="prototype-row">
 	<td class="col" id="col1"></td>
 	<td class="col" id="col2"></td>
@@ -39,7 +39,37 @@
 
   <div id="favorites">
     <h2>Favoriten</h2>
-    <p>in Arbeit ...</p>
+    <table id="favorite-table" class="result-table">
+      <tr id="header-row">
+	<th class="date" id="sort-by-date">Dabei seit</th>
+	<th class="name" id="sort-by-name">Name</th>
+	<th class="dist" id="sort-by-dist">ungefäre Entfernung</th>
+	<th class="match" id="sort-by-match">Übereinstimmung</th>
+	<th class="details"></th>
+      </tr>
+      <tr id="prototype-row">
+	<td class="date" id="col1"></td>
+	<td class="name" id="col2"></td>
+	<td class="dist" id="col3"></td>
+	<td class="match" id="col4"></td>
+	<td class="details" id="col5"></td>
+      </tr>
+    </table>
+
+    <table id="favorite-controller" class="result-controller">
+      <tr id="prototype-row">
+	<td class="col" id="col1"></td>
+	<td class="col" id="col2"></td>
+	<td class="col" id="col3"></td>
+	<td class="col" id="col4"></td>
+	<td class="col" id="col5"></td>
+	<td class="col" id="col6"></td>
+	<td class="col" id="col7"></td>
+	<td class="col" id="col8"></td>
+	<td class="col" id="col9"></td>
+	<td class="col" id="col10"></td>
+      </tr>
+    </table>
   </div>
 
   <div id="search-setup">
