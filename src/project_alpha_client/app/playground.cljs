@@ -26,11 +26,22 @@
             [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
             [goog.ui.Dialog :as Dialog]
             [goog.Timer :as timer])
-  (:use [project-alpha-client.lib.logging :only [loginfo]]))
+  (:use [project-alpha-client.lib.logging :only [loginfo]])
+  (:use-macros [macros.macros :only [hash-args]]))
 
 
 (def current-url (js* "document.URL"))
 (loginfo (str "CURRENT-URL: " current-url))
+
+
+;; illustration of macro usage
+
+(def h (let [a (fn [] "hello world!")
+             b (fn [] "another function")
+             c (fn [] 43)]
+         (hash-args a b c)))
+
+(loginfo (str "macro test: " ((:a h))))
 
 
 

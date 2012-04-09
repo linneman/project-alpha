@@ -13,4 +13,5 @@
                  [org.clojure/data.json "0.1.1"]
                  [org.apache.commons/commons-email "1.2"]]
   :dev-dependencies [[lein-clojurescript "1.1.0"]]
+  :extra-classpath-dirs ["src"]
   :main project-alpha-server.app.core)
