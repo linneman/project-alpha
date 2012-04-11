@@ -147,26 +147,30 @@
              dispatched-event
              dispatched-data
              keep-open]}]
-  (let [dialog (setup-modal-dialog-panel panel-id)
-        ok-button (goog.ui.decorate (dom/get-element ok-button-id))]
+  (let [dialog (setup-modal-dialog-panel panel-id)]
     (when title-id
       (. dialog (setTitle
                  (goog.dom.getTextContent (dom/get-element title-id)))))
     (. dialog (setButtonSet js/null))
     (set! (. dialog -panel-id) panel-id)
-    (. ok-button (setEnabled true))
-    (events/listen ok-button "action"
-                   #(do
-                      (when-not keep-open (. dialog (setVisible false)))
-                      (dispatch/fire dispatched-event dispatched-data)))
     (events/listen dialog "afterhide"
                    #(dispatch/fire :dialog-closed panel-id))
-    (if cancel-button-id
-      (let [cancel-button (goog.ui.decorate (dom/get-element cancel-button-id))]
-        (events/listen cancel-button "action" #(. dialog (setVisible false)))
-        (. cancel-button (setEnabled true))
-        [dialog ok-button cancel-button])
-      [dialog ok-button])))
+    (let [cancel-button
+          (when cancel-button-id
+            (let [button (goog.ui.decorate (dom/get-element cancel-button-id))]
+              (events/listen button "action" #(. dialog (setVisible false)))
+              (. button (setEnabled true))
+              button))
+          ok-button
+          (when ok-button-id
+            (let [button (goog.ui.decorate (dom/get-element ok-button-id))]
+              (events/listen button "action"
+                             #(do
+                                (when-not keep-open (. dialog (setVisible false)))
+                                (dispatch/fire dispatched-event dispatched-data)))
+              (. button (setEnabled true))
+              button))]
+      [dialog ok-button cancel-button])))
 
 
 (defn open-modal-dialog
