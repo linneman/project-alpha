@@ -14,6 +14,7 @@
             [project-alpha-client.app.nav :as nav]
             [project-alpha-client.lib.json :as json]
             [project-alpha-client.lib.editor :as editor]
+            [project-alpha-client.app.user-details-dialog :as user-details]
             [clojure.browser.dom :as dom]
             [clojure.string :as string]
             [goog.dom :as gdom]
@@ -23,6 +24,7 @@
             [goog.ui.ButtonRenderer :as ButtonRenderer]
             [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
             [goog.ui.TabPane :as TabPane]
+            [goog.ui.Dialog :as Dialog]
             [goog.Timer :as timer]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.table-controller
@@ -31,8 +33,9 @@
                 render-table-button
                 create-test-data]]
         [project-alpha-client.lib.logging :only [loginfo]]
-        [project-alpha-client.lib.utils :only [send-request get-element
-                                               init-alpha-button get-element]]))
+        [project-alpha-client.lib.utils
+         :only [get-modal-dialog open-modal-dialog
+                send-request get-element init-alpha-button]]))
 
 
 ;;; the profile page (client side equivalent to index.html)
@@ -52,7 +55,10 @@
   (def user-details-reactor (dispatch/react-to
                         #{:show-user-details}
                         (fn [evt data]
-                          (loginfo (str "detail button pressed for user id: " data)))))
+                          (loginfo (str "detail button pressed for user id: " data))
+                          (user-details/render-sample-user)
+                          (user-details/open-dialog 100 :is-in-fav-list true)
+                          )))
 
 
   ;; the result table objects are initialized when firstly clicked
@@ -90,7 +96,7 @@
                  (render-table
                   "search-result-table"
                   "search-result-controller"
-                  (create-test-data)))
+                  (take 30 (create-test-data))))
          (style/showElement (dom/get-element
                              "search_request_progress") false))
        10)))
@@ -170,7 +176,11 @@
     (release-sortable-search-result-table @result-table-atom)
     (reset! result-table-atom nil)
 
-    )
+    (user-details/open-dialog 100 :is-in-fav-list true)
+    (user-details/render-sample-user)
+
+    ) ; end of comment
+
 
 
 ) ; (when search-pane

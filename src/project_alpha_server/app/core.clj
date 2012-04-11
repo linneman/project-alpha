@@ -110,6 +110,11 @@
       (json-str (select-keys data [:name :email :id :level :confirmed]))
       (json-str {}))))
 
+(def ^{:private true :doc "provides templates which are used for all sites"}
+  standard-pages
+  ["login.html" "nav.html" "index.html" "status.html" "profile.html" "search.html"
+   "user_details_dialog.html" "imprint.html"])
+
 (compojure/defroutes main-routes
   ;; --- authentification and registration ---
   (POST login-post-uri args (login args))
@@ -119,14 +124,14 @@
   (POST "/set_password" args (set-password args))
   (GET ["/user/:name" :name #".*"] [name] (let [name (url-decode name)] (user-response name)))
   ;; --- static html (composed out of outer layout side and inner content pane ---
-  (GET "/index.html" _ (site "register.html" "login.html" "nav.html" "index.html" "status.html" "profile.html" "search.html" "imprint.html"))
-  (GET "/status.html" _ (site "login.html" "nav.html" "index.html" "status.html" "profile.html" "search.html" "imprint.html"))
-  (GET "/profile.html" _ (site "login.html" "nav.html" "index.html" "status.html" "profile.html" "search.html" "imprint.html"))
-  (GET "/search.html" _ (site "login.html" "nav.html" "index.html" "status.html" "profile.html" "search.html" "imprint.html"))
-  (GET "/imprint.html" _ (site "login.html" "nav.html" "index.html" "status.html" "profile.html" "search.html" "imprint.html"))
+  (GET "/index.html" _ (apply site "register.html" standard-pages))
+  (GET "/status.html" _ (apply site standard-pages))
+  (GET "/profile.html" _ (apply site standard-pages))
+  (GET "/search.html" _ (apply site standard-pages))
+  (GET "/imprint.html" _ (apply site standard-pages))
   (GET "/confirm" args (confirm args "index.html"))
   (GET "/reset_pw_conf" args (confirm args "reset_pw.html"))
-  (GET "/reset_pw.html" _ (site "register.html" "login.html" "index.html" "nav.html" "status.html" "reset_pw.html"))
+  (GET "/reset_pw.html" _ (apply site "register.html" "reset_pw.html" standard-pages))
   ;; --- json handlers ---
   (GET "/status" _ "server-running")
   (GET "/session" args (str "<body>" args "</body>"))
@@ -137,6 +142,7 @@
   (route/resources "/")
   (route/not-found "Page not found"))
 
+
 (def app
   (-> main-routes
       (wrap-authentication login-get-uri [login-post-uri register-get-uri register-post-uri "/user" "/confirm" "/reset_pw_req" "/reset_pw_conf"])
@@ -144,6 +150,7 @@
       json-params/wrap-json-params
       wrap-multipart-params
       handler/api))
+
 
 (defonce server (jetty/run-jetty #'app
                                  {:port 3000 :join? false}))
