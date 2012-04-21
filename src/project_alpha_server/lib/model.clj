@@ -18,7 +18,8 @@
             [project-alpha-server.local-settings :as setup])
   (:use [ring.middleware.session.store :only [SessionStore]]
         [project-alpha-server.lib.crypto :only
-         [get-secret-key get-encrypt-pass-and-salt hash-password]]))
+         [get-secret-key get-encrypt-pass-and-salt hash-password]]
+        [macros.macros]))
 
 ;; The database connection
 ;; argument for sql requests
@@ -160,19 +161,18 @@
 
 (defn add-user
   "add a new user"
-  [& {:keys [name email password level confirmed confirmation_link]
-      :or {level 0 confirmed false
-           confirmation_link "undefined"}}]
+  [& {:keys [name email password level confirmed confirmation_link created_at]
+      :or {level 0
+           confirmed false
+           confirmation_link "undefined"
+           created_at (java.util.Date.)}}
+   ]
   (let [{:keys [password salt]} (get-encrypt-pass-and-salt password)]
-    (sql/insert users (sql/values
-                       {:name name
-                        :email email
-                        :password password
-                        :salt salt
-                        :level level
-                        :confirmed confirmed
-                        :confirmation_link confirmation_link
-                        :created_at (java.util.Date.)}))))
+    (sql/insert
+     users (sql/values
+            (hash-args name email password salt
+                       level confirmed confirmation_link
+                       created_at)))))
 
 (defn find-user
   "finds user with given keys"
@@ -234,7 +234,8 @@
   usage illustration
 
   (add-user :name "Otto" :email "linneman@gmx.de" :password "secret")
-  (add-user :name "Konrad" :email "Konrad.Linnemann@google.de" :password "secret")
+  (add-user :name "Konrad" :email "Konrad.Linnemann@google.de" :password "secret"
+            :created_at (java.util.Date. 71 8 2))
   (change-user-password "mynewpassword" {:name "Otto"})
   (check-user-password "mynewpassword" "Otto")
   (check-user-password "mynewpassword" "linneman@gmx.de")
