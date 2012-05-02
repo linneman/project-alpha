@@ -16,9 +16,9 @@
   (:require [korma.db :as db]
             [korma.core :as sql]
             [clojure.java.jdbc :as jdbc]
-            [project-alpha-server.local-settings :as setup])
-  (:use [project-alpha-server.lib.model]
-        [clojure.data.json :only [json-str write-json read-json]]
+            [project-alpha-server.local-settings :as setup]
+            [clojure.string :as string])
+  (:use [clojure.data.json :only [json-str write-json read-json]]
         [project-alpha-server.lib.utils]))
 
 
@@ -27,20 +27,90 @@
 (def opengeodb-con (db/mysql setup/sql-connection-opengeodb-de))
 
 
-
 ;;; --- utility functions ---
+;;; (opengeodb-de is required)
 
 (defn opengeo-sqlreq
-  "sends an sql request to the database
-   example:
-    (sqlreq 'select count(*) from users')"
+  "sends an sql request to the database"
   [req]
   (jdbc/with-connection opengeodb-con
     (jdbc/with-query-results rs
       [req]
       (doall rs))))
 
+(defn opengeo-sqltact
+  "trigger sql transaction"
+  [transaction]
+  (jdbc/with-connection opengeodb-con
+    (jdbc/transaction (transaction))))
 
+(defn opengeo-sqltcmd
+  "trigger sql transaction"
+  [cmd]
+  (jdbc/with-connection opengeodb-con
+    (jdbc/do-commands cmd)))
+
+(defn create-geodb-table
+  "Create table with given spec"
+  [table & spec]
+  (opengeo-sqltact #(apply jdbc/create-table (conj spec table))))
+
+(defn drop-geodb-table
+  "Drop the specified table"
+  [table]
+  (jdbc/with-connection opengeodb-con
+    (jdbc/transaction
+     (try
+       (clojure.java.jdbc/drop-table table)
+       (catch Exception _)))))
+
+;; -- database setup  --
+
+(defn create-table-zip-coordinates
+  "create table for zip coordinates"
+  []
+  (create-geodb-table
+   :zip_coordinates
+   [:zc_id :integer "NOT NULL" "PRIMARY KEY" "AUTO_INCREMENT"]
+   [:zc_loc_id :integer "NOT NULL"]
+   [:zc_zip "varchar(10)" "NOT NULL"]
+   [:zc_location_name "varchar(255)" "NOT NULL"]
+   [:zc_lat :double "NOT NULL"]
+   [:zc_lon :double "NOT NULL"]
+   ))
+
+(defn import-table-zip-coordinates
+  "inserts required values into table zip-coordinates"
+  []
+  (opengeo-sqltcmd
+   "INSERT INTO zip_coordinates (zc_loc_id, zc_zip, zc_location_name, zc_lat, zc_lon)
+      SELECT gl.loc_id, plz.text_val, name.text_val, coord.lat, coord.lon
+         FROM geodb_textdata plz
+         LEFT JOIN geodb_textdata name ON name.loc_id = plz.loc_id
+         LEFT JOIN geodb_locations gl ON gl.loc_id = plz.loc_id
+         LEFT JOIN geodb_coordinates coord ON plz.loc_id = coord.loc_id
+         LEFT JOIN geodb_intdata data ON plz.loc_id = data.loc_id
+         WHERE plz.text_type =500300000
+         AND name.text_type =500100000
+         AND gl.loc_type =100600000
+         AND data.int_type =600700000;"))
+
+
+
+(comment
+  ;; Zip - Coordinate table must be created
+  (create-table-zip-coordinates)
+
+  ;; and appropriate values must be inserted
+  ;; for vicinity search
+  (import-table-zip-coordinates)
+
+  ;; drops the table
+  (drop-geodb-table :zip_coordinates)
+  )
+
+
+;;; --- API ---
 
 (defn- get-location
   "retrieves the location entry with the highest population
@@ -58,6 +128,7 @@
          LEFT JOIN geodb_coordinates coord ON plz.loc_id = coord.loc_id
          LEFT JOIN geodb_intdata data ON plz.loc_id = data.loc_id
          WHERE plz.text_type =500300000
+
          AND plz.text_val LIKE '%s%%'
          AND name.text_type =500100000
          AND gl.loc_type =100600000
@@ -110,3 +181,55 @@
   (def marburg "350")
   (def giessen "353")
   (calc-dist-zip giessen marburg))
+
+
+
+(defn get-vicinity-to-pos
+  "requests all zip-positions to the vicinity of a
+   given position and distance. For each hit the
+   locations zip code, the locations name and the
+   distance to the given position is returned."
+  [lon lat dist]
+  (let [req "SELECT
+               zc_zip,
+               zc_location_name,
+               ACOS(
+                    SIN(RADIANS(zc_lat)) * SIN(RADIANS($lat))
+                    + COS(RADIANS(zc_lat)) * COS(RADIANS($lat)) * COS(RADIANS(zc_lon)
+                    - RADIANS($lon))
+                    ) * 6380 AS distance
+               FROM zip_coordinates
+               WHERE ACOS(
+                    SIN(RADIANS(zc_lat)) * SIN(RADIANS($lat))
+                    + COS(RADIANS(zc_lat)) * COS(RADIANS($lat)) * COS(RADIANS(zc_lon)
+                    - RADIANS($lon))
+                    ) * 6380 < $dist
+               ORDER BY distance;"
+        req (string/replace req "$lon" (str lon))
+        req (string/replace req "$lat" (str lat))
+        req (string/replace req "$dist" (str dist))
+        ]
+    (opengeo-sqlreq req)
+    ))
+
+
+(defn get-vicinity-to-zip
+  "requests all zip-positions to the vicinity of a
+   given zip code distance. For each hit the
+   locations zip code, the locations name and the
+   distance to the given position is returned."
+  [zip distance]
+  (let [{:keys [user_lon user_lat]} (get-location-for-zip zip)]
+    (get-vicinity-to-pos user_lon user_lat distance)))
+
+
+(comment
+
+  (get-vicinity-to-pos 8.7 50.5167 10) ; giessen
+  (get-vicinity-to-zip "354" 10) ; giessen
+
+  )
+
+
+
+

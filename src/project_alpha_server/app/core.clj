@@ -26,6 +26,7 @@
         [project-alpha-server.app.model]
         [project-alpha-server.lib.auth]
         [project-alpha-server.lib.utils]
+        [project-alpha-server.app.find-users]
         [clojure.pprint :only [pprint]]
         [clojure.data.json :only [json-str write-json read-json]]
         ))
