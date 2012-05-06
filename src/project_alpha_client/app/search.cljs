@@ -71,8 +71,8 @@
     [table-id controller-id data]
     (init-sortable-search-result-table controller-id table-id data 10
      {"sort-by-date" (partial sort #(compare
-                                     (german-date-str-to-ms (first %1))
-                                     (german-date-str-to-ms (first %2))))
+                                     (german-date-str-to-ms (first %2))
+                                     (german-date-str-to-ms (first %1))))
       "sort-by-name" (partial sort #(compare (second %1) (second %2)))
       "sort-by-dist" (partial sort #(compare
                                      (unitstr2num (nth %1 2))
@@ -81,8 +81,48 @@
                                       (unitstr2num (nth %2 3))
                                       (unitstr2num (nth %1 3))))}))
 
+  (defn create-resp-data
+    "creates test data for usage illustration of table-controller functions"
+    [resp]
+    (let [data (json/parse resp)]
+      (doall
+       (map #(let [id (first %)
+                   name ((second %) "name")
+                   created-at ((second %) "created_at")
+                   match-variance ((second %) "match_variance")
+                   distance ((second %) "distance")]
+               (vector created-at  name (str distance "km")
+                       (str match-variance "%")
+                       (partial render-table-button
+                                (str "id-" id) :show-user-details (str id))))
+            data))))
+
 
   (defn- request-result-pane [force-update]
+    "retrieves all matching users and updates table view controller"
+    (when force-update
+      (when @result-table-atom
+        (release-sortable-search-result-table @result-table-atom)
+        (reset! result-table-atom nil)))
+    (when-not @result-table-atom
+      (style/showElement (dom/get-element
+                          "search_request_progress") true)
+      (send-request "/user-matches"
+                    { "key1" "data1"}
+                    (fn [ajax-evt]
+                      (let [resp (. (. ajax-evt -target) (getResponseText))]
+                        (reset! result-table-atom
+                                (render-table
+                                 "search-result-table"
+                                 "search-result-controller"
+                                 (create-resp-data resp))))
+                      (style/showElement (dom/get-element
+                                          "search_request_progress") false))
+                    )))
+
+  (defn- request-result-panet-test [force-update]
+    "updates table view controller with some test data
+     (development purposes)"
     (when force-update
       (when @result-table-atom
         (release-sortable-search-result-table @result-table-atom)
@@ -100,6 +140,22 @@
          (style/showElement (dom/get-element
                              "search_request_progress") false))
        10)))
+
+
+  (comment
+    "here we are going to connect the client request and the servers
+     repson ..."
+    (send-request "/user-matches"
+                  { "key1" "data1"}
+                  (fn [ajax-evt]
+                    (let [resp (. (. ajax-evt -target) (getResponseText))]
+                      (loginfo resp)
+                      (def resp resp)))
+                  "GET")
+
+    (create-resp-data resp)
+
+    )
 
 
   (defn- request-favorite-pane [force-update]

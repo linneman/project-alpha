@@ -171,6 +171,19 @@
    sql-res))
 
 
+(defn- sql-resp-transform-to-german-date
+  "trim date string to year-month-day"
+  [sql-res]
+  (map
+   #(assoc-in % [:created_at]
+              (let [us-date-str (str (% :created_at))
+                    year (. us-date-str substring 0 4)
+                    month (. us-date-str substring 5 7)
+                    day (. us-date-str substring 8 10)]
+                (str day "." month "." year)))
+   sql-res))
+
+
 (defn- sql-resp-transform-variance
   "express match variance in percent"
   [sql-res]
@@ -182,10 +195,27 @@
      sql-res)))
 
 
-(defn- sql-resp-to-json
-  "transform keywords to strings (json)"
+(defn- sql-resp-transform-dist
+  "round distance to kilometers"
   [sql-res]
-  (map clj2json-hash sql-res))
+  (map
+   #(assoc-in % [:distance] (Math/round (% :distance)))
+   sql-res))
+
+
+(comment "deprecated"
+
+  (defn- sql-resp-to-json
+    "transform keywords to strings (json)"
+    [sql-res]
+    (map clj2json-hash sql-res))
+
+  (defn- sql-resp-2-hash-by-id-old
+    "transforns the sql response data set to a hash set
+   where the id is assigned to the key and all other
+   entries are assigned to the values."
+    [sql-res]
+    (reduce #(assoc %1 (%2 "id") (dissoc %2 "id")) {} sql-res)))
 
 
 (defn- sql-resp-2-hash-by-id
@@ -193,17 +223,17 @@
    where the id is assigned to the key and all other
    entries are assigned to the values."
   [sql-res]
-  (reduce #(assoc %1 (%2 "id") (dissoc %2 "id")) {} sql-res))
-
+  (reduce #(assoc %1 (%2 :id) (dissoc %2 :id)) {} sql-res))
 
 (defn- transform-sql-resp
   "transform sql response to application specific json
    object"
   [sql-res]
   (-> sql-res
-      sql-resp-transform-date
+      ;sql-resp-transform-date
+      sql-resp-transform-to-german-date
       sql-resp-transform-variance
-      sql-resp-to-json
+      sql-resp-transform-dist
       sql-resp-2-hash-by-id))
 
 

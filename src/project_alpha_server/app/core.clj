@@ -139,6 +139,8 @@
   (GET "/counter" args (session-counter args))
   (POST "/profile" {params :params session :session} (do (println (json2clj-hash params)) (update-profile (:id session) (json2clj-hash params)) "OK"))
   (GET "/profile" {session :session} (json-str (dissoc (get-profile (:id session)) :modified)))
+  (GET "/user-matches" {session :session} (json-str (find-all-matches :user-id 6)))
+  ;(GET "/user-matches" {session :session} (json-str {:otto :hallo}))
   (GET "/" _ (forward-url "/index.html"))
   (route/resources "/")
   (route/not-found "Page not found"))
