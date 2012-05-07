@@ -291,6 +291,17 @@
                    ; (loginfo (json/generate {"text" (. editor (getCleanContents))}))
                    (post-as-json (get-text-content))))
 
+
+  (comment "check evil hacks"
+
+           (post-as-json {"text" "<a href=\"javascript:alert('oh now')\">javascript</a>"})
+           (post-as-json {"text" "<script type=\"text/javascript\">alert('oh now');</script>"})
+           (post-as-json {"text" "<SCRIPT type=\"text/javascript\">alert('oh now');</SCRIPT>"})
+           (post-as-json {"text" "Otto Linnemann"})
+
+    )
+
+
   (events/listen tabpane goog.ui.TabPane.Events.CHANGE
                  (fn [e] (let [idx (. (. e -page) (getIndex))
                                id-str (. (. (. tabpane (getPage idx))

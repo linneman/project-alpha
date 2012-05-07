@@ -14,22 +14,21 @@
             [compojure.handler :as handler]
             [net.cgrand.enlive-html :as html]
             [project-alpha-server.local-settings :as setup]
-            [swank.swank]
-            )
+            [swank.swank])
   (:use [compojure.core :only [GET POST PUT DELETE]]
         [ring.util.response :only [response]]
         [ring.util.codec :only [url-decode url-encode]]
         [ring.middleware.session :only [wrap-session]]
         [ring.middleware.cookies :only [wrap-cookies]]
         [ring.middleware.multipart-params :only [wrap-multipart-params]]
+        [project-alpha-server.app.escape-handlers]
         [project-alpha-server.lib.model]
         [project-alpha-server.app.model]
         [project-alpha-server.lib.auth]
         [project-alpha-server.lib.utils]
         [project-alpha-server.app.find-users]
         [clojure.pprint :only [pprint]]
-        [clojure.data.json :only [json-str write-json read-json]]
-        ))
+        [clojure.data.json :only [json-str write-json read-json]]))
 
 
 (def ^{:private true
@@ -61,6 +60,7 @@
        :doc "register resource address for post registration data"}
   register-post-uri
   "/register")
+
 
 (defn log-request-handler
   [handler]
@@ -148,6 +148,7 @@
 
 (def app
   (-> main-routes
+      anti-xss-handler
       (wrap-authentication login-get-uri [login-post-uri register-get-uri register-post-uri "/user" "/confirm" "/reset_pw_req" "/reset_pw_conf"])
       (wrap-session {:store (db-session-store) :cookie-attrs {:max-age setup/cookie-max-age}})
       json-params/wrap-json-params
