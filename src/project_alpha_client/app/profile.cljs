@@ -186,6 +186,36 @@
     )
 
 
+
+  ; --- html formatters for image adjustment ---
+
+  (defn- filter-image-urls
+    "returns a list with all image url's"
+    [txt]
+    (let [res (re-seq #"(<img)(.*?)(src=\")([^\"]*)(\")" txt)]
+      (map #(nth % 4) res)))
+
+
+  (defn- adjust-images
+    "resizes and adjusts all images inside an html string"
+    [txt]
+    (let [image-urls (filter-image-urls txt)
+          no-image-txt (string/replace txt #"<img[^>]*>" "")
+          images (map #(str "<img src=\"" %
+                            "\" width=\"200\" align=\"right\" style=\"clear:both\">")
+                      image-urls)]
+      (str
+       (apply str images)
+       no-image-txt)
+    ))
+
+
+  (comment usage-illustration
+    (adjust-images "<p>hello world</p> <img  src=\"http://central-services.dnsdojo.org/test.jpg\">
+              <img src=\"http://central-services.dnsdojo.org/test2.jpg\"> <p>etc. etc.</p>")
+    )
+
+
   ; --- getters for ajax POST ---
 
   (defn get-text-content
@@ -195,8 +225,9 @@
      that the text is lost when the browser
      tab is closed."
     []
-    (let [text (. editor (getCleanContents))]
-      (if text {"text" text})))
+    (when-let [text (. editor (getCleanContents))]
+      (let [text (adjust-images text)]
+        {"text" text})))
 
 
   (defn get-age-and-sex-content
