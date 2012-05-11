@@ -111,10 +111,19 @@
       (json-str (select-keys data [:name :email :id :level :confirmed]))
       (json-str {}))))
 
+(defn- profile-resp-for
+  "delivers ajax response for profile request for given id"
+  [id]
+  (let [prof (dissoc (get-profile id) :modified)
+        name ((first (find-user-by-id id)) :name)]
+    (json-str (merge prof {:name name}))))
+
+
 (def ^{:private true :doc "provides templates which are used for all sites"}
   standard-pages
   ["login.html" "nav.html" "index.html" "status.html" "profile.html" "search.html"
    "user_details_dialog.html" "imprint.html"])
+
 
 (compojure/defroutes main-routes
   ;; --- authentification and registration ---
@@ -138,7 +147,8 @@
   (GET "/session" args (str "<body>" args "</body>"))
   (GET "/counter" args (session-counter args))
   (POST "/profile" {params :params session :session} (do (println (json2clj-hash params)) (update-profile (:id session) (json2clj-hash params)) "OK"))
-  (GET "/profile" {session :session} (json-str (dissoc (get-profile (:id session)) :modified)))
+  (GET "/profile" {session :session} (profile-resp-for (:id session)))
+  (GET "/profile/:id" {params :route-params} (profile-resp-for (:id params)))
   (GET "/user-matches" {session :session} (json-str (find-all-matches :user-id 6)))
   ;(GET "/user-matches" {session :session} (json-str {:otto :hallo}))
   (GET "/" _ (forward-url "/index.html"))

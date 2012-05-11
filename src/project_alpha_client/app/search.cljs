@@ -56,8 +56,9 @@
                         #{:show-user-details}
                         (fn [evt data]
                           (loginfo (str "detail button pressed for user id: " data))
-                          (user-details/render-sample-user)
-                          (user-details/open-dialog 100 :is-in-fav-list true)
+                          ;(user-details/render-sample-user)
+                          (user-details/render-user-with-id data)
+                          (user-details/open-dialog data :is-in-fav-list true)
                           )))
 
 

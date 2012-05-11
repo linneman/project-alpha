@@ -119,6 +119,18 @@
           sample-user-desc (str title sample-user-pic-url long-par many-lines)]
       (render-user-data user-details-dialog sample-user-desc)))
 
+  (defn render-user-with-id
+    [id]
+    (send-request (str "/profile/" id)
+                  ""
+                  (fn [ajax-evt]
+                    (let [resp (. (. ajax-evt -target) (getResponseText))
+                          user-data (json/parse resp)
+                          title (str "<h2>Profildata zu Nutzer " (user-data "name") "</h2>")
+                          descr (user-data "text")]
+                      (render-user-data user-details-dialog (str title descr))))
+                  "GET"))
+
 
   (comment
 
@@ -126,7 +138,9 @@
 
     (open-dialog 100 :is-in-fav-list true)
     (render-sample-user)
+    (render-user-with-id 50)
     (close-user-details-dialog user-details-dialog)
+
 
     )
 
