@@ -25,3 +25,26 @@
     position:absolute;
     opacity:0;
 }
+
+
+
+#user-details-content {
+    position:absolute;
+    top:0%;
+    opacity:0;
+}
+
+.ud-h1 {
+    /* currently not used */
+    color:blue;
+    font-size:1.5em;
+}
+
+.ud-h2 {
+    color:orange;
+    font-size:1.3em;
+}
+
+#ud-html-text {
+    color:green;
+}

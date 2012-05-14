@@ -119,31 +119,73 @@
           sample-user-desc (str title sample-user-pic-url long-par many-lines)]
       (render-user-data user-details-dialog sample-user-desc)))
 
+
+  (defn hash-col-by-key
+    "reforms a sequence of tuples (hash-maps) to
+     a new hash-map with the given key values as
+     keys and the rest of the tuples as values"
+    [col key]
+    (reduce merge
+            {}
+            (map #(hash-map (% key) (dissoc % key)) col)))
+
+
   (defn render-user-with-id
+    "renders all user details data. In a first step
+     we push the different aspects into an invisible
+     dom element. Afterwards we retrieve the html data
+     of this element and transfer it to the dialogs
+     content pane."
     [id]
     (send-request (str "/profile/" id)
                   ""
                   (fn [ajax-evt]
                     (let [resp (. (. ajax-evt -target) (getResponseText))
                           user-data (json/parse resp)
-                          title (str "<h2>Profildata zu Nutzer " (user-data "name") "</h2>")
-                          descr (user-data "text")]
-                      (render-user-data user-details-dialog (str title descr))))
+                          root (get-element "user-details-content")
+                          free-text-elem (get-element "ud-html-text" root)
+                          fav-books-sec (get-element "ud-fav-books-sec" root)
+                          fav-movies-sec (get-element "ud-fav-movies-sec" root)
+                          fav-books-by-rank (hash-col-by-key (user-data "user_fav_books") "rank")
+                          fav-movies-by-rank (hash-col-by-key (user-data "user_fav_movies") "rank")]
+                      (def otto user-data)
+                      (set! (. free-text-elem -innerHTML) (user-data "text"))
+                      (if (empty? fav-books-by-rank) (style/showElement fav-books-sec false)
+                          (style/showElement fav-books-sec true))
+                      (if (empty? fav-movies-by-rank) (style/showElement fav-movies-sec false)
+                          (style/showElement fav-movies-sec true))
+                      (doseq [k [1 2 3]]
+                        (set! (. (get-element (str "ud-favbook-auth" k) root) -innerHTML)
+                              ((fav-books-by-rank k {}) "author"))
+                        (set! (. (get-element (str "ud-favbook-title" k) root) -innerHTML)
+                              ((fav-books-by-rank k {}) "title"))
+                        (set! (. (get-element (str "ud-favmovie-auth" k) root) -innerHTML)
+                              ((fav-movies-by-rank k {}) "author"))
+                        (set! (. (get-element (str "ud-favmovie-title" k) root) -innerHTML)
+                              ((fav-movies-by-rank k {}) "title")))
+                      (. (user-details-dialog :dialog) (setTitle (user-data "name")))
+                      (render-user-data user-details-dialog (. root -innerHTML))))
                   "GET"))
-
 
   (comment
 
     ;(open-user-details-dialog user-details-dialog 100 :is-in-fav-list true)
+
+    (def root (get-element "user-details-content"))
+    (def fav-books-sec (get-element "ud-fav-books-sec" root))
+
+    (set! (. (get-element (str "ud-favmovie-title" 2) root) -innerHTML) "Otto")
 
     (open-dialog 100 :is-in-fav-list true)
     (render-sample-user)
     (render-user-with-id 50)
     (close-user-details-dialog user-details-dialog)
 
+    (render-user-with-id 6)
+    (render-user-with-id 998)
+    (open-dialog 998 :is-in-fav-list true)
 
     )
-
 
   ;; mail stuff later moved to own directory
   (let [[dialog ok-button cancel-button]
