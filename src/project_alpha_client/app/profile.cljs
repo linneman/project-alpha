@@ -202,7 +202,7 @@
     (let [image-urls (filter-image-urls txt)
           no-image-txt (string/replace txt #"<img[^>]*>" "")
           images (map #(str "<img src=\"" %
-                            "\" width=\"200\" align=\"right\" style=\"clear:both\">")
+                            "\" width=\"200\" align=\"right\" style=\"clear:both;padding-bottom:10px;padding-left:10px\">")
                       image-urls)]
       (str
        (apply str images)

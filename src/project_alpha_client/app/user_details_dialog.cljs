@@ -129,6 +129,13 @@
             {}
             (map #(hash-map (% key) (dissoc % key)) col)))
 
+  (defn set-all-span-elems!
+    "inserts string in all span elements with given id"
+    [id string]
+    (let [nodelist (gdom/getElementsByTagNameAndClass "span" id)]
+      (loop [i (dec (. nodelist -length))]
+        (set! (. (. nodelist (item i)) -innerHTML) string)
+        (when (> i 0) (recur (dec i))))))
 
   (defn render-user-with-id
     "renders all user details data. In a first step
@@ -163,6 +170,7 @@
                               ((fav-movies-by-rank k {}) "author"))
                         (set! (. (get-element (str "ud-favmovie-title" k) root) -innerHTML)
                               ((fav-movies-by-rank k {}) "title")))
+                      (set-all-span-elems! "ud-name" (user-data "name"))
                       (. (user-details-dialog :dialog) (setTitle (user-data "name")))
                       (render-user-data user-details-dialog (. root -innerHTML))))
                   "GET"))
@@ -172,7 +180,10 @@
     ;(open-user-details-dialog user-details-dialog 100 :is-in-fav-list true)
 
     (def root (get-element "user-details-content"))
-    (def fav-books-sec (get-element "ud-fav-books-sec" root))
+    (def fav-books-sec (get-element "ud-name" root))
+
+    (set-all-span-elems! "ud-name" "Otto")
+
 
     (set! (. (get-element (str "ud-favmovie-title" 2) root) -innerHTML) "Otto")
 
