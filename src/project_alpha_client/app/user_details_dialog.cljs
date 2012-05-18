@@ -23,11 +23,13 @@
             [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
             [goog.ui.Dialog :as Dialog]
             [goog.Timer :as timer]
-            [project-alpha-client.lib.dispatch :as dispatch])
+            [project-alpha-client.lib.dispatch :as dispatch]
+            [project-alpha-client.app.profile :as profile])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.utils
          :only [get-modal-dialog open-modal-dialog
-                send-request get-element init-alpha-button]]))
+                send-request get-element init-alpha-button]]
+        [project-alpha-client.lib.math :only [floor ceil abs]]))
 
 
 (when (dom/get-element "user-details")
@@ -119,6 +121,17 @@
           sample-user-desc (str title sample-user-pic-url long-par many-lines)]
       (render-user-data user-details-dialog sample-user-desc)))
 
+  (defn age-range-min
+    "age is blurred within five years groups,
+     this function calculates low boundary."
+    [age]
+    (* 5 (floor (/ age 5))))
+
+  (defn age-range-max
+    "age is blurred within five years groups,
+     this function calculates upper boundary."
+    [age]
+    (* 5 (ceil (/ (+ age 0.01) 5))))
 
   (defn hash-col-by-key
     "reforms a sequence of tuples (hash-maps) to
@@ -153,9 +166,10 @@
                           free-text-elem (get-element "ud-html-text" root)
                           fav-books-sec (get-element "ud-fav-books-sec" root)
                           fav-movies-sec (get-element "ud-fav-movies-sec" root)
-                          fav-books-by-rank (hash-col-by-key (user-data "user_fav_books") "rank")
-                          fav-movies-by-rank (hash-col-by-key (user-data "user_fav_movies") "rank")]
-                      (def otto user-data)
+                          fav-books-by-rank (hash-col-by-key (user-data "user_fav_books")
+                                                             "rank")
+                          fav-movies-by-rank (hash-col-by-key (user-data "user_fav_movies")
+                                                              "rank")]
                       (set! (. free-text-elem -innerHTML) (user-data "text"))
                       (if (empty? fav-books-by-rank) (style/showElement fav-books-sec false)
                           (style/showElement fav-books-sec true))
@@ -171,21 +185,25 @@
                         (set! (. (get-element (str "ud-favmovie-title" k) root) -innerHTML)
                               ((fav-movies-by-rank k {}) "title")))
                       (set-all-span-elems! "ud-name" (user-data "name"))
+                      (set-all-span-elems! "ud-age-min" (age-range-min (user-data "user_age")))
+                      (set-all-span-elems! "ud-age-max" (age-range-max (user-data "user_age")))
+                      (set-all-span-elems! "ud-zip" (user-data "user_zip"))
+                      (set-all-span-elems! "ud-cities" (profile/zip-cities-hash
+                                                        (user-data "user_zip")))
                       (. (user-details-dialog :dialog) (setTitle (user-data "name")))
+                      (doseq [k (range 1 11)]
+                        (let [quest-txt (. (get-element (str "prof-quest" k)) -innerText)
+                              answ-txt (. (get-element
+                                           (str "prof-rating" (user-data (str "question_" k)))
+                                           ) -innerText)]
+                          (set! (. (get-element (str "ud-quest" k)) -innerText) quest-txt)
+                          (set! (. (get-element (str "ud-answer" k)) -innerText) answ-txt)))
                       (render-user-data user-details-dialog (. root -innerHTML))))
                   "GET"))
 
   (comment
 
     ;(open-user-details-dialog user-details-dialog 100 :is-in-fav-list true)
-
-    (def root (get-element "user-details-content"))
-    (def fav-books-sec (get-element "ud-name" root))
-
-    (set-all-span-elems! "ud-name" "Otto")
-
-
-    (set! (. (get-element (str "ud-favmovie-title" 2) root) -innerHTML) "Otto")
 
     (open-dialog 100 :is-in-fav-list true)
     (render-sample-user)
@@ -195,6 +213,9 @@
     (render-user-with-id 6)
     (render-user-with-id 998)
     (open-dialog 998 :is-in-fav-list true)
+
+    (defn [age]
+      ())
 
     )
 

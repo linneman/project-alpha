@@ -18,7 +18,6 @@
     height:420px;
     margin:5px;
     overflow:auto;
-    color:red;
 }
 
 #user_details_messages {
@@ -42,10 +41,22 @@
 }
 
 .ud-h2 {
-    color:orange;
+    color:black;
     font-size:1.3em;
 }
 
 #ud-html-text {
-    color:green;
+    color:navy;
+}
+
+#ud-age-and-loc {
+    color:black;
+}
+
+#ud-fav-books-sec {
+    color:black;
+}
+
+#ud-fav-movies-sec {
+    color:black;
 }
