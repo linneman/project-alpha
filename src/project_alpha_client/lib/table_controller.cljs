@@ -321,7 +321,11 @@
            last-idx (count data-array)
            first-row-idx (dec start-idx)
            last-row-idx (+ first-row-idx (:nr-rows data))
-           last-row-idx (if (> last-row-idx last-idx) last-idx last-row-idx)]
+           last-row-idx (if (> last-row-idx last-idx) last-idx last-row-idx)
+           render-data (subvec data-array first-row-idx last-row-idx)
+           filled-render-data (concat render-data
+                                      (repeat (- (:nr-rows data) (count render-data))
+                                              [" "]))]
        (loginfo (str "received page-crtl event: " (pr-str data)))
        (when (:render-crtl data)
          (render-table-controller table-controller
@@ -329,8 +333,8 @@
                                   (:last-idx data)
                                   (:nr-rows data)))
        (clear-table rendered-table)
-                                        ;(println "first: " first-row-idx "last: " last-row-idx)
-       (render-table rendered-table (subvec data-array first-row-idx last-row-idx))
+       ;(println "first: " first-row-idx "last: " last-row-idx)
+       (render-table rendered-table filled-render-data)
        (update-table-contoller-button-state table-controller start-idx)
        ))))
 
