@@ -44,28 +44,21 @@
 
 (when search-pane
 
+  ;; the result table objects are initialized when firstly clicked
+  ;; too high initial delay
+  (def result-table-atom (atom nil))
+  (def favorite-table-atom (atom nil))
+  (def fav_user-ids-atom (atom nil))
+  (def fav_user-data-atom (atom nil))
+
 
   ;; --- sortable search result table ---
+
   (defn unitstr2num [string] (apply js/Number (re-seq #"-?[\d.]+" string)))
   (defn german-date-str-to-ms
     [datestr]
     (let [[day month year] (map js/Number (. datestr (split ".")))]
       (. (js/Date. year month day) (getTime))))
-
-  (def user-details-reactor (dispatch/react-to
-                        #{:show-user-details}
-                        (fn [evt data]
-                          (loginfo (str "detail button pressed for user id: " data))
-                          ;(user-details/render-sample-user)
-                          (user-details/render-user-with-id data)
-                          (user-details/open-dialog data :is-in-fav-list true)
-                          )))
-
-
-  ;; the result table objects are initialized when firstly clicked
-  ;; too high initial delay
-  (def result-table-atom (atom nil))
-  (def favorite-table-atom (atom nil))
 
 
   (defn- render-table
@@ -82,21 +75,20 @@
                                       (unitstr2num (nth %2 3))
                                       (unitstr2num (nth %1 3))))}))
 
-  (defn create-resp-data
-    "creates test data for usage illustration of table-controller functions"
-    [resp]
-    (let [data (json/parse resp)]
-      (doall
-       (map #(let [id (first %)
-                   name ((second %) "name")
-                   created-at ((second %) "created_at")
-                   match-variance ((second %) "match_variance")
-                   distance ((second %) "distance")]
-               (vector created-at  name (str distance "km")
-                       (str match-variance "%")
-                       (partial render-table-button
-                                (str "id-" id) :show-user-details (str id))))
-            data))))
+  (defn- gen-table-data
+    "transforms ajax response data in input for table-controller functions"
+    [data]
+    (doall
+     (map #(let [id (first %)
+                 name ((second %) "name")
+                 created-at ((second %) "created_at")
+                 match-variance ((second %) "match_variance")
+                 distance ((second %) "distance")]
+             (vector created-at  name (str distance "km")
+                     (str match-variance "%")
+                     (partial render-table-button
+                              (str "id-" id) :show-user-details (str id))))
+          data)))
 
 
   (defn- request-result-pane [force-update]
@@ -116,12 +108,12 @@
                                 (render-table
                                  "search-result-table"
                                  "search-result-controller"
-                                 (create-resp-data resp))))
+                                 (gen-table-data (json/parse resp)))))
                       (style/showElement (dom/get-element
                                           "search_request_progress") false))
                     )))
 
-  (defn- request-result-panet-test [force-update]
+  (defn- request-result-pane-test [force-update]
     "updates table view controller with some test data
      (development purposes)"
     (when force-update
@@ -145,7 +137,7 @@
 
   (comment
     "here we are going to connect the client request and the servers
-     repson ..."
+     repsone ..."
     (send-request "/user-matches"
                   { "key1" "data1"}
                   (fn [ajax-evt]
@@ -154,12 +146,12 @@
                       (def resp resp)))
                   "GET")
 
-    (create-resp-data resp)
+    (gen-table-data (json/parse resp))
 
     )
 
 
-  (defn- request-favorite-pane [force-update]
+  (defn- request-favorite-pane-test [force-update]
     (when force-update
       (when @favorite-table-atom
         (release-sortable-search-result-table @favorite-table-atom)
@@ -178,6 +170,99 @@
                              "search_request_progress") false))
        10)))
 
+
+  (defn request-favorite-pane [force-update]
+    "retrieves all matching users and updates table view controller"
+    (when force-update
+      (when @favorite-table-atom
+        (release-sortable-search-result-table @favorite-table-atom)
+        (reset! favorite-table-atom nil)))
+    (when-not @favorite-table-atom
+      (style/showElement (dom/get-element
+                          "search_request_progress") true)
+      (send-request "/user-fav-user-ids"
+                    {}
+                    (fn [ajax-evt]
+                      (let [resp (. (. ajax-evt -target) (getResponseText))]
+                        (reset! fav_user-ids-atom (set (json/parse resp))))))
+      (send-request "/user-favorites"
+                    {}
+                    (fn [ajax-evt]
+                      (let [resp (. (. ajax-evt -target) (getResponseText))
+                            resp (json/parse resp)]
+                        (reset! fav_user-data-atom resp)
+                        (reset! favorite-table-atom
+                                (render-table
+                                 "favorite-table"
+                                 "favorite-controller"
+                                 (gen-table-data resp))))
+                      (style/showElement (dom/get-element
+                                          "search_request_progress") false))
+                    )))
+
+
+  ;; --- @todo: update favorite list exclusively on client side ---
+
+  (comment
+
+    (defn- add-usr-id-to-fav-pane [id]
+      (swap! fav_user-ids-atom conj data)
+      (comment ...)
+      )
+
+    (defn- del-usr-id-to-fav-pane [id]
+      (swap! fav_user-ids-atom disj data)
+      (comment ...)
+      )
+    )
+
+
+  ;; --- sortable search result table event handling ---
+
+
+  (def ^{:private true
+         :doc "event handler for opening the details dialog for specified user"}
+    user-details-reactor
+    (dispatch/react-to
+     #{:show-user-details}
+     (fn [evt data]
+       (let [id (js/Number data)]
+         (loginfo (str "detail button pressed for user id: " id))
+                                        ;(user-details/render-sample-user)
+         (user-details/render-user-with-id id)
+         (user-details/open-dialog data :is-in-fav-list
+                                   (contains? @fav_user-ids-atom id))))))
+
+
+  (def ^{:private true
+         :doc "event handler for adding user to favorite list"}
+    add-fav-user-reactor
+    (dispatch/react-to
+     #{:add-user-to-fav}
+     (fn [evt data]
+       (let [data (js/Number data)]
+         (loginfo (pr-str evt data))
+         (user-details/open-dialog data :is-in-fav-list true)
+         (send-request "/add-fav-user"
+                       (json/generate {:match_id data})
+                       (fn [e] (request-favorite-pane true))
+                       "POST")))))
+
+
+  (def ^{:private true
+         :doc "event handler for removing user from favorite list"}
+    del-fav-user-reactor
+    (dispatch/react-to
+     #{:rm-user-from-fav}
+     (fn [evt data]
+       (let [data (js/Number data)]
+         (loginfo (pr-str evt data))
+         (request-favorite-pane true)
+         (user-details/open-dialog data :is-in-fav-list false)
+         (send-request "/del-fav-user"
+                       (json/generate {:match_id data})
+                       (fn [e] (request-favorite-pane true))
+                       "POST")))))
 
 
   ; --- the tab pane ---

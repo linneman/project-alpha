@@ -163,6 +163,38 @@
     (sqlreq req)))
 
 
+(defn- find-fav-users
+  "request all favorite users"
+  [& {:keys [user_lon user_lat user_sex user_interest_sex
+             question_1 question_2 question_3
+             question_4 question_5 question_6
+             question_7 question_8 question_9
+             question_10 created-before-max-days limit] :as args}]
+  (let [req "SELECT usr.id, usr.name, usr.created_at,
+               ACOS(
+                    SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
+                    + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
+                    - RADIANS($user_lon$))
+                    ) * 6380 AS distance,
+               POW($question_1$ - prf.question_1, 2) +
+               POW($question_2$ - prf.question_2, 2) +
+               POW($question_3$ - prf.question_3, 2) +
+               POW($question_4$ - prf.question_4, 2) +
+               POW($question_5$ - prf.question_5, 2) +
+               POW($question_6$ - prf.question_6, 2) +
+               POW($question_7$ - prf.question_7, 2) +
+               POW($question_8$ - prf.question_8, 2) +
+               POW($question_9$ - prf.question_9, 2) +
+               POW($question_10$ - prf.question_10, 2) AS match_variance
+               FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id
+               LEFT JOIN user_fav_users fav ON fav.match_id = prf.id
+               WHERE fav.user_id = $id$
+               ORDER BY usr.created_at desc
+               LIMIT $limit$;"
+        req (replace-dollar-template-by-keyvals req args)]
+    (sqlreq req)))
+
+
 (defn- sql-resp-transform-date
   "trim date string to year-month-day"
   [sql-res]
@@ -201,21 +233,6 @@
   (map
    #(assoc-in % [:distance] (Math/round (% :distance)))
    sql-res))
-
-
-(comment "deprecated"
-
-  (defn- sql-resp-to-json
-    "transform keywords to strings (json)"
-    [sql-res]
-    (map clj2json-hash sql-res))
-
-  (defn- sql-resp-2-hash-by-id-old
-    "transforns the sql response data set to a hash set
-   where the id is assigned to the key and all other
-   entries are assigned to the values."
-    [sql-res]
-    (reduce #(assoc %1 (%2 "id") (dissoc %2 "id")) {} sql-res)))
 
 
 (defn- sql-resp-2-hash-by-id
@@ -281,9 +298,20 @@
     (reduce merge matches)))
 
 
+(defn find-all-favorites
+  "database retrieval for favorite matches."
+  [& {:keys [user-id limit] :or {limit 100} :as args}]
+  (let [usr-prf (first (find-profile :id user-id))
+        usr-prf (mapcat #(vector (key %) (val %))
+                          (merge usr-prf (hash-args limit)))
+        matches (transform-sql-resp (apply find-fav-users usr-prf))]
+    matches))
+
+
 (comment usage illustation
 
   (def x (find-all-matches :user-id 6))
+  (def y (find-all-favorites :user-id 6))
 
   (x 3511)
   (println (str x))
@@ -324,6 +352,17 @@
       :limit 10)))
 
   (count (merge a b c))
+
+  (def d
+    (transform-sql-resp
+     (find-fav-users
+      :user_lon 8.7 :user_lat 50.5167 :id 6
+      :user_sex "female" :user_interest_sex "male"
+      :question_1 1 :question_2 1 :question_3 1
+      :question_4 1 :question_5 1 :question_6 1
+      :question_7 1 :question_8 1 :question_9 1
+      :question_10 1
+      :limit 10)))
 
   )
 

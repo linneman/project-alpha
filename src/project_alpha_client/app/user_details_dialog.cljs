@@ -87,7 +87,7 @@
          :doc "event handler for user details dialog"}
     user-dialog-reactor
     (dispatch/react-to
-     #{:add-user-to-fav :rm-user-from-fav :send-msg-to-user}
+     #{:send-msg-to-user}
      (fn [evt data]
        (loginfo (pr-str evt data)))))
 

@@ -132,6 +132,22 @@
   (drop-table :user_fav_movies))
 
 
+;; --- favorite users ---
+
+(defn create-user-fav-movies
+  "creates relation table for favorite users"
+  []
+  (create-table
+   :user_fav_users
+   [:user_id :integer]
+   [:match_id :integer]))
+
+(defn drop-user-fav-movies
+  "deletes relation table for favorite users"
+  []
+  (drop-table :user_fav_users))
+
+
 (comment usage illustration
 
   (create-profiles)
@@ -145,6 +161,9 @@
   (drop-movies)
   (create-user-fav-movies)
   (drop-user_fav-movies)
+
+  (create-user-fav-movies)
+  (drop-user-fav-movies)
   )
 
 
@@ -155,10 +174,13 @@
 
 (declare user_fav_books)
 (declare user_fav_movies)
+(declare user_fav_users)
+
 
 (sql/defentity profiles
   (sql/has-many user_fav_books {:fk :user_id})
-  (sql/has-many user_fav_movies {:fk :user_id}))
+  (sql/has-many user_fav_movies {:fk :user_id})
+  (sql/has-many user_fav_users {:fk :user_id}))
 
 
 (sql/defentity books
@@ -178,6 +200,14 @@
   (sql/has-one profiles {:fk :user_id})
   (sql/has-one movies {:fk :id}))
 
+
+(sql/defentity user_fav_users
+  (sql/has-many profiles {:fk :id}))
+
+(sql/defentity user_fav_movies
+  (sql/pk :book_id)
+  (sql/has-one profiles {:fk :user_id})
+  (sql/has-one movies {:fk :id}))
 
 (def profile-cache (atom {}))
 (declare write-user-fav-books)
@@ -263,7 +293,9 @@
 (comment usage illustration
 
          (find-profile :id 88)
-         (find-profile :id 3))
+         (find-profile :id 3)
+         (def a (find-profile :id 6))
+         )
 
 
 (comment some sql usage illustration
@@ -317,6 +349,37 @@
   (stop-profile-flush-cache-timer)
 
   (flush-profile-cache @profile-cache)
+  )
+
+(defn add-fav-user
+  "add favorite user pair (add-fav-user :user_id x :match_id y)"
+  [& {:as args}]
+  (sql/insert user_fav_users
+              (sql/values args)))
+
+(defn delete-fav-user
+  "delete favorite user (delete-fav-user :user_id x :match_id y)"
+  [& {:as args}]
+  (sql/delete user_fav_users (sql/where args)))
+
+(defn get-all-fav-users-of
+  "returns all favorite users of user with given id"
+  [user-id]
+  (map :match_id
+       (sql/select user_fav_users
+                   (sql/fields :match_id)
+                   (sql/where {:user_id user-id}))))
+
+
+(comment
+  (add-fav-user :user_id 6 :match_id 562)
+  (add-fav-user :user_id 6 :match_id 500)
+
+  (delete-fav-user :user_id 6 :match_id 562)
+  (delete-fav-user :user_id 6 :match_id 500)
+
+  (def a (get-all-fav-users-of 6))
+
   )
 
 
