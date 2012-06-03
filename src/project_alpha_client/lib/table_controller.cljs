@@ -392,11 +392,12 @@
 
 
 (defn- init-table-sort-buttons
-  [table-id-str event]
+  [table-id-str]
   (let [table (dom/get-element table-id-str)
         table-body (gdom/getFirstElementChild table)
         header-row (get-element "header-row" table-body)
         cells (htmlcoll2array (. header-row -cells))
+        event (keyword (str table-id-str "-sort-search-results"))
         buttons (map
                  #(when (re-seq #"^sort" (. % -id))
                     (let [txt (. % -innerText)]
@@ -432,20 +433,21 @@
      within init-sortable-search-result-table."
   [sort-buttons search-result-table-atom
    table-controller table-content data nr-rows evt-sort-function-hashes]
-  (dispatch/react-to
-   #{:sort-search-results}
-   (fn [evt evt-data]
-     (loginfo (str "sort-by-xxx clicked: " evt-data))
-     (dorun
-      (map #(if (= (. % -evt-params) evt-data)
-              (. % (setEnabled false))
-              (. % (setEnabled true))) sort-buttons))
-     (release-search-result-table @search-result-table-atom)
-     (let [sorted-data ((evt-sort-function-hashes evt-data) data)]
-       (reset! search-result-table-atom
-               (init-search-result-table table-controller
-                                         table-content sorted-data nr-rows)))
-     )))
+  (let [event (keyword (str table-content "-sort-search-results"))]
+    (dispatch/react-to
+     #{event}
+     (fn [evt evt-data]
+       (loginfo (str "sort-by-xxx clicked: " evt-data))
+       (dorun
+        (map #(if (= (. % -evt-params) evt-data)
+                (. % (setEnabled false))
+                (. % (setEnabled true))) sort-buttons))
+       (release-search-result-table @search-result-table-atom)
+       (let [sorted-data ((evt-sort-function-hashes evt-data) data)]
+         (reset! search-result-table-atom
+                 (init-search-result-table table-controller
+                                           table-content sorted-data nr-rows)))
+       ))))
 
 
 (defn init-sortable-search-result-table
@@ -469,15 +471,16 @@
   (let [search-result-table (init-search-result-table table-controller
                                                       table-content data nr-rows)
         search-result-table-atom (atom search-result-table)
-        sort-buttons (init-table-sort-buttons table-content :sort-search-results)
+        sort-buttons (init-table-sort-buttons table-content)
         sort-reactor (get-sort-reactor
                       sort-buttons search-result-table-atom
                       table-controller
                       table-content
                       data
                       nr-rows
-                      evt-sort-function-hashes)]
-    (dispatch/fire :sort-search-results (first (keys evt-sort-function-hashes)))
+                      evt-sort-function-hashes)
+        event (keyword (str table-content "-sort-search-results"))]
+    (dispatch/fire event (first (keys evt-sort-function-hashes)))
     {:search-result-table-atom search-result-table-atom
      :sort-buttons sort-buttons
      :sort-reactor sort-reactor}))
