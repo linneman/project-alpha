@@ -357,7 +357,7 @@
      page selected by the user and returns an object which
      is used for later release."
   [table-controller table-content data nr-rows]
-  (let [last-idx (count data)
+  (let [last-idx (max 1 (count data))
         crtl-reactor (get-table-controller-reactor table-controller table-content data)
         table (render-table-controller table-controller 1 last-idx nr-rows)
         buttons (. table -crtlButtons)

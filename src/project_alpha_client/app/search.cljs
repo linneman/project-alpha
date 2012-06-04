@@ -48,8 +48,8 @@
   ;; too high initial delay
   (def result-table-atom (atom nil))
   (def favorite-table-atom (atom nil))
-  (def fav_user-ids-atom (atom nil))
-  (def fav_user-data-atom (atom nil))
+  (def fav-user-ids-atom (atom nil))
+  (def fav-user-data-atom (atom nil))
 
 
   ;; --- sortable search result table ---
@@ -112,6 +112,7 @@
                       (style/showElement (dom/get-element
                                           "search_request_progress") false))
                     )))
+
 
   (defn- request-result-pane-test [force-update]
     "updates table view controller with some test data
@@ -184,20 +185,24 @@
                     {}
                     (fn [ajax-evt]
                       (let [resp (. (. ajax-evt -target) (getResponseText))]
-                        (reset! fav_user-ids-atom (set (json/parse resp))))))
+                        (reset! fav-user-ids-atom (set (json/parse resp))))))
       (send-request "/user-favorites"
                     {}
                     (fn [ajax-evt]
                       (let [resp (. (. ajax-evt -target) (getResponseText))
-                            resp (json/parse resp)]
-                        (reset! fav_user-data-atom resp)
+                            resp (json/parse resp)
+                            no-fav-pane (dom/get-element "search_no_favorites")]
+                        (reset! fav-user-data-atom resp)
                         (reset! favorite-table-atom
                                 (render-table
                                  "favorite-table"
                                  "favorite-controller"
-                                 (gen-table-data resp))))
-                      (style/showElement (dom/get-element
-                                          "search_request_progress") false))
+                                 (gen-table-data resp)))
+                        (style/showElement (dom/get-element
+                                            "search_request_progress") false)
+                        (if (empty? @fav-user-data-atom)
+                          (style/showElement no-fav-pane true)
+                          (style/showElement no-fav-pane false))))
                     )))
 
 
@@ -206,12 +211,12 @@
   (comment
 
     (defn- add-usr-id-to-fav-pane [id]
-      (swap! fav_user-ids-atom conj data)
+      (swap! fav-user-ids-atom conj data)
       (comment ...)
       )
 
     (defn- del-usr-id-to-fav-pane [id]
-      (swap! fav_user-ids-atom disj data)
+      (swap! fav-user-ids-atom disj data)
       (comment ...)
       )
     )
@@ -231,7 +236,7 @@
                                         ;(user-details/render-sample-user)
          (user-details/render-user-with-id id)
          (user-details/open-dialog data :is-in-fav-list
-                                   (contains? @fav_user-ids-atom id))))))
+                                   (contains? @fav-user-ids-atom id))))))
 
 
   (def ^{:private true
