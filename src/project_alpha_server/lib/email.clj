@@ -10,9 +10,9 @@
 
 
 (ns project-alpha-server.lib.email
+  (:use [project-alpha-server.lib.utils])
   (:require [project-alpha-server.local-settings :as setup])
   (:import [org.apache.commons.mail SimpleEmail]))
-
 
 
 (defn sendmail
@@ -33,21 +33,24 @@
 
 ; (sendmail "linneman@gmx.de" "Test" "Eine Nachricht mit Umlauten: ÄÖÜ äöü ß: http://central-services.dnsdojo.org")
 
-
 (defn send-confirm-mail
   "sends the user with the specified address an email
    with the url he has to confirm his registration."
-  [to-address url]
-  (let [msg (slurp setup/confirm-email-msg-path)
-        subj (slurp setup/confirm-email-subj-path)]
+  [lang to-address url]
+  (let [msg (slurp (replace-dollar-template-by-keyvals setup/confirm-email-msg-path
+                                                       {:lang lang}))
+        subj (slurp (replace-dollar-template-by-keyvals setup/confirm-email-subj-path
+                                                       {:lang lang}))]
     (sendmail to-address subj (str msg url))))
 
 (defn send-reset-passwd-mail
   "sends the user with the specified address an email
    with the url for allowing to reset the password."
-  [to-address url]
-  (let [msg (slurp setup/reset-pw-email-msg-path)
-        subj (slurp setup/reset-pw-email-subj-path)]
+  [lang to-address url]
+  (let [msg (slurp (replace-dollar-template-by-keyvals setup/reset-pw-email-msg-path
+                                                       {:lang lang}))
+        subj (slurp (replace-dollar-template-by-keyvals setup/reset-pw-email-subj-path
+                                                       {:lang lang}))]
     (sendmail to-address subj (str msg url))))
 
 ; (send-confirm-mail "linneman@gmx.de" "/confirm/abcdef")

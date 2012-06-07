@@ -1,0 +1,70 @@
+<div id="login-pane">
+  <div id="login" class="project-alpha-dialog">
+    <form>
+      <table>
+	<tr><td align="right">Name oder Email:</td><td><input id="login-name" class="login-field" type="text" name="name"></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td align="right">Passwort:</td><td><input id="login-password" class="login-field" type="password" name="password"></td></tr>
+      </table>
+
+      <div id="confirm-login" class="goog-flat-button goog-flat-button-disabled project-alpha-dialog-button"
+	   title="Klicken Sie hier, wenn alle Einträge ausgefüllt sind!">Login</div>
+    </form>
+  </div>
+
+  <div id="pw-forgotten-form" class="project-alpha-dialog">
+    <form>
+      <table>
+	<tr><td align="right">Name oder Email:</td><td><input id="pw-reminder-name" class="login-field" type="text" name="remind_name"></td></tr>
+	<tr><td>&nbsp;</td></tr>
+      </table>
+
+      <div id="confirm-pw-forgotten" class="goog-flat-button goog-flat-button-disabled project-alpha-dialog-button"
+	   title="Hier klicken, um einen neuen Freischaltcode an Ihre email-Adresse zu übertragen!">Freischaltcode zusenden</div>
+    </form>
+
+    <div id="send_pw_reminder_progress">
+      <h3>Daten werden an Server übermittelt ...</h3>
+      <img src="/img/spinner.gif"></img>
+    </div>
+  </div>
+
+  <div id="login-failed" class="project-alpha-dialog">
+    <h1 align="center">Anmeldung fehlgeschlagen!</h1>
+    <div id="confirm-login-failed" class="goog-flat-button goog-flat-button-disabled project-alpha-dialog-button">OK</div>
+  </div>
+
+  <div id="login-user-not-confirmed" class="project-alpha-dialog">
+    <p>Rufen Sie Ihre email ab und klicken Sie auf den Bestätigungslink, um Ihren Zugang freizuschalten!</p>
+    <div id="confirm-login-user-not-confirmed" class="goog-flat-button goog-flat-button-disabled project-alpha-dialog-button">OK</div>
+  </div>
+
+  <div id="login-wrong-account" class="project-alpha-dialog">
+    <p>Sie haben zuvor einen anderen Benutzernamen verwendet. Bitte beachten Sie, dass Sie nur einen Account verwenden sollten!</p>
+    <div id="confirm-wrong-account-confirmed" class="goog-flat-button goog-flat-button-disabled project-alpha-dialog-button">OK</div>
+  </div>
+
+
+  <div id="reset_pw_advice_dialog" class="project-alpha-dialog">
+    <p>Ihnen wird in den nächsten Minuten eine email zugestellt, die eine URL mit einem Frei&shy;schaltcode enthält.
+      Bitte prüfen Sie jetzt Ihr Postfach und klicken Sie auf den in der Bestäti&shy;gungs&shy;email enthaltenen Verweis.</p>
+    <div id="reset_pw_advice_button" class="goog-flat-button goog-flat-button-disabled project-alpha-dialog-button">OK</div>
+  </div>
+
+  <div id="user_not_existing_dialog" class="project-alpha-dialog">
+    <p>Dem System ist kein Benutzer mit den angegebenen Daten bekannt!</p>
+    <div id="user_not_existing_button" class="goog-flat-button goog-flat-button-disabled project-alpha-dialog-button">OK</div>
+  </div>
+
+  <div id="login-messages" class="project-alpha-dialog">
+    <div id="login-dialog-title">Anmeldung</div>
+    <div id="pw-forgotten-dialog-title">Passwort-Freischaltcode übertragen</div>
+    <div id="login-failed-dialog-title">Fehlgeschlagen</div>
+    <div id="login-user-not-confirmed-title">Ihre email Adresse wurde nicht bestätigt!</div>
+    <div id="login-wrong-account-title">Mehrfachanmeldung nicht gestattet!</div>
+
+    <div id="reset_pw_advice_title">Passwort zurücksetzen</div>
+    <div id="user_not_existing_title">Benutzerdaten unbekannt</div>
+  </div>
+</div>
+

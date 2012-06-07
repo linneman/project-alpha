@@ -312,8 +312,6 @@
        (update-tab-panes (get-page-id-str data)))))
 
 
-  ;; trigger initial pane changed event
-  (dispatch/fire :search-tab-changed (. tabpane (getSelectedIndex)))
 
 
 
@@ -352,7 +350,9 @@
       (style/setOpacity search-pane 1) ;; important for first load only
       (style/showElement search-pane true)
       (nav/enable-nav-pane)
-      (loginfo "search page enabled"))
+      (loginfo "search page enabled")
+      ;; trigger initial pane changed event
+      (dispatch/fire :search-tab-changed (. tabpane (getSelectedIndex))))
     (do
       (pages/reload-url "/search.html")
       (loginfo "search page reloaded"))))

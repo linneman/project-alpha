@@ -1,4 +1,4 @@
-;;;
+
 ;;; Clojure based web application
 ;;; https://github.com/clojure/clojurescript for further information.
 ;;;
@@ -26,7 +26,7 @@
   page (atom nil))
 
 
-(defn reload-url
+(defn- reload-url
   "reloads the page (page is loaded from server)"
   [url]
   (js/eval (str "window.location.href='" url "';")))
@@ -40,11 +40,20 @@
   (js/eval (str "window.history.pushState('', 'project-alpha', '" url "');")))
 
 
+(defn get-lang-id
+  "retrieves language id out of the second url section from right.
+   This approach currently restricts to one level uri's. Later
+   implementations might change this."
+  []
+  (let [url (js/eval (str "window.location.href"))]
+    (second (reverse (re-seq #"[A-Za-z0-9:._=?%]+" url)))))
+
+
 (defn switch-to-page
   "switches to new page and rewrites the url
    This is emulating a new page load from server."
   [new-page]
-  (let [new-url (str "/" (. (str new-page) (substring 1)) ".html")]
+  (let [new-url (str "/" (get-lang-id) "/" (. (str new-page) (substring 1)) ".html")]
     (swap! page #(when (not= % new-page)
                    (loginfo (str "switched to page " new-page))
                    (rewrite-url new-url)

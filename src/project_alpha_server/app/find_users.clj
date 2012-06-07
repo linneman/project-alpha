@@ -27,24 +27,6 @@
            [java.util TimerTask Timer]))
 
 
-(defn- replace-dollar-template-by-keyvals
-  "takes a string with template values prefixed
-   with a dollar sign and replaces all templates
-   for the given keys with the given values in
-   the hash table kv."
-  [s kv]
-  (let [key2str (fn [k] (. (str k) (substring 1)))
-        var-repl (fn [s k v]
-                   (string/replace s (str "$" (key2str k) "$") v))]
-    (loop [l kv repl s]
-              (if (empty? l)
-                repl
-                (let [kv (first l) k (key kv) v (val kv)
-                      repl (var-repl repl k (str v))]
-                  (recur (rest l)
-                         repl))))))
-
-
 (defn- find-users-in-vicinity
   "requests all zip-positions to the vicinity of a
    given position and distance. For each hit the

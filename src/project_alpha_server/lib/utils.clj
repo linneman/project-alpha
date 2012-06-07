@@ -7,8 +7,8 @@
 ;;;
 ;;; utility functions
 
-(ns project-alpha-server.lib.utils)
-
+(ns project-alpha-server.lib.utils
+  (:require [clojure.string :as string]))
 
 
 (defn json2clj-hash
@@ -31,3 +31,28 @@
   [h]
   (let [kw2str (fn [kw] (apply str (rest (str kw))))]
     (zipmap (map kw2str (keys h)) (vals h))))
+
+
+(defn replace-dollar-template-by-keyvals
+  "takes a string with template values prefixed
+   with a dollar sign and replaces all templates
+   for the given keys with the given values in
+   the hash table kv."
+  [s kv]
+  (let [key2str (fn [k] (. (str k) (substring 1)))
+        var-repl (fn [s k v]
+                   (string/replace s (str "$" (key2str k) "$") v))]
+    (loop [l kv repl s]
+              (if (empty? l)
+                repl
+                (let [kv (first l) k (key kv) v (val kv)
+                      repl (var-repl repl k (str v))]
+                  (recur (rest l)
+                         repl))))))
+
+
+(defn forward-url
+  "utility function for forwarding to given url."
+  [url]
+  (format "<html><head><meta  http-equiv=\"refresh\" content=\"0; URL=%s\"></head><body>forwarding ...</body></html>" url))
+

@@ -20,13 +20,8 @@
         [project-alpha-server.lib.crypto :only [get-secret-key]]
         [project-alpha-server.lib.email :only [send-confirm-mail
                                                send-reset-passwd-mail]]
+        [project-alpha-server.lib.utils]
         [swank.core :only [break]]))
-
-
-(defn forward-url
-  "utility function for forwarding to given url."
-  [url]
-  (format "<html><head><meta  http-equiv=\"refresh\" content=\"0; URL=%s\"></head><body>forwarding ...</body></html>" url))
 
 
 (defn register
@@ -35,6 +30,7 @@
    of the confirmation email."
   [ring-args]
   (let [params (:params ring-args)
+        lang (:lang ring-args)
         name (params "name")
         email (params "email")
         password (params "password")
@@ -45,7 +41,7 @@
                     protocol (.getProtocol URL)]
                 (.toString (java.net.URL. protocol host port method))))
         key (codec/base64-encode (get-secret-key {}))
-        confirmation_link (str "/confirm?key=" (codec/url-encode key))
+        confirmation_link (str "/" lang "/confirm?key=" (codec/url-encode key))
         session (:session ring-args)
         cookies (:cookies ring-args)
         cookies (assoc cookies
@@ -64,7 +60,10 @@
           (let [session (assoc session :registered true)
                 cookies (assoc cookies
                           "registered" {:value "true" :max-age setup/cookie-max-age})]
-            (send-confirm-mail email (cat setup/host-url confirmation_link))
+            (println "*****************")
+            (println lang)
+            (println ring-args)
+            (send-confirm-mail lang email (cat setup/host-url confirmation_link))
             (-> (response "OK") (assoc :session session) (assoc :cookies cookies)))
           (let [session (assoc session :authenticated true)
                 cookies (assoc cookies
@@ -80,6 +79,7 @@
    confirmation email."
   [ring-args]
   (let [params (:params ring-args)
+        lang (:lang ring-args)
         name (params "name")
         cat (fn [url method]
               (let [URL (java.net.URL. url)
@@ -98,8 +98,8 @@
                                             {:max-age setup/cookie-max-age})
                       "registered" {:value "true" :max-age setup/cookie-max-age})
             session (assoc session :registered true)
-            confirmation_link (str "/reset_pw_conf?key=" (codec/url-encode key))]
-        (send-reset-passwd-mail email (cat setup/host-url confirmation_link))
+            confirmation_link (str "/" lang "/reset_pw_conf?key=" (codec/url-encode key))]
+        (send-reset-passwd-mail lang email (cat setup/host-url confirmation_link))
         (-> (response "OK") (assoc :session session) (assoc :cookies cookies)))
       (response "NOT OK"))))
 
@@ -209,6 +209,8 @@
   [handler login-get-uri uri-white-list]
   (fn [request]
     (let [uri (:uri request)
+          lang (or (request :lang) setup/default-language)
+          login-get-uri (str "/" lang login-get-uri)
           session (:session request)
           authenticated (:authenticated session)
           uri-white-list (conj uri-white-list login-get-uri)

@@ -10,6 +10,10 @@
 (def host-url "http://localhost:3000/")
 (def cookie-max-age (* 30 24 3600))
 
+;;; --- Supported languages for localized html (resources/templates) ---
+(def languages #{"de" "en"})
+(def default-language "de")
+
 
 ;;; --- Definitions for send mail, currently only GMail has been tested ---
 
@@ -25,10 +29,10 @@
 ;;; --- Local files e.g. used for sendmail ---
 
 (def email-authentication-required true)
-(def confirm-email-msg-path "resources/templates/confirm_email_msg.txt")
-(def confirm-email-subj-path "resources/templates/confirm_email_subj.txt")
-(def reset-pw-email-msg-path "resources/templates/reset_pw_email_msg.txt")
-(def reset-pw-email-subj-path "resources/templates/reset_pw_email_subj.txt")
+(def confirm-email-msg-path "resources/templates/$lang$/confirm_email_msg.txt")
+(def confirm-email-subj-path "resources/templates/$lang$/confirm_email_subj.txt")
+(def reset-pw-email-msg-path "resources/templates/$lang$/reset_pw_email_msg.txt")
+(def reset-pw-email-subj-path "resources/templates/$lang$/reset_pw_email_subj.txt")
 
 
 ;;; --- Connection parameters to SQL database, currently MySQL ---

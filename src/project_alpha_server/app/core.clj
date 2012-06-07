@@ -15,7 +15,8 @@
             [net.cgrand.enlive-html :as html]
             [project-alpha-server.local-settings :as setup]
             [swank.swank])
-  (:use [compojure.core :only [GET POST PUT DELETE]]
+  (:use [clojure.string :only [split]]
+        [compojure.core :only [GET POST PUT DELETE]]
         [ring.util.response :only [response]]
         [ring.util.codec :only [url-decode url-encode]]
         [ring.middleware.session :only [wrap-session]]
@@ -27,8 +28,10 @@
         [project-alpha-server.lib.auth]
         [project-alpha-server.lib.utils]
         [project-alpha-server.app.find-users]
+        [project-alpha-server.lib.rewrite]
         [clojure.pprint :only [pprint]]
-        [clojure.data.json :only [json-str write-json read-json]]))
+        [clojure.data.json :only [json-str write-json read-json]]
+        [macros.macros]))
 
 
 (def ^{:private true
@@ -61,12 +64,20 @@
   register-post-uri
   "/register")
 
+(def ^{:private true
+       :doc "list of handlers which are not bloacked by authentication"}
+  white-list-handlers
+  [login-post-uri register-get-uri register-post-uri
+   "/user" "/confirm" "/reset_pw_req" "/reset_pw_conf"])
+
 
 (defn log-request-handler
+  "simple logger (debugging purposes)"
   [handler]
   (fn [request]
     (let [response (handler request)]
-      (do (println response) response))))
+      (do (println request) response))))
+
 
 (defn session-counter
   "illustration how to use session (removed later on)"
@@ -92,8 +103,9 @@
   "shortcut for gen-site which appends <templates-path>
    to frame and content pages and uses the div element
    'content_pane' to be replaced."
-  [& sites]
-  (let [cat (fn [path name]
+  [lang & sites]
+  (let [templates-path (str templates-path "/" lang)
+        cat (fn [path name]
               (.toString (java.io.File. path name)))
         frame layout-resource
         full-name-frame (cat templates-path frame)
@@ -125,6 +137,8 @@
    "user_details_dialog.html" "imprint.html"])
 
 
+;; --- application routes ---
+
 (compojure/defroutes main-routes
   ;; --- authentification and registration ---
   (POST login-post-uri args (login args))
@@ -133,17 +147,18 @@
   (POST "/reset_pw_req" args (reset-pw-req args))
   (POST "/set_password" args (set-password args))
   (GET ["/user/:name" :name #".*"] [name] (let [name (url-decode name)] (user-response name)))
-  ;; --- static html (composed out of outer layout side and inner content pane ---
-  (GET "/index.html" _ (apply site "register.html" standard-pages))
-  (GET "/status.html" _ (apply site standard-pages))
-  (GET "/profile.html" _ (apply site standard-pages))
-  (GET "/search.html" _ (apply site standard-pages))
-  (GET "/imprint.html" _ (apply site standard-pages))
-  (GET "/confirm" args (confirm args "index.html"))
-  (GET "/reset_pw_conf" args (confirm args "reset_pw.html"))
-  (GET "/reset_pw.html" _ (apply site "register.html" "reset_pw.html" standard-pages))
+  ; --- static html routes ---
+  (GET "/:lang/test.html" [lang] (do (println lang) "OK"))
+  (GET "/:lang/index.html" [lang] (apply site lang "register.html" standard-pages))
+  (GET "/:lang/status.html" [lang] (apply site lang standard-pages))
+  (GET "/:lang/profile.html" [lang] (apply site lang standard-pages))
+  (GET "/:lang/search.html" [lang] (apply site lang standard-pages))
+  (GET "/:lang/mprint.html" [lang] (apply site lang standard-pages))
+  (GET "/:lang/reset_pw.html" [lang] (apply site lang "register.html" "reset_pw.html" standard-pages))
   ;; --- json handlers ---
   (GET "/status" _ "server-running")
+  (GET "/confirm" args (confirm args (str "/" (args :lang) "/index.html")))
+  (GET "/reset_pw_conf" args (confirm args (str "/" (args :lang) "/reset_pw.html")))
   (GET "/session" args (str "<body>" args "</body>"))
   (GET "/counter" args (session-counter args))
   (POST "/profile" {params :params session :session} (do (println (json2clj-hash params)) (update-profile (:id session) (json2clj-hash params)) "OK"))
@@ -154,7 +169,7 @@
   (GET "/user-fav-user-ids" {session :session} (json-str (get-all-fav-users-of (:id session))))
   (POST "/add-fav-user" {params :params session :session} (add-fav-user :user_id (:id session) :match_id (params "match_id")) "OK")
   (POST "/del-fav-user" {params :params session :session} (delete-fav-user :user_id (:id session) :match_id (params "match_id")) "OK")
-  (GET "/" _ (forward-url "/index.html"))
+  (GET "/" _ (forward-url (str "/" setup/default-language "/index.html")))
   (route/resources "/")
   (route/not-found "Page not found"))
 
@@ -162,7 +177,8 @@
 (def app
   (-> main-routes
       anti-xss-handler
-      (wrap-authentication login-get-uri [login-post-uri register-get-uri register-post-uri "/user" "/confirm" "/reset_pw_req" "/reset_pw_conf"])
+      (wrap-authentication login-get-uri white-list-handlers)
+      rewrite-handler
       (wrap-session {:store (db-session-store) :cookie-attrs {:max-age setup/cookie-max-age}})
       json-params/wrap-json-params
       wrap-multipart-params
