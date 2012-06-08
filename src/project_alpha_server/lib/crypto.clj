@@ -89,7 +89,7 @@
   "returns strong password hash according to recommendation
    from Joerg Ramb. Many thanks!"
   (assert (> (count salt) 10))          ;would like to have >64 bit of salt
-  (assert (> (count password) 5))       ;come on, how low can we go?
+  (assert (> (count password) 4))       ;come on, how low can we go?
   (let [md (java.security.MessageDigest/getInstance "SHA-512")
         encoder (sun.misc.BASE64Encoder.)]
     (.update md (.getBytes salt "UTF-8")) ;assume text salt
