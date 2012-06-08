@@ -203,7 +203,7 @@
   [sql-res]
   (let [nr-quest 10
         max-var 16
-        var2per (fn [var] (Math/round (* 100 (/ var (* nr-quest max-var)))))]
+        var2per (fn [var] (when var (Math/round (* 100 (/ var (* nr-quest max-var))))))]
     (map
      #(assoc-in % [:match_variance] (var2per (% :match_variance)))
      sql-res)))
@@ -213,7 +213,7 @@
   "round distance to kilometers"
   [sql-res]
   (map
-   #(assoc-in % [:distance] (Math/round (% :distance)))
+   #(assoc-in % [:distance] (when-let [d (% :distance)] (Math/round d)))
    sql-res))
 
 
