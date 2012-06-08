@@ -266,6 +266,7 @@
            max-hits-vicinity 245
            max-hits-matching 245
            max-hits-recently-created 10} :as args}]
+  (flush-profile user-id)
   (let [nr-quest 10
         max-var 16
         per2var (fn [var] (* nr-quest max-var (/ var 100.0)))
@@ -283,6 +284,7 @@
 (defn find-all-favorites
   "database retrieval for favorite matches."
   [& {:keys [user-id limit] :or {limit 100} :as args}]
+  (flush-profile user-id)
   (let [usr-prf (first (find-profile :id user-id))
         usr-prf (mapcat #(vector (key %) (val %))
                           (merge usr-prf (hash-args limit)))

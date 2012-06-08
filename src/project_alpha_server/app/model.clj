@@ -213,11 +213,11 @@
 (declare write-user-fav-books)
 (declare write-user-fav-movies)
 
-(defn flush-profile-cache
+(defn- flush-profile-cache-id
   "flushes the profile cache. This function is
    frequently invoked by a timer."
-  [h]
-  (doseq [[id fields] h]
+  [id h]
+  (if-let [fields (h id)]
     (let [fav-books (map json2clj-hash (:fav_books fields))
           fav-movies (map json2clj-hash (:fav_movies fields))
           fields (dissoc fields :fav_books :fav_movies)
@@ -225,7 +225,16 @@
           fields (if zip (merge fields (get-location-for-zip zip)) fields)]
       (write-user-fav-books id fav-books) ; no modification date check here
       (write-user-fav-movies id fav-movies) ; no modification date check here
-      (insert-or-update-when-not-modified profiles id fields))))
+      (insert-or-update-when-not-modified profiles id fields)
+      (dissoc h id))
+    h))
+
+(defn- flush-profile-cache
+  "flushes the profile cache. This function is
+   frequently invoked by a timer."
+  [h]
+  (doseq [[id fields] h]
+    (flush-profile-cache-id id h)))
 
 
 (defn- start-profile-flush-cache-timer
@@ -262,7 +271,16 @@
          #(let [merged-fields (if % (merge (% id) fields) fields)
                 mf-and-modified (assoc merged-fields
                                   :modified (java.util.Date.))]
-            {id mf-and-modified})))
+            (assoc % id mf-and-modified))))
+
+
+(defn flush-profile
+  "writes profile data for a given id to the database. This is
+   e.g. required before accessing client functions which retrieve
+   this profile data (search)."
+  [id]
+  (swap! profile-cache #(when % (flush-profile-cache-id id %)))
+  (println (str "flushed profile for user id " id)))
 
 
 (defn find-profile
