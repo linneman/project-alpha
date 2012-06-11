@@ -178,8 +178,8 @@
   (-> main-routes
       anti-xss-handler
       (wrap-authentication login-get-uri white-list-handlers)
-      rewrite-handler
       (wrap-session {:store (db-session-store) :cookie-attrs {:max-age setup/cookie-max-age}})
+      rewrite-handler
       json-params/wrap-json-params
       wrap-multipart-params
       handler/api))

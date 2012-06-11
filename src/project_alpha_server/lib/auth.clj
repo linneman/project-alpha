@@ -139,31 +139,33 @@
         name (params "name")
         password (params "password")
         user (check-user-password password name)
-        {id :id} user]
-    (if (and (:id session) (not (= (:id session) id)))
-      (response "WRONG ACCOUNT")
-      (if (and user (or (:confirmed user)
-                        (not setup/email-authentication-required)))
-        (let [session (assoc session :registered true :authenticated true :id id)
-              cookies (assoc cookies
-                        "ring-session" (merge (cookies "ring-session")
-                                              {:max-age setup/cookie-max-age})
-                        "registered" {:value "true" :max-age setup/cookie-max-age}
-                        "authenticated" {:value "true" :max-age setup/cookie-max-age})]
+        {id :id} user
+        session-id (session :id)]
+    (if (and user (or (:confirmed user)
+                      (not setup/email-authentication-required)))
+      (let [session (assoc session :registered true :authenticated true :id id)
+            cookies (assoc cookies
+                      "ring-session" (merge (cookies "ring-session")
+                                            {:max-age setup/cookie-max-age})
+                      "registered" {:value "true" :max-age setup/cookie-max-age}
+                      "authenticated" {:value "true" :max-age setup/cookie-max-age})]
+        (if (or (not session-id) (= session-id id))
           (-> (response "OK")
               (assoc :session session)
               (assoc :cookies cookies)
-              ))
-        (if user
-          (response "NOT CONFIRMED")
-          (response "NOT OK"))))))
+              )
+          (response "WRONG ACCOUNT")))
+      (if user
+        (response "NOT CONFIRMED")
+        (response "NOT OK")))))
 
 (defn test-login
   []
   (let [params {"password" "sonne" "name" "otto"}
-        session {:id 78 :authenticated false :registered true}
-        ring-args {:session session :params params}]
-    (login ring-args)))
+        session {:id 6 :authenticated false :registered true}
+        ring-args {:session session :params params :cookies {}}]
+    (login ring-args)
+    ))
 
 ; (test-login)
 
@@ -221,6 +223,9 @@
                         session)]
       (if (or authenticated
               (and (not (uri-json-request? uri)) (not (uri-html? uri))) ; json and html are forbidden
-              (not (not-any? #(re-seq (re-pattern (str "^" (.replace % "/" "\\/"))) uri) uri-white-list)))
+              (not (not-any? #(re-seq
+                               (re-pattern
+                                (str "^" (.replace % "/" "\\/") "([\\?|/][\\w=_&]+)?$"))
+                               uri) uri-white-list)))
         (handler request)
         (-> (response (forward-url login-get-uri)) (assoc :session upd-session))))))
