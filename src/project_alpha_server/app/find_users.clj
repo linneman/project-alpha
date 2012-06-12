@@ -105,7 +105,7 @@
                      < $max-match-variance$
                AND prf.user_sex = \"$user_sex$\"
                AND prf.user_interest_sex = \"$user_interest_sex$\"
-               ORDER BY match_variance desc
+               ORDER BY match_variance asc
                LIMIT $limit$;"
         req (replace-dollar-template-by-keyvals req args)]
     (sqlreq req)))
@@ -236,14 +236,13 @@
       sql-resp-2-hash-by-id))
 
 
-(defn- invert-sex-interest
-  "invert the fields user_sex and user_interest_sex
+(defn- map-sex-interest
+  "assigns the fields user_sex and user_interest_sex
    in the given hash kv for matching."
   [kv]
-  (let [sexinv (fn [sexstr] (if (= "male" sexstr) "female" "male"))]
-    (-> kv
-        (assoc-in [:user_sex] (sexinv (kv :user_sex)))
-        (assoc-in [:user_interest_sex] (sexinv (kv :user_interest_sex))))))
+  (-> kv
+      (assoc-in [:user_sex] (kv :user_interest_sex))
+      (assoc-in [:user_interest_sex] (kv :user_sex))))
 
 
 (defn find-all-matches
@@ -273,13 +272,15 @@
             per2var (fn [var] (* nr-quest max-var (/ var 100.0)))
             max-match-variance (per2var max-match-variance)
             usr-prf (first (find-profile :id user-id))
-            trg-prf (invert-sex-interest usr-prf)
+            trg-prf (map-sex-interest usr-prf)
             match-prf (mapcat #(vector (key %) (val %))
                               (merge trg-prf (hash-args max-dist max-match-variance created-before-max-days)))
             matches (map #(transform-sql-resp (apply %1 (conj match-prf %2 :limit)))
                          [find-users-in-vicinity find-matching-users find-recent-users]
                          [max-hits-vicinity max-hits-matching max-hits-recently-created])
-            matches (reduce merge matches)]
+            matches (reduce merge matches)
+            matches (dissoc matches user-id) ; make sure not to integrate the user himself
+            ]
         {:data matches})
       {:error (check-profile-integrity user-id)})))
 

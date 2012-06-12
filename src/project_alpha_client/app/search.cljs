@@ -82,10 +82,10 @@
      (map #(let [id (first %)
                  name ((second %) "name")
                  created-at ((second %) "created_at")
-                 match-variance ((second %) "match_variance")
+                 match-correlation (- 100 ((second %) "match_variance"))
                  distance ((second %) "distance")]
              (vector created-at  name (str distance "km")
-                     (str match-variance "%")
+                     (str match-correlation "%")
                      (partial render-table-button
                               (str "id-" id) :show-user-details (str id))))
           data)))
