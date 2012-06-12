@@ -168,8 +168,8 @@
                POW($question_8$ - prf.question_8, 2) +
                POW($question_9$ - prf.question_9, 2) +
                POW($question_10$ - prf.question_10, 2) AS match_variance
-               FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id
-               LEFT JOIN user_fav_users fav ON fav.match_id = prf.id
+               FROM profiles prf JOIN users usr ON prf.id = usr.id
+               JOIN user_fav_users fav ON fav.match_id = prf.id
                WHERE fav.user_id = $id$
                ORDER BY usr.created_at desc
                LIMIT $limit$;"
