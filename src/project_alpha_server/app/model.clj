@@ -210,8 +210,8 @@
   (sql/has-one movies {:fk :id}))
 
 (def profile-cache (atom {}))
-(declare write-user-fav-books)
-(declare write-user-fav-movies)
+(declare write-user-fav-books write-user-fav-movies check-profile-integrity)
+
 
 (defn- flush-profile-cache-id
   "flushes the profile cache. This function is
@@ -229,12 +229,14 @@
       (dissoc h id))
     h))
 
+
 (defn- flush-profile-cache
   "flushes the profile cache. This function is
    frequently invoked by a timer."
   [h]
   (doseq [[id fields] h]
-    (flush-profile-cache-id id h)))
+    (flush-profile-cache-id id h)
+    (check-profile-integrity id)))
 
 
 (defn- start-profile-flush-cache-timer
@@ -280,7 +282,8 @@
    this profile data (search)."
   [id]
   (swap! profile-cache #(when % (flush-profile-cache-id id %)))
-  (println (str "flushed profile for user id " id)))
+  (println (str "flushed profile for user id " id))
+  (check-profile-integrity id))
 
 
 (defn find-profile
@@ -308,11 +311,41 @@
          _profiles)))
 
 
+(defn check-profile-integrity
+  "checkes profile for missing and required data
+   such as sex, interest sex, age, location,
+   and questionaire data. when all data is given
+   set user level to 1.
+   function returns vector of stringed keys which
+   are missed."
+  [id]
+  (println (str "-> check-profile-integrity for " id))
+  (let [[prf] (find-profile :id id)
+        [usr] (find-user-by-id id)
+        chk-field-set #{:user_sex :user_interest_sex
+                        :user_age :user_lon :user_lat}
+        chk-field-set (reduce conj chk-field-set
+                              (map #(keyword (str "question_" %)) (range 1 11)))
+        prf (select-keys prf chk-field-set)
+        missing-entries (filter #(not (val %)) prf)
+        kw2str (fn [kw] (apply str (rest (str kw))))]
+    (when (and (empty? missing-entries) (= 0 (usr :level)))
+      (update-user {:level 1} {:id id}))
+    (map #(kw2str (key %)) missing-entries)))
+
+
+
 (comment usage illustration
 
          (find-profile :id 88)
          (find-profile :id 3)
          (def a (find-profile :id 6))
+
+         (check-profile-integrity 6)
+         (check-profile-integrity 5000)
+         (check-profile-integrity 5059)
+         (check-profile-integrity 5060)
+         (find-profile :id 5060)
          )
 
 

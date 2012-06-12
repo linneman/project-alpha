@@ -76,7 +76,8 @@
   [handler]
   (fn [request]
     (let [response (handler request)]
-      (do (println request) response))))
+      (println (str "REQUEST -> " (request :uri)))
+      response)))
 
 
 (defn session-counter
@@ -164,6 +165,7 @@
   (POST "/profile" {params :params session :session} (do (println (json2clj-hash params)) (update-profile (:id session) (json2clj-hash params)) "OK"))
   (GET "/profile" {session :session} (profile-resp-for (:id session)))
   (GET "/profile/:id" {params :route-params} (profile-resp-for (:id params)))
+  (POST "/flush-profile" {session :session} (json-str (flush-profile (:id session))))
   (GET "/user-matches" {session :session} (json-str (find-all-matches :user-id (:id session))))
   (GET "/user-favorites" {session :session} (json-str (find-all-favorites :user-id (:id session))))
   (GET "/user-fav-user-ids" {session :session} (json-str (get-all-fav-users-of (:id session))))
@@ -177,6 +179,7 @@
 (def app
   (-> main-routes
       anti-xss-handler
+      ;log-request-handler
       (wrap-authentication login-get-uri white-list-handlers)
       (wrap-session {:store (db-session-store) :cookie-attrs {:max-age setup/cookie-max-age}})
       rewrite-handler

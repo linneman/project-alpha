@@ -113,7 +113,7 @@
    [:password "varchar(255)"]
    [:salt "varchar(255)"]
    [:confirmation_link "varchar(255)"]
-   [:level :integer]
+   [:level :integer] ; 0: registration ongoing (user not integrated into search), 1: profile integrity given (normal user), 2: admin
    [:confirmed :boolean]
    [:created_at "datetime"]
    ))

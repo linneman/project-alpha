@@ -91,6 +91,33 @@
           data)))
 
 
+  (defn- flush-profile
+    "ensures that profile data is synchronized and checked on server.
+     post the request to flush the user's profile 100ms delayed to
+     give pending post requests send from the profile's pane a chance
+     to complete.
+     The 'flush-profile' post request answers with a list of non formed
+     profile's data which can be be used to direct users what is
+     specifically missing."
+    [callback]
+    (timer/callOnce
+     #(send-request "/flush-profile"
+                    ""
+                    (fn [ajax-evt]
+                      (let [resp (. (. ajax-evt -target) (getResponseText))
+                            missing (json/parse resp)]
+                        (loginfo (str "profile flushed and checked, result:" resp))
+                        (if (empty? missing)
+                          (callback)
+                          (do
+                            (style/showElement (dom/get-element
+                                                "search_profile_incomplete") true)
+                            (style/showElement (dom/get-element
+                                            "search_request_progress") false)))))
+                    "POST")
+     100))
+
+
   (defn- request-result-pane [force-update]
     "retrieves all matching users and updates table view controller"
     (when force-update
@@ -100,18 +127,23 @@
     (when-not @result-table-atom
       (style/showElement (dom/get-element
                           "search_request_progress") true)
-      (send-request "/user-matches"
-                    { "key1" "data1"}
-                    (fn [ajax-evt]
-                      (let [resp (. (. ajax-evt -target) (getResponseText))]
-                        (reset! result-table-atom
-                                (render-table
-                                 "search-result-table"
-                                 "search-result-controller"
-                                 (gen-table-data (json/parse resp)))))
-                      (style/showElement (dom/get-element
-                                          "search_request_progress") false))
-                    )))
+      (flush-profile
+       #(send-request "/user-matches"
+                      {}
+                      (fn [ajax-evt]
+                        (let [resp (. (. ajax-evt -target) (getResponseText))
+                              resp (json/parse resp)]
+                          (if (resp "data")
+                            (do (reset! result-table-atom
+                                        (render-table
+                                         "search-result-table"
+                                         "search-result-controller"
+                                         (gen-table-data (resp "data"))))
+                                (style/showElement (dom/get-element
+                                                    "search_profile_incomplete") false))
+                            (js/alert "Transmission Error!")))
+                        (style/showElement (dom/get-element
+                                            "search_request_progress") false))))))
 
 
   (defn- request-result-pane-test [force-update]
@@ -192,12 +224,15 @@
                       (let [resp (. (. ajax-evt -target) (getResponseText))
                             resp (json/parse resp)
                             no-fav-pane (dom/get-element "search_no_favorites")]
-                        (reset! fav-user-data-atom resp)
-                        (reset! favorite-table-atom
-                                (render-table
-                                 "favorite-table"
-                                 "favorite-controller"
-                                 (gen-table-data resp)))
+                        (if (resp "data")
+                          (do
+                            (reset! fav-user-data-atom (resp "data"))
+                            (reset! favorite-table-atom
+                                    (render-table
+                                     "favorite-table"
+                                     "favorite-controller"
+                                     (gen-table-data (resp "data")))))
+                          (reset! @fav-user-data-atom nil))
                         (style/showElement (dom/get-element
                                             "search_request_progress") false)
                         (if (empty? @fav-user-data-atom)

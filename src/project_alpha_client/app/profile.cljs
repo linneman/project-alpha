@@ -274,7 +274,7 @@
   ;(get-fav-books)
 
 
-  ; --- update functions trigger by ajax GET ---
+  ; --- db update functions triggered by gui events ---
 
   (defn- post-as-json
     [hash-to-post]
@@ -282,6 +282,7 @@
                         (json/generate hash-to-post)
                         (fn [e] nil)
                         "POST"))
+
 
   (defn- update-tab-panes
     "post everything of the profiles pane
@@ -356,6 +357,8 @@
                       (dispatch/fire :get-my-profile-resp
                                      (json/parse resp))))))
 
+
+  ; --- gui update functions triggered by ajax GET ---
 
   (defn- update-questionnaire
     "updates the displayed questionnaire answer list"

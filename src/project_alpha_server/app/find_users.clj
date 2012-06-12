@@ -266,30 +266,35 @@
            max-hits-vicinity 245
            max-hits-matching 245
            max-hits-recently-created 10} :as args}]
-  (flush-profile user-id)
-  (let [nr-quest 10
-        max-var 16
-        per2var (fn [var] (* nr-quest max-var (/ var 100.0)))
-        max-match-variance (per2var max-match-variance)
-        usr-prf (first (find-profile :id user-id))
-        trg-prf (invert-sex-interest usr-prf)
-        match-prf (mapcat #(vector (key %) (val %))
-                          (merge trg-prf (hash-args max-dist max-match-variance created-before-max-days)))
-        matches (map #(transform-sql-resp (apply %1 (conj match-prf %2 :limit)))
-                     [find-users-in-vicinity find-matching-users find-recent-users]
-                     [max-hits-vicinity max-hits-matching max-hits-recently-created])]
-    (reduce merge matches)))
+  (let [[{:keys [level]}] (find-user-by-id user-id)]
+    (if (= level 1)
+      (let [nr-quest 10
+            max-var 16
+            per2var (fn [var] (* nr-quest max-var (/ var 100.0)))
+            max-match-variance (per2var max-match-variance)
+            usr-prf (first (find-profile :id user-id))
+            trg-prf (invert-sex-interest usr-prf)
+            match-prf (mapcat #(vector (key %) (val %))
+                              (merge trg-prf (hash-args max-dist max-match-variance created-before-max-days)))
+            matches (map #(transform-sql-resp (apply %1 (conj match-prf %2 :limit)))
+                         [find-users-in-vicinity find-matching-users find-recent-users]
+                         [max-hits-vicinity max-hits-matching max-hits-recently-created])
+            matches (reduce merge matches)]
+        {:data matches})
+      {:error (check-profile-integrity user-id)})))
 
 
 (defn find-all-favorites
   "database retrieval for favorite matches."
   [& {:keys [user-id limit] :or {limit 100} :as args}]
-  (flush-profile user-id)
-  (let [usr-prf (first (find-profile :id user-id))
-        usr-prf (mapcat #(vector (key %) (val %))
-                          (merge usr-prf (hash-args limit)))
-        matches (transform-sql-resp (apply find-fav-users usr-prf))]
-    matches))
+  (if-let [[{:keys [level]}] (find-user-by-id user-id)]
+    (if (= level 1)
+      (let [usr-prf (first (find-profile :id user-id))
+            usr-prf (mapcat #(vector (key %) (val %))
+                            (merge usr-prf (hash-args limit)))
+            matches (transform-sql-resp (apply find-fav-users usr-prf))]
+        {:data matches})
+      {:error (check-profile-integrity user-id)})))
 
 
 (comment usage illustation
@@ -297,7 +302,8 @@
   (def x (find-all-matches :user-id 6))
   (def y (find-all-favorites :user-id 6))
 
-  (x 3511)
+  (def x (find-all-matches :user-id 5059))
+
   (println (str x))
 
 
