@@ -192,10 +192,12 @@
                                                         (user-data "user_zip")))
                       (. (user-details-dialog :dialog) (setTitle (user-data "name")))
                       (doseq [k (range 1 11)]
-                        (let [quest-txt (. (get-element (str "prof-quest" k)) -innerText)
-                              answ-txt (. (get-element
-                                           (str "prof-rating" (user-data (str "question_" k)))
-                                           ) -innerText)]
+                        (let [rating (user-data (str "question_" k))
+                              quest-txt (. (get-element (str "prof-quest" k)) -innerText)
+                              answ-txt (if rating (. (get-element
+                                                      (str "prof-rating" rating)
+                                                      ) -innerText)
+                                           " - ")]
                           (set! (. (get-element (str "ud-quest" k)) -innerText) quest-txt)
                           (set! (. (get-element (str "ud-answer" k)) -innerText) answ-txt)))
                       (render-user-data user-details-dialog (. root -innerHTML))))

@@ -27,33 +27,82 @@
            [java.util TimerTask Timer]))
 
 
+(defn- generate-sql-match-calc-exp
+  "generates the SQL expressiong to calculate the variance
+   of the questionnaire answers between user and profile data.
+   Since it should be easy to increase the number of questions
+   we dynmically generate the appropriate SQL for incorporate
+   the currently used questions according to 'setup/nr-questions'.
+
+   The function generates an SQL expression string of the form:
+
+   POW($question_1$ - prf.question_1, 2) +
+   POW($question_2$ - prf.question_2, 2) +
+   ...
+
+   POW($question_<nr-questions>$ - prf.question_<nr-questions>, 2)"
+  []
+  (let [varexp (reduce
+                #(str %1 "+" (format "POW($question_%d$-prf.question_%d,2)" %2 %2))
+                ""
+                (range 1 (inc setup/nr-questions)))
+        varexp (. varexp (substring 1))]
+    varexp))
+
+
+(defn- generate-sql-match-as-exp
+  "generates the SQL expressiong to calculate the variance
+   of the questionnaire answers between user and profile data.
+   Since it should be easy to increase the number of questions
+   we dynmically generate the appropriate SQL for incorporate
+   the currently used questions according to 'setup/nr-questions'.
+
+   The function generates an SQL expression string of the form:
+
+   POW($question_1$ - prf.question_1, 2) +
+   POW($question_2$ - prf.question_2, 2) +
+   ...
+
+   POW($question_<nr-questions>$ - prf.question_<nr-questions>, 2)
+        AS match_variance"
+  []
+  (str "\n" (generate-sql-match-calc-exp) " AS match_variance\n"))
+
+
+(defn- generate-sql-match-where-exp
+  "generates the SQL expressiong to filter a low variance
+   of the questionnaire answers between user and profile data.
+   Since it should be easy to increase the number of questions
+   we dynmically generate the appropriate SQL for incorporate
+   the currently used questions according to 'setup/nr-questions'.
+
+   The function generates an SQL expression string of the form:
+
+   WHERE POW($question_1$ - prf.question_1, 2) +
+         POW($question_2$ - prf.question_2, 2) +
+         ...
+
+         POW($question_<nr-questions>$ - prf.question_<nr-questions>, 2)
+         < $max-match-variance$"
+  []
+  (str "\nWHERE " (generate-sql-match-calc-exp) " < $max-match-variance$\n"))
+
+
 (defn- find-users-in-vicinity
   "requests all zip-positions to the vicinity of a
    given position and distance. For each hit the
    locations zip code, the locations name and the
    distance to the given position is returned."
-  [& {:keys [user_lon user_lat max-dist user_sex user_interest_sex
-             question_1 question_2 question_3
-             question_4 question_5 question_6
-             question_7 question_8 question_9
-             question_10 limit] :as args}]
-  (let [req "SELECT usr.id, usr.name, usr.created_at,
+  [& {:keys [user_lon user_lat max-dist user_sex user_interest_sex limit] :as args}]
+  (let [req (str
+              "SELECT usr.id, usr.name, usr.created_at,
                ACOS(
                     SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
                     + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
                     - RADIANS($user_lon$))
-                    ) * 6380 AS distance,
-               POW($question_1$ - prf.question_1, 2) +
-               POW($question_2$ - prf.question_2, 2) +
-               POW($question_3$ - prf.question_3, 2) +
-               POW($question_4$ - prf.question_4, 2) +
-               POW($question_5$ - prf.question_5, 2) +
-               POW($question_6$ - prf.question_6, 2) +
-               POW($question_7$ - prf.question_7, 2) +
-               POW($question_8$ - prf.question_8, 2) +
-               POW($question_9$ - prf.question_9, 2) +
-               POW($question_10$ - prf.question_10, 2) AS match_variance
-               FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id
+                    ) * 6380 AS distance,"
+              (generate-sql-match-as-exp)
+              "FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id
                WHERE ACOS(
                     SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
                     + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
@@ -62,7 +111,7 @@
                AND prf.user_sex = \"$user_sex$\"
                AND prf.user_interest_sex = \"$user_interest_sex$\"
                ORDER BY distance
-               LIMIT $limit$;"
+               LIMIT $limit$;")
         req (replace-dollar-template-by-keyvals req args)]
     (sqlreq req)))
 
@@ -71,42 +120,20 @@
   "request all users with same sexual interest and
    best matching of the questionaire."
   [& {:keys [user_lon user_lat user_sex user_interest_sex
-             question_1 question_2 question_3
-             question_4 question_5 question_6
-             question_7 question_8 question_9
-             question_10 max-match-variance limit] :as args}]
-  (let [req "SELECT usr.id, usr.name, usr.created_at,
-               ACOS(
-                    SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
-                    + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
-                    - RADIANS($user_lon$))
-                    ) * 6380 AS distance,
-               POW($question_1$ - prf.question_1, 2) +
-               POW($question_2$ - prf.question_2, 2) +
-               POW($question_3$ - prf.question_3, 2) +
-               POW($question_4$ - prf.question_4, 2) +
-               POW($question_5$ - prf.question_5, 2) +
-               POW($question_6$ - prf.question_6, 2) +
-               POW($question_7$ - prf.question_7, 2) +
-               POW($question_8$ - prf.question_8, 2) +
-               POW($question_9$ - prf.question_9, 2) +
-               POW($question_10$ - prf.question_10, 2) AS match_variance
-               FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id
-               WHERE POW($question_1$ - prf.question_1, 2) +
-                     POW($question_2$ - prf.question_2, 2) +
-                     POW($question_3$ - prf.question_3, 2) +
-                     POW($question_4$ - prf.question_4, 2) +
-                     POW($question_5$ - prf.question_5, 2) +
-                     POW($question_6$ - prf.question_6, 2) +
-                     POW($question_7$ - prf.question_7, 2) +
-                     POW($question_8$ - prf.question_8, 2) +
-                     POW($question_9$ - prf.question_9, 2) +
-                     POW($question_10$ - prf.question_10, 2)
-                     < $max-match-variance$
-               AND prf.user_sex = \"$user_sex$\"
-               AND prf.user_interest_sex = \"$user_interest_sex$\"
-               ORDER BY match_variance asc
-               LIMIT $limit$;"
+             max-match-variance limit] :as args}]
+  (let [req (str "SELECT usr.id, usr.name, usr.created_at,
+                  ACOS(
+                       SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
+                       + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
+                       - RADIANS($user_lon$))
+                       ) * 6380 AS distance,"
+                 (generate-sql-match-as-exp)
+                 "FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id"
+                 (generate-sql-match-where-exp)
+                 "AND prf.user_sex = \"$user_sex$\"
+                  AND prf.user_interest_sex = \"$user_interest_sex$\"
+                  ORDER BY match_variance asc
+                  LIMIT $limit$;")
         req (replace-dollar-template-by-keyvals req args)]
     (sqlreq req)))
 
@@ -118,29 +145,20 @@
              question_4 question_5 question_6
              question_7 question_8 question_9
              question_10 created-before-max-days limit] :as args}]
-  (let [req "SELECT usr.id, usr.name, usr.created_at,
-               ACOS(
-                    SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
-                    + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
-                    - RADIANS($user_lon$))
-                    ) * 6380 AS distance,
-               POW($question_1$ - prf.question_1, 2) +
-               POW($question_2$ - prf.question_2, 2) +
-               POW($question_3$ - prf.question_3, 2) +
-               POW($question_4$ - prf.question_4, 2) +
-               POW($question_5$ - prf.question_5, 2) +
-               POW($question_6$ - prf.question_6, 2) +
-               POW($question_7$ - prf.question_7, 2) +
-               POW($question_8$ - prf.question_8, 2) +
-               POW($question_9$ - prf.question_9, 2) +
-               POW($question_10$ - prf.question_10, 2) AS match_variance
-               FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id
-               WHERE DATE_SUB(CURDATE(),INTERVAL $created-before-max-days$ DAY)
-                             <= usr.created_at
-               AND prf.user_sex = \"$user_sex$\"
-               AND prf.user_interest_sex = \"$user_interest_sex$\"
-               ORDER BY usr.created_at desc
-               LIMIT $limit$;"
+  (let [req (str "SELECT usr.id, usr.name, usr.created_at,
+                  ACOS(
+                       SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
+                       + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
+                       - RADIANS($user_lon$))
+                       ) * 6380 AS distance,"
+                 (generate-sql-match-as-exp)
+                 "FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id
+                  WHERE DATE_SUB(CURDATE(),INTERVAL $created-before-max-days$ DAY)
+                                <= usr.created_at
+                  AND prf.user_sex = \"$user_sex$\"
+                  AND prf.user_interest_sex = \"$user_interest_sex$\"
+                  ORDER BY usr.created_at desc
+                  LIMIT $limit$;")
         req (replace-dollar-template-by-keyvals req args)]
     (sqlreq req)))
 
@@ -148,31 +166,19 @@
 (defn- find-fav-users
   "request all favorite users"
   [& {:keys [user_lon user_lat user_sex user_interest_sex
-             question_1 question_2 question_3
-             question_4 question_5 question_6
-             question_7 question_8 question_9
-             question_10 created-before-max-days limit] :as args}]
-  (let [req "SELECT usr.id, usr.name, usr.created_at,
-               ACOS(
-                    SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
-                    + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
-                    - RADIANS($user_lon$))
-                    ) * 6380 AS distance,
-               POW($question_1$ - prf.question_1, 2) +
-               POW($question_2$ - prf.question_2, 2) +
-               POW($question_3$ - prf.question_3, 2) +
-               POW($question_4$ - prf.question_4, 2) +
-               POW($question_5$ - prf.question_5, 2) +
-               POW($question_6$ - prf.question_6, 2) +
-               POW($question_7$ - prf.question_7, 2) +
-               POW($question_8$ - prf.question_8, 2) +
-               POW($question_9$ - prf.question_9, 2) +
-               POW($question_10$ - prf.question_10, 2) AS match_variance
-               FROM profiles prf JOIN users usr ON prf.id = usr.id
-               JOIN user_fav_users fav ON fav.match_id = prf.id
-               WHERE fav.user_id = $id$
-               ORDER BY usr.created_at desc
-               LIMIT $limit$;"
+             created-before-max-days limit] :as args}]
+  (let [req (str "SELECT usr.id, usr.name, usr.created_at,
+                  ACOS(
+                       SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
+                       + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
+                       - RADIANS($user_lon$))
+                       ) * 6380 AS distance,"
+                 (generate-sql-match-as-exp)
+                 "FROM profiles prf JOIN users usr ON prf.id = usr.id
+                  JOIN user_fav_users fav ON fav.match_id = prf.id
+                  WHERE fav.user_id = $id$
+                  ORDER BY usr.created_at desc
+                  LIMIT $limit$;")
         req (replace-dollar-template-by-keyvals req args)]
     (sqlreq req)))
 
@@ -201,9 +207,8 @@
 (defn- sql-resp-transform-variance
   "express match variance in percent"
   [sql-res]
-  (let [nr-quest 10
-        max-var 16
-        var2per (fn [var] (when var (Math/round (* 100 (/ var (* nr-quest max-var))))))]
+  (let [max-var 16
+        var2per (fn [var] (when var (Math/round (* 100 (/ var (* setup/nr-questions max-var))))))]
     (map
      #(assoc-in % [:match_variance] (var2per (% :match_variance)))
      sql-res)))
@@ -223,6 +228,7 @@
    entries are assigned to the values."
   [sql-res]
   (reduce #(assoc %1 (%2 :id) (dissoc %2 :id)) {} sql-res))
+
 
 (defn- transform-sql-resp
   "transform sql response to application specific json
@@ -267,9 +273,8 @@
            max-hits-recently-created 10} :as args}]
   (let [[{:keys [level]}] (find-user-by-id user-id)]
     (if (= level 1)
-      (let [nr-quest 10
-            max-var 16
-            per2var (fn [var] (* nr-quest max-var (/ var 100.0)))
+      (let [max-var 16
+            per2var (fn [var] (* setup/nr-questions max-var (/ var 100.0)))
             max-match-variance (per2var max-match-variance)
             usr-prf (first (find-profile :id user-id))
             trg-prf (map-sex-interest usr-prf)

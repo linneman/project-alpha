@@ -304,10 +304,11 @@
                              (sql/fields :movies.author :movies.title :rank)
                              (sql/with movies)
                              (sql/where {:user_id (:id profile)}))
-                 ]
-             (assoc profile
-               :user_fav_books fav-book-list
-               :user_fav_movies fav-movie-list)))
+                 full-prof (assoc profile
+                             :user_fav_books fav-book-list
+                             :user_fav_movies fav-movie-list)]
+             (apply dissoc full-prof (map #(keyword (str "question_" %))
+                                          (range (inc setup/nr-questions) (count full-prof))))))
          _profiles)))
 
 
@@ -325,7 +326,7 @@
         chk-field-set #{:user_sex :user_interest_sex
                         :user_age :user_lon :user_lat}
         chk-field-set (reduce conj chk-field-set
-                              (map #(keyword (str "question_" %)) (range 1 11)))
+                              (map #(keyword (str "question_" %)) (range 1 (inc setup/nr-questions))))
         prf (select-keys prf chk-field-set)
         missing-entries (filter #(not (val %)) prf)
         kw2str (fn [kw] (apply str (rest (str kw))))]

@@ -34,6 +34,9 @@
 (def reset-pw-email-msg-path "resources/templates/$lang$/reset_pw_email_msg.txt")
 (def reset-pw-email-subj-path "resources/templates/$lang$/reset_pw_email_subj.txt")
 
+;;; --- profile setup ---
+(def ^{:doc "questionaire from question_1 .. question_<nr-questions>"} nr-questions 7)
+
 
 ;;; --- Connection parameters to SQL database, currently MySQL ---
 
