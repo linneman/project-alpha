@@ -239,7 +239,7 @@
     (check-profile-integrity id)))
 
 
-(defn- start-profile-flush-cache-timer
+(defn start-profile-flush-cache-timer
   "starts a timer which writes back the cached data
    for users profile after the specified timer in seconds."
   [period]
@@ -252,14 +252,12 @@
        (schedule task (long period) (long period)))))
 
 
-(defn- stop-profile-flush-cache-timer
+(defn stop-profile-flush-cache-timer
   []
   "stops flushing the profile cache"
   (. profile-flush-timer (cancel)))
 
 
-;;; start the profile cache flush timer
-(start-profile-flush-cache-timer 60000)
 
 
 

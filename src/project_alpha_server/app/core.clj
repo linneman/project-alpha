@@ -31,6 +31,8 @@
         [project-alpha-server.lib.rewrite]
         [clojure.pprint :only [pprint]]
         [clojure.data.json :only [json-str write-json read-json]]
+        [cljs.repl :only (repl)]
+        [cljs.repl.browser :only (repl-env)]
         [macros.macros]))
 
 
@@ -188,13 +190,35 @@
       handler/api))
 
 
-(defonce server (jetty/run-jetty #'app
-                                 {:port 3000 :join? false}))
+(defn start-server
+  "starts the websever"
+  []
+  ;;; start the profile cache flush timer
+  (start-profile-flush-cache-timer 60000)
 
-(defn -main [& args]
-  (.start server)
-  (swank.swank/start-server :port 4005)
+  (defonce server (jetty/run-jetty #'app
+                                 {:port 3000 :join? false}))
+  (.start server))
+
+
+(defn stop-server
+  "stop the webserver"
+  []
+  (.stop server)
+  (stop-profile-flush-cache-timer)
   )
 
-; (.start server)
-; (.stop server)
+
+(defn cljs-repl
+  "starts up the clojurescript repl"
+  []
+  (repl (repl-env)))
+
+
+(defn -main [& args]
+  (swank.swank/start-server :port 4005)
+  (start-server)
+  )
+
+; (start-server)
+; (stop-server)
