@@ -110,6 +110,7 @@
                     ) * 6380 < $max-dist$
                AND prf.user_sex = \"$user_sex$\"
                AND prf.user_interest_sex = \"$user_interest_sex$\"
+               AND usr.level = 1
                ORDER BY distance
                LIMIT $limit$;")
         req (replace-dollar-template-by-keyvals req args)]
@@ -132,6 +133,7 @@
                  (generate-sql-match-where-exp)
                  "AND prf.user_sex = \"$user_sex$\"
                   AND prf.user_interest_sex = \"$user_interest_sex$\"
+                  AND usr.level = 1
                   ORDER BY match_variance asc
                   LIMIT $limit$;")
         req (replace-dollar-template-by-keyvals req args)]
@@ -157,6 +159,7 @@
                                 <= usr.created_at
                   AND prf.user_sex = \"$user_sex$\"
                   AND prf.user_interest_sex = \"$user_interest_sex$\"
+                  AND usr.level = 1
                   ORDER BY usr.created_at desc
                   LIMIT $limit$;")
         req (replace-dollar-template-by-keyvals req args)]
@@ -177,6 +180,7 @@
                  "FROM profiles prf JOIN users usr ON prf.id = usr.id
                   JOIN user_fav_users fav ON fav.match_id = prf.id
                   WHERE fav.user_id = $id$
+                  AND usr.level = 1
                   ORDER BY usr.created_at desc
                   LIMIT $limit$;")
         req (replace-dollar-template-by-keyvals req args)]
