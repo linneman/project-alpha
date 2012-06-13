@@ -29,3 +29,10 @@
   []
   (let [auth-cookie (. goog.net.cookies (get "registered"))]
     (= auth-cookie "true")))
+
+
+(defn clear-app-cookies
+  "removes cookies which is e.g. required for language change"
+  []
+  (. goog.net.cookies (remove "authenticated"))
+  (. goog.net.cookies (remove "registered")))

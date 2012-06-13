@@ -19,7 +19,9 @@
             [goog.events.EventType :as event-type]
             [goog.Timer :as timer]
             [goog.style :as style])
-  (:use [project-alpha-client.lib.logging :only [loginfo]]))
+  (:use [project-alpha-client.lib.logging :only [loginfo]]
+        [project-alpha-client.lib.auth :only [clear-app-cookies]]))
+
 
 (def ^{:doc "atom which holds the keyword of the currently acitve page"
        :private true }
@@ -47,6 +49,17 @@
   []
   (let [url (js/eval (str "window.location.href"))]
     (second (reverse (re-seq #"[A-Za-z0-9:._=?%]+" url)))))
+
+
+(defn switch-lang
+  "switches the current language. deletes the cookies of the
+   previously used language before which is necessary because
+   otherwise login is impossible due to remaining cookie
+   zombies."
+  [lang]
+  (let [new-url (str "/" lang "/" (. (str @page) (substring 1)) ".html")]
+    (clear-app-cookies)
+    (reload-url new-url)))
 
 
 (defn switch-to-page
