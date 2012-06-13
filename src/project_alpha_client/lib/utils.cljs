@@ -23,8 +23,7 @@
             [goog.events :as events]
             [goog.events.EventType :as event-type]
             [goog.style :as style])
-  (:use [project-alpha-client.lib.logging :only [loginfo]]
-        [project-alpha-client.lib.pages :only [get-lang-id]]))
+  (:use [project-alpha-client.lib.logging :only [loginfo]]))
 
 
 (defn- current-url-keyword
@@ -72,19 +71,6 @@
   "usage illustration"
   (get-button-group-value "user_sex")
   (set-button-group-value "user_sex" #{"male"}))
-
-
-(defn- exp-url
-  "expands method by language tag, later derived from URL"
-  [url]
-  (str "/" (get-lang-id) url))
-
-(defn send-request
-  "send XHTTP request as string"
-  ([url str] (send-request url str (fn [e] nil) "GET"))
-  ([url str function] (send-request url str function "GET"))
-  ([url str function method]
-     (goog.net.XhrIo/send (exp-url url) function method str (json/clj->js {"Content-Type" ["application/json"]}))))
 
 
 (defn validate-email

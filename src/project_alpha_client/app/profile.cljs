@@ -30,8 +30,10 @@
             [goog.positioning.Corner :as Corner]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
-        [project-alpha-client.lib.utils :only [send-request get-button-group-value
-                                               set-button-group-value get-element]]))
+        [project-alpha-client.lib.utils :only [get-button-group-value
+                                               set-button-group-value get-element]]
+        [project-alpha-client.lib.ajax :only [send-request]]
+        [project-alpha-client.lib.auth :only [authenticated?]]))
 
 ;;; the profile page (client side equivalent to profile.html)
 (def profile-pane (dom/get-element "profile-pane"))
@@ -347,6 +349,7 @@
                                   (update-tab-panes data)
                                   )))
 
+
   (defn- request-profile-data
     []
     (send-request "/profile"
@@ -443,7 +446,8 @@
   "hides the index-page, activates the status"
   []
   (when profile-pane
-    (update-tab-panes @active-pane-idx) ; do not forget to post last active page data
+    (when (authenticated?)
+      (update-tab-panes @active-pane-idx)) ; do not forget to post last active page data
     (style/showElement profile-pane false)))
 
 

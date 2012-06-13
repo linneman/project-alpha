@@ -21,7 +21,7 @@
             [goog.ui.TabPane :as TabPane]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
-        [project-alpha-client.lib.utils :only [send-request]]))
+        [project-alpha-client.lib.ajax :only [send-request]]))
 
 ;;; the profile page (client side equivalent to index.html)
 (def status-pane (dom/get-element "status-pane"))

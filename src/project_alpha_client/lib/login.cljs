@@ -16,9 +16,9 @@
             [project-alpha-client.lib.json :as json]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
-        [project-alpha-client.lib.utils :only [send-request
-                                               get-modal-dialog
-                                               open-modal-dialog]]))
+        [project-alpha-client.lib.utils :only [get-modal-dialog
+                                               open-modal-dialog]]
+        [project-alpha-client.lib.ajax :only [send-request]]))
 
 ;;; the login pane
 (def login-pane (dom/get-element "login-pane"))

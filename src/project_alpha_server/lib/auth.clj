@@ -15,7 +15,7 @@
             [ring.util.codec :as codec]
             [project-alpha-server.local-settings :as setup])
   (:use [compojure.core :only [GET POST PUT DELETE]]
-        [ring.util.response :only [response]]
+        [ring.util.response :only [response status set-cookie]]
         [project-alpha-server.lib.model]
         [project-alpha-server.lib.crypto :only [get-secret-key]]
         [project-alpha-server.lib.email :only [send-confirm-mail
@@ -217,15 +217,20 @@
           authenticated (:authenticated session)
           uri-white-list (conj uri-white-list login-get-uri)
           uri-html? (fn [uri] (re-seq #"\.html$" uri))
+          is-url-request (uri-html? uri)
           uri-json-request? (fn [uri] (not (re-seq #"\/.*\..*$" uri)))
-          upd-session (if (or (uri-html? uri) (uri-json-request? uri))
+          upd-session (if (or is-url-request (uri-json-request? uri))
                         (assoc session :prev-req-uri uri) ; don't remember css, img, etc.
                         session)]
       (if (or authenticated
-              (and (not (uri-json-request? uri)) (not (uri-html? uri))) ; json and html are forbidden
+              (and (not (uri-json-request? uri)) (not is-url-request)) ; json and html are forbidden
               (not (not-any? #(re-seq
                                (re-pattern
                                 (str "^" (.replace % "/" "\\/") "([\\?|/][\\w=_&]+)?$"))
                                uri) uri-white-list)))
         (handler request)
-        (-> (response (forward-url login-get-uri)) (assoc :session upd-session))))))
+        (if is-url-request
+          (-> (response (forward-url login-get-uri)) (assoc :session upd-session))
+          (-> (set-cookie
+               (status (response "NOT AUTHENTICATED") 403)
+               "authenticated" "false")))))))

@@ -1,8 +1,8 @@
 (defproject project-alpha "1.0.0-SNAPSHOT"
   :description "clojure based web application"
   :dependencies [[org.clojure/clojure "1.3.0"]
-                 [ring/ring-core "0.3.11"]
-                 [ring/ring-jetty-adapter "0.3.11"]
+                 [ring/ring-core "1.1.0"]
+                 [ring/ring-jetty-adapter "1.1.0"]
                  [ring-json-params "0.1.3"]
                  [compojure "0.6.5" :exclusions
                   [org.clojure/clojure org.clojure/clojure-contrib]]

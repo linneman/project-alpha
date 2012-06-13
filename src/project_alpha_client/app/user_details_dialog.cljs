@@ -28,7 +28,8 @@
   (:use [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.utils
          :only [get-modal-dialog open-modal-dialog
-                send-request get-element init-alpha-button]]
+                get-element init-alpha-button]]
+        [project-alpha-client.lib.ajax :only [send-request]]
         [project-alpha-client.lib.math :only [floor ceil abs]]))
 
 

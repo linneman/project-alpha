@@ -67,7 +67,7 @@
 (def ^{:private true
        :doc "list of handlers which are not bloacked by authentication"}
   white-list-handlers
-  [login-post-uri register-get-uri register-post-uri
+  ["/" login-post-uri register-get-uri register-post-uri
    "/user" "/confirm" "/reset_pw_req" "/reset_pw_conf"])
 
 

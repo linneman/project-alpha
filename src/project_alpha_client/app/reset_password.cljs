@@ -22,7 +22,7 @@
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.register :only [open-newpassword-dialog]]
         [project-alpha-client.lib.logging :only [loginfo]]
-        [project-alpha-client.lib.utils :only [send-request]]))
+        [project-alpha-client.lib.ajax :only [send-request]]))
 
 ;;; the reset password page (client side equivalent to index.html)
 (def reset-password-pane (dom/get-element "reset-password-pane"))
