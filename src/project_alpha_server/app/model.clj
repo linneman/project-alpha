@@ -209,7 +209,14 @@
   (sql/has-one profiles {:fk :user_id})
   (sql/has-one movies {:fk :id}))
 
-(def profile-cache (atom {}))
+
+(def profile-cache
+  (agent {}
+         :error-mode :continue
+         :error-handler
+         (fn err-handler-fn [ag ex]
+           (err-println "Exception" ex "occured while writing profile cache data" @ag))))
+
 (declare write-user-fav-books write-user-fav-movies check-profile-integrity)
 
 
@@ -245,7 +252,7 @@
   [period]
   (let [task (proxy [TimerTask] []
                (run []
-                 (swap! profile-cache flush-profile-cache)
+                 (send-off profile-cache flush-profile-cache)
                  (println "profile cache flushed")))]
     (def profile-flush-timer (new Timer))
     (. profile-flush-timer
@@ -267,7 +274,7 @@
 (defn update-profile
   "queues new profile data for db storage"
   [id fields]
-  (swap! profile-cache
+  (send-off profile-cache
          #(let [merged-fields (if % (merge (% id) fields) fields)
                 mf-and-modified (assoc merged-fields
                                   :modified (java.util.Date.))]
@@ -279,7 +286,7 @@
    e.g. required before accessing client functions which retrieve
    this profile data (search)."
   [id]
-  (swap! profile-cache #(when % (flush-profile-cache-id id %)))
+  (send-off profile-cache #(when % (flush-profile-cache-id id %)))
   (println (str "flushed profile for user id " id))
   (check-profile-integrity id))
 
@@ -372,7 +379,7 @@
   "updates cache and retrieves profile data
    for given id."
   [id]
-  (swap! profile-cache flush-profile-cache)
+  (flush-profile id)
   (first (find-profile :id id)))
 
 
@@ -393,7 +400,7 @@
 
   (def a (get-profile 88))
   (delete-profile :id 4)
-  (swap! profile-cache flush-profile-cache)
+  (send-off profile-cache flush-profile-cache)
 
   (start-profile-flush-cache-timer 60000)
   (stop-profile-flush-cache-timer)

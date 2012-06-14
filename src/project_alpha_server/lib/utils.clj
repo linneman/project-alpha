@@ -56,3 +56,9 @@
   [url]
   (format "<html><head><meta  http-equiv=\"refresh\" content=\"0; URL=%s\"></head><body>forwarding ...</body></html>" url))
 
+
+(defn err-println
+  "println for STDERR"
+  [& args]
+  (binding [*out* *err*]
+    (apply println args)))
