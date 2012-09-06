@@ -9,3 +9,16 @@
   /* display:none; */
   opacity:0;
 }
+
+
+#compose-msg-dialog #cmp-msg-editor {
+    width: 600px;
+    height: 200px;
+    background-color: white;
+    border: 1px solid grey;
+}
+
+#compose-msg-dialog {
+    width:700px;
+    height:400px;
+}

@@ -166,6 +166,29 @@
   (drop-user-fav-movies)
   )
 
+(defn create-messages
+  "creates messages table"
+  []
+  (create-table
+   :messages
+   [:msg_id :integer "PRIMARY KEY" "AUTO_INCREMENT"]
+   [:reference_msg_id :integer]
+   [:from_user_id :integer]
+   [:to_user_id :integer]
+   [:creation_date "timestamp"]
+   [:text "text"]))
+
+(defn drop-messages
+  "deletes messages table"
+  []
+  (drop-table :messages))
+
+(comment usage illustration
+
+  (create-messages)
+  (drop-messages)
+
+  )
 
 ;; --- information retrieval ---
 
