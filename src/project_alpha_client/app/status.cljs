@@ -52,6 +52,13 @@
   (. editor (makeEditable))
 
 
+  (defn- render-ref-mail
+    "renders user data"
+    [dialog html-txt]
+    (let [html-txt-elem (get-element "ref-msgs" (. dialog (getContentElement)))]
+      (set! (. html-txt-elem -innerHTML) html-txt)
+      ))
+
   (defn open-compose-msg-dialog
     "opens a new compose message dialog with the addresse and a table
      of all previous messages as arguments."
@@ -59,6 +66,7 @@
     (let [msg-title (get-element "compose-msg-dialog-title" status-pane)
           msg-title (str (goog.dom.getTextContent msg-title) user-name)]
       (. msg-compose-dialog (setTitle msg-title)))
+    (render-ref-mail msg-compose-dialog (reduce str referenced-msg-tab))
     (open-modal-dialog msg-compose-dialog)
     )
 
@@ -66,6 +74,8 @@
   (comment usage illustration
      (open-compose-msg-dialog "Sabinchen" ["<p>Message from Sabinchen</p>" "<p>Previous message from me</p>"])
      )
+
+
 
 
   ; --- receive and sent messages tab pane ---

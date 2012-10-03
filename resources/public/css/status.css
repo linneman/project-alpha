@@ -27,7 +27,7 @@
     border: 1px solid grey;
 }
 
-#compose-msg-dialog #referred-msgs {
+#compose-msg-dialog #ref-msgs {
     font-variant:normal;
     font-size:medium;
     width:100%;
