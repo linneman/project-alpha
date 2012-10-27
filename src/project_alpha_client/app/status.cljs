@@ -59,6 +59,26 @@
       (set! (. html-txt-elem -innerHTML) html-txt)
       ))
 
+
+  (defn- set-compose-enabled-state
+    "The same dialog pane is used for composing a new message where
+     the current message stream is rendered at the bottom of the
+     dialog pane and for just showing this message stream. In the
+     latter case the editor and the send/abort buttons are not
+     rendered. This function is used to switch between both states."
+    [enabled]
+    (let [elem (. msg-compose-dialog (getContentElement))]
+      (style/showElement
+       (get-element "cmp-msg-toolbar" elem)
+       enabled)
+      (style/showElement
+       (get-element "cmp-msg-editor" elem)
+       enabled)
+      (style/showElement
+       (get-element "buttons" elem)
+       enabled)))
+
+
   (defn open-compose-msg-dialog
     "opens a new compose message dialog with the addresse and a table
      of all previous messages as arguments."
@@ -67,14 +87,28 @@
           msg-title (str (goog.dom.getTextContent msg-title) user-name)]
       (. msg-compose-dialog (setTitle msg-title)))
     (render-ref-mail msg-compose-dialog (reduce str referenced-msg-tab))
+    (set-compose-enabled-state true)
+    (open-modal-dialog msg-compose-dialog)
+    )
+
+
+  (defn open-show-msg-dialog
+    "opens the same dialog as with open-compose-msg-dialog but
+     shows only the message stream and hides the editor pane"
+    [user-name msg-tab]
+    (let [msg-title (get-element "show-msg-dialog-title" status-pane)
+          msg-title (str (goog.dom.getTextContent msg-title) user-name)]
+      (. msg-compose-dialog (setTitle msg-title)))
+    (render-ref-mail msg-compose-dialog (reduce str msg-tab))
+    (set-compose-enabled-state false)
     (open-modal-dialog msg-compose-dialog)
     )
 
 
   (comment usage illustration
      (open-compose-msg-dialog "Sabinchen" ["<p>Message from Sabinchen</p>" "<p>Previous message from me</p>"])
+     (open-show-msg-dialog "Sabinchen" ["<p>Message from Sabinchen</p>" "<p>Previous message from me</p>"])
      )
-
 
 
 
