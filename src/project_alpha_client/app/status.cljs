@@ -42,17 +42,19 @@
          :ok-button-id "confirm-compose-msg"
          :cancel-button-id "cancel-compose-msg"
          :dispatched-event :msg-compose-dialog-confirmed)]
+    (style/setStyle (. dialog (getElement)) "z-index", "4")
     (def msg-compose-dialog dialog)
     (def confirm-msg-compose-button ok-button)
     (def cancel-msg-compose-button cancel-button))
 
+
   (def editor (editor/create "cmp-msg-editor" "cmp-msg-toolbar"))
   ;; (open-modal-dialog msg-compose-dialog)
-  (. editor (setHtml false txt true))
+  (. editor (setHtml false "" true))
   (. editor (makeEditable))
 
 
-  (defn- render-ref-mail
+  (defn- set-ref-mail-html-txt
     "renders user data"
     [dialog html-txt]
     (let [html-txt-elem (get-element "ref-msgs" (. dialog (getContentElement)))]
@@ -79,36 +81,84 @@
        enabled)))
 
 
+  (defn- render-msg-stream-html
+    "generates the html stream for the array of the
+     message data stream received by
+     render-communication-stream-with"
+    [msg-array]
+    (reduce #(str %1 ("text" %2) "<br />") "" msg-array))
+
+
+  (defn- render-communication-stream-with
+    "Compose a new message for user with given id. Function retrieves all
+     previous messages with ajax request before opening the compose message
+     dialog."
+    [id msg-title]
+    (open-modal-dialog msg-compose-dialog)
+    (send-request (str "/correspondence/" id)
+                  ""
+                  (fn [ajax-evt]
+                    (let [resp (. (. ajax-evt -target) (getResponseText))
+                          user-data (json/parse resp)
+                          name-array (first user-data)
+                          receiver-name (second (second name-array))
+                          msg-array (second user-data)
+                          msg-title (str msg-title receiver-name)]
+                      (when msg-array
+                        (def x user-data)
+                        (set-ref-mail-html-txt msg-compose-dialog
+                                               (render-msg-stream-html msg-array))
+                        (. msg-compose-dialog (setTitle msg-title))
+                        (style/showElement (get-element "compose_request_progress") false))
+                      (loginfo (str "answer received: " resp))
+                      )))
+                  "GET")
+
+  ;(render-communication-stream-with 5061 "Nachricht senden an: ")
+
+
   (defn open-compose-msg-dialog
     "opens a new compose message dialog with the addresse and a table
      of all previous messages as arguments."
-    [user-name referenced-msg-tab]
+    [id]
     (let [msg-title (get-element "compose-msg-dialog-title" status-pane)
-          msg-title (str (goog.dom.getTextContent msg-title) user-name)]
-      (. msg-compose-dialog (setTitle msg-title)))
-    (render-ref-mail msg-compose-dialog (reduce str referenced-msg-tab))
-    (set-compose-enabled-state true)
-    (open-modal-dialog msg-compose-dialog)
+          msg-title (goog.dom.getTextContent msg-title)]
+      (set-compose-enabled-state true)
+      (. editor (setHtml false "" true))
+      (render-communication-stream-with id msg-title)
+      )
     )
 
 
   (defn open-show-msg-dialog
-    "opens the same dialog as with open-compose-msg-dialog but
-     shows only the message stream and hides the editor pane"
-    [user-name msg-tab]
+    "opens a new compose message dialog with the addresse and a table
+     of all previous messages as arguments."
+    [id]
     (let [msg-title (get-element "show-msg-dialog-title" status-pane)
-          msg-title (str (goog.dom.getTextContent msg-title) user-name)]
-      (. msg-compose-dialog (setTitle msg-title)))
-    (render-ref-mail msg-compose-dialog (reduce str msg-tab))
-    (set-compose-enabled-state false)
-    (open-modal-dialog msg-compose-dialog)
+          msg-title (goog.dom.getTextContent msg-title)]
+      (set-compose-enabled-state false)
+      (render-communication-stream-with id msg-title)
+      )
     )
 
 
-  (comment usage illustration
-     (open-compose-msg-dialog "Sabinchen" ["<p>Message from Sabinchen</p>" "<p>Previous message from me</p>"])
-     (open-show-msg-dialog "Sabinchen" ["<p>Message from Sabinchen</p>" "<p>Previous message from me</p>"])
-     )
+  (comment usage-illustration
+           (open-compose-msg-dialog 5061)
+           (open-compose-msg-dialog "5061")
+
+           (open-show-msg-dialog 5061)
+           )
+
+
+  (def ^{:private true
+         :doc "event handler for triggering compose message dialog"}
+    user-dialog-reactor
+    (dispatch/react-to
+     #{:send-msg-to-user}
+     (fn [evt data]
+       (open-compose-msg-dialog data)
+       (loginfo (pr-str evt data)))))
+
 
 
 

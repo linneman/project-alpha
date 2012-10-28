@@ -173,6 +173,7 @@
   (GET "/user-fav-user-ids" {session :session} (json-str (get-all-fav-users-of (:id session))))
   (POST "/add-fav-user" {params :params session :session} (add-fav-user :user_id (:id session) :match_id (params "match_id")) "OK")
   (POST "/del-fav-user" {params :params session :session} (delete-fav-user :user_id (:id session) :match_id (params "match_id")) "OK")
+  (GET "/correspondence/:id" {session :session params :route-params} (do (println (str "from: " (:id session) ", to: " (:id params))) (json-str (get-correspondence (:id session) (:id params)))))
   (GET "/" _ (forward-url (str "/" setup/default-language "/index.html")))
   (route/resources "/")
   (route/not-found "Page not found"))

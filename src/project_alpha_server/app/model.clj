@@ -569,3 +569,62 @@
     {:author "Marcel Proust" :title "Verlorene Zeit" :rank 2}])
 
   )
+
+
+;; --- messages ---
+
+(sql/defentity messages)
+
+(defn add-msg
+  "add message
+   (add-msg :reference_msg_id x :from_user_id y :to_user_id z :text text)"
+  [& {:as args}]
+  (sql/insert messages
+              (sql/values args)))
+
+(defn delete-msg
+  "delete message (delete-msg :message_id x)"
+  [& {:as args}]
+  (sql/delete messages (sql/where args)))
+
+
+;; usage illustration
+; (add-msg :reference_msg_id 0 :from_user_id 6 :to_user_id 7 :text "Hallo Welt!")
+; (delete-msg :msg_id 1)
+
+(comment
+  (add-msg :reference_msg_id 0 :from_user_id 6 :to_user_id 5061 :text "Hallo Sabinchen")
+  (add-msg :reference_msg_id 3 :from_user_id 5061 :to_user_id 6 :text "Hallo Otto")
+  (add-msg :reference_msg_id 4 :from_user_id 6 :to_user_id 5061 :text "Sabinchen, wie geht's?")
+  (add-msg :reference_msg_id 5 :from_user_id 5061 :to_user_id 6 :text "Gut Otto, Gruss, Sabinchen")
+
+
+  (add-msg :reference_msg_id 0 :from_user_id 6 :to_user_id 360 :text "Hallo Lisa")
+  (add-msg :reference_msg_id 6 :from_user_id 5061 :to_user_id 6 :text "Ach Otto, meld' Dich doch mal bei Sabinchen")
+  (add-msg :reference_msg_id 7 :from_user_id 360 :to_user_id 6 :text "Gruesse von Lisa"))
+
+
+(defn get-correspondence
+  "retrieves the complete communication between two users
+   the function returns an array of two entries. The first
+   element provides a hash table with the users name for
+   the given id's. The second element provides all messages
+   exchanged between both users in descending order
+   (most recent message comes first)."
+  [from_user_id to_user_id]
+  (let [[{from_user_name :name}] (find-user-by-id from_user_id)
+        [{to_user_name :name}] (find-user-by-id to_user_id)]
+    (when (and from_user_name to_user_name)
+      (let [db_res (sql/select messages
+                               (sql/where
+                                (and
+                                 (or {:from_user_id from_user_id} {:from_user_id to_user_id})
+                                 (or {:to_user_id from_user_id} {:to_user_id to_user_id})))
+                               (sql/order :creation_date :DESC))]
+        [{from_user_id from_user_name to_user_id to_user_name}
+         (map #(assoc % :creation_date (str (:creation_date %))) db_res)]))))
+
+
+(comment usage illustration
+         (get-correspondence 6 5061)
+         (json-str (get-correspondence 6 5061)))

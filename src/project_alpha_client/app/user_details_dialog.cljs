@@ -84,13 +84,15 @@
       ))
 
 
-  (def ^{:private true
-         :doc "event handler for user details dialog"}
-    user-dialog-reactor
-    (dispatch/react-to
-     #{:send-msg-to-user}
-     (fn [evt data]
-       (loginfo (pr-str evt data)))))
+  (comment
+    (def ^{:private true
+           :doc "event handler for user details dialog"}
+      user-dialog-reactor
+      (dispatch/react-to
+       #{:send-msg-to-user}
+       (fn [evt data]
+         (loginfo (pr-str evt data)))))
+    )
 
 
   (def ^{:private true
