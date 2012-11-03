@@ -628,3 +628,23 @@
 (comment usage illustration
          (get-correspondence 6 5061)
          (json-str (get-correspondence 6 5061)))
+
+
+(defn new-message
+  "creates a new message for key value args
+   :recv-id and :msg-txt"
+  [& {:keys [recv-id msg-txt]}]
+  (do (println recv-id msg-txt)
+      "OK"))
+
+(comment
+  (new-message :recv-id "561" :msg-txt "Hallo Welt")
+  (def a {:recv-id "561" :msg-txt "Hallo Welt"})
+
+
+
+  (apply new-message (mapcat #(vector (key %) (val %)) a))
+
+
+  (apply-hash a new-message)
+  (apply-hash {:recv-id "561" :msg-txt "Hallo Welt"} new-message))

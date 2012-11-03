@@ -41,7 +41,9 @@
          :title-id "compose-msg-dialog-title"
          :ok-button-id "confirm-compose-msg"
          :cancel-button-id "cancel-compose-msg"
-         :dispatched-event :msg-compose-dialog-confirmed)]
+         :dispatched-event :msg-compose-dialog-confirmed
+         :keep-open true
+         )]
     (style/setStyle (. dialog (getElement)) "z-index", "4")
     (def msg-compose-dialog dialog)
     (def confirm-msg-compose-button ok-button)
@@ -94,6 +96,7 @@
      previous messages with ajax request before opening the compose message
      dialog."
     [id msg-title]
+    (style/showElement (get-element "compose_request_progress") true)
     (open-modal-dialog msg-compose-dialog)
     (send-request (str "/correspondence/" id)
                   ""
@@ -104,12 +107,14 @@
                           receiver-name (second (second name-array))
                           msg-array (second user-data)
                           msg-title (str msg-title receiver-name)]
+                      (set! (. msg-compose-dialog -comm-stream) user-data)
                       (when msg-array
                         (def x user-data)
                         (set-ref-mail-html-txt msg-compose-dialog
                                                (render-msg-stream-html msg-array))
                         (. msg-compose-dialog (setTitle msg-title))
-                        (style/showElement (get-element "compose_request_progress") false))
+                        (style/showElement (get-element "compose_request_progress") false)
+                        )
                       (loginfo (str "answer received: " resp))
                       )))
                   "GET")
@@ -150,6 +155,30 @@
            )
 
 
+  (defn- post-new-message
+    "transfer data for user with given id via ajax post request.
+     The message data is fetched from the message dialog"
+    []
+    (let [comm-stream (. msg-compose-dialog -comm-stream)
+          recv-id (first (second (first comm-stream)))
+          msg-txt (. editor (getCleanContents))]
+      (style/showElement (get-element "compose_request_progress") true)
+      (send-request "/new-message"
+                    (json/generate {:recv-id recv-id :msg-txt msg-txt})
+                    (fn [ajax-evt]
+                      (style/showElement (get-element "compose_request_progress") false)
+                      (let [resp (. (. ajax-evt -target) (getResponseText))]
+                        (loginfo resp)
+                        (if (= resp "OK")
+                          (. msg-compose-dialog (setVisible false))
+                          (js/alert (. (get-element
+                                        "compose-msg-dialog-transmission-error"
+                                        status-pane) -textContent)))))
+                    "POST")))
+
+  ; (post-new-message)
+
+
   (def ^{:private true
          :doc "event handler for triggering compose message dialog"}
     user-dialog-reactor
@@ -159,6 +188,15 @@
        (open-compose-msg-dialog data)
        (loginfo (pr-str evt data)))))
 
+
+  (def ^{:private true
+         :doc "event handler for triggering ajax post for sending new msg."}
+    msg-compose-dialog-confirmend-reactor
+    (dispatch/react-to
+     #{:msg-compose-dialog-confirmed}
+     (fn [evt data]
+       (post-new-message)
+       (loginfo (pr-str evt data)))))
 
 
 
