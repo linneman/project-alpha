@@ -183,11 +183,27 @@
   []
   (drop-table :messages))
 
+(defn create-unread-messages
+  "create table refering unread messages"
+  []
+  (create-table
+   :unread_messages
+   [:unread_id :integer "PRIMARY KEY" "AUTO_INCREMENT"]
+   [:user_id :integer]
+   [:msg_id :integer]))
+
+(defn drop-unread-messages
+  "deletes table for unread messages"
+  []
+  (drop-table :unread_messages))
+
+
 (comment usage illustration
 
   (create-messages)
   (drop-messages)
-
+  (create-unread-messages)
+  (drop-unread-messages)
   )
 
 ;; --- information retrieval ---
@@ -573,19 +589,35 @@
 
 ;; --- messages ---
 
-(sql/defentity messages)
+(declare unread_messages)
+
+(sql/defentity messages
+  (sql/has-one unread_messages))
+
+(sql/defentity unread_messages
+  (sql/pk :msg_id)
+  (sql/has-one messages {:fk :msg_id}))
+
 
 (defn add-msg
   "add message
    (add-msg :reference_msg_id x :from_user_id y :to_user_id z :text text)"
   [& {:as args}]
-  (sql/insert messages
-              (sql/values args)))
+  (sql/insert messages (sql/values args)))
 
 (defn delete-msg
   "delete message (delete-msg :message_id x)"
   [& {:as args}]
   (sql/delete messages (sql/where args)))
+
+
+(defn add-unread-msg
+  [& {:as args}]
+  (sql/insert unread_messages (sql/values args)))
+
+(defn delete-unread-msg
+  [& {:as args}]
+  (sql/delete unread_messages (sql/where args)))
 
 
 ;; usage illustration
@@ -601,7 +633,33 @@
 
   (add-msg :reference_msg_id 0 :from_user_id 6 :to_user_id 360 :text "Hallo Lisa")
   (add-msg :reference_msg_id 6 :from_user_id 5061 :to_user_id 6 :text "Ach Otto, meld' Dich doch mal bei Sabinchen")
-  (add-msg :reference_msg_id 7 :from_user_id 360 :to_user_id 6 :text "Gruesse von Lisa"))
+  (add-msg :reference_msg_id 7 :from_user_id 360 :to_user_id 6 :text "Gruesse von Lisa")
+  (add-msg :reference_msg_id 9 :from_user_id 6 :to_user_id 366 :text "Gruesse von Otto")
+
+  (add-unread-msg :msg_id 3)
+  (delete-unread-msg :msg_id 3)
+  )
+
+
+(defn- delete-from-unread-msg
+  "removes messages from unread table when
+   message correspondence stream is recieived
+   refer also to function get-correspondence"
+  [from_user_id to_user_id]
+  (let [msg-to-delete
+        (sql/select unread_messages
+                    (sql/fields :unread_id)
+                    (sql/with messages)
+                    (sql/where
+                     (and
+                      {:user_id from_user_id}
+                      {:messages.from_user_id to_user_id}
+                      {:messages.to_user_id from_user_id})))
+        msg-to-delete (map #(:unread_id %) msg-to-delete)]
+    ;(println "(delete-from-unread-msg " from_user_id to_user_id ")")
+    (when (not (empty? msg-to-delete))
+      (sql/delete unread_messages
+                  (sql/where (in :unread_id msg-to-delete))))))
 
 
 (defn get-correspondence
@@ -617,34 +675,41 @@
     (when (and from_user_name to_user_name)
       (let [db_res (sql/select messages
                                (sql/where
-                                (and
-                                 (or {:from_user_id from_user_id} {:from_user_id to_user_id})
-                                 (or {:to_user_id from_user_id} {:to_user_id to_user_id})))
+                                (or
+                                 (and {:from_user_id from_user_id} {:to_user_id to_user_id})
+                                 (and {:from_user_id to_user_id} {:to_user_id from_user_id})))
                                (sql/order :creation_date :DESC))]
-        [{from_user_id from_user_name to_user_id to_user_name}
+        (delete-from-unread-msg from_user_id to_user_id)
+        [{:from-id from_user_id :from-name from_user_name
+          :to-id to_user_id :to-name to_user_name}
          (map #(assoc % :creation_date (str (:creation_date %))) db_res)]))))
 
 
 (comment usage illustration
          (get-correspondence 6 5061)
-         (json-str (get-correspondence 6 5061)))
+         (get-correspondence 5061 6)
+
+         (json-str (get-correspondence 6 5061))
+         (json-str (get-correspondence 5061 6))
+         )
 
 
 (defn new-message
   "creates a new message for key value args
-   :recv-id and :msg-txt"
-  [& {:keys [recv-id msg-txt]}]
-  (do (println recv-id msg-txt)
-      "OK"))
+   :sender-id :recv-id and :msg-txt"
+  [& {:keys [sender-id recv-id msg-txt] :as args}]
+  (println args)
+  (println "->from:" sender-id ", ->to:" recv-id)
+  (let [corr (get-correspondence sender-id recv-id)
+        ref-id (if corr
+                 (:msg_id (first (second corr)))
+                 0)]
+    (when-let [{id :GENERATED_KEY}
+               (add-msg :reference_msg_id ref-id :from_user_id sender-id :to_user_id
+                                            recv-id :text msg-txt)]
+      (add-unread-msg :user_id recv-id :msg_id id)
+      "OK")))
 
 (comment
-  (new-message :recv-id "561" :msg-txt "Hallo Welt")
-  (def a {:recv-id "561" :msg-txt "Hallo Welt"})
-
-
-
-  (apply new-message (mapcat #(vector (key %) (val %)) a))
-
-
-  (apply-hash a new-message)
-  (apply-hash {:recv-id "561" :msg-txt "Hallo Welt"} new-message))
+  (new-message :sender-id 6 :recv-id "561" :msg-txt "Hallo Welt")
+  )

@@ -103,8 +103,8 @@
                   (fn [ajax-evt]
                     (let [resp (. (. ajax-evt -target) (getResponseText))
                           user-data (json/parse resp)
-                          name-array (first user-data)
-                          receiver-name (second (second name-array))
+                          header (first user-data)
+                          receiver-name ("to-name" header)
                           msg-array (second user-data)
                           msg-title (str msg-title receiver-name)]
                       (set! (. msg-compose-dialog -comm-stream) user-data)
@@ -116,6 +116,7 @@
                         (style/showElement (get-element "compose_request_progress") false)
                         )
                       (loginfo (str "answer received: " resp))
+                      (loginfo receiver-name)
                       )))
                   "GET")
 
@@ -160,7 +161,7 @@
      The message data is fetched from the message dialog"
     []
     (let [comm-stream (. msg-compose-dialog -comm-stream)
-          recv-id (first (second (first comm-stream)))
+          recv-id ("to-id" (first comm-stream))
           msg-txt (. editor (getCleanContents))]
       (style/showElement (get-element "compose_request_progress") true)
       (send-request "/new-message"
