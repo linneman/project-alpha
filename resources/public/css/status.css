@@ -60,3 +60,8 @@
     width:32px;
     height:32px;
 }
+
+#status-pane #status-messages {
+    position:absolute;
+    opacity:0;
+}
