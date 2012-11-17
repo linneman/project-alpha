@@ -10,11 +10,62 @@
   opacity:0;
 }
 
+
+#status-pane .result-table {
+    width:100%;
+    height:90%;
+    border: 1px solid black;
+    /* border-collapse:collapse; */
+}
+
+#status-pane .result-table * {
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
+}
+
+#status-pane #search-results table tr,
+#status-pane #favorites table tr {
+   height: 2.4em;
+}
+
+#status-pane .result-table #prototype-row {
+    display:none;
+}
+
+#status-pane .result-table .date { width:5%; }
+#status-pane .result-table .name { width:15%; }
+#status-pane .result-table .dist { width:5%; }
+#status-pane .result-table .match { width:5%; }
+#status-pane .result-table .last-msg { width:60%; }
+#status-pane .result-table .showall { width:5%; }
+#status-pane .result-table .answer { width:5%; }
+
+
+#status-pane .result-controller {
+    width:100%;
+    border: 1px solid black;
+    /* border-collapse:collapse; */
+}
+
+#status-pane .result-controller * {
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
+}
+
+#status-pane .result-controller #prototype-row {
+    display:none;
+}
+
+#status-pane .result-controller .col {
+    width:10%;
+    text-align:center;
+}
+
+
 #compose-msg-dialog {
     width:700px;
     height:500px;
 }
-
 
 #compose-msg-dialog #cmp-msg-toolbar {
     width: 100%;
@@ -35,7 +86,6 @@
     margin:5px;
     overflow:auto;
 }
-
 
 
 #compose-msg-dialog #compose_request_progress {

@@ -23,17 +23,54 @@
     <div id="compose-msg-dialog-title">Nachricht senden an: </div>
     <div id="show-msg-dialog-title">Kommunikation mit: </div>
     <div id="compose-msg-dialog-transmission-error">Fehler bei Datenübertragung zum Server aufgetreten!</div>
+    <div id="showall-user-msg">Details</div>
+    <div id="reply-user-msg">Antworten</div>
   </div>
 
   <div id="msg-tab-pane"></div>
 
   <div id="page1">
     <h2>Neue Nachrichten</h2>
-    <p>...</p>
+    <table id="new-messages-table" class="result-table">
+      <tr id="header-row">
+	<th class="date" id="sort-by-date">Datum</th>
+	<th class="name" id="sort-by-name">Name</th>
+	<th class="dist" id="sort-by-dist">Entfernung</th>
+	<th class="match" id="sort-by-match">Match</th>
+	<th class="last-msg" id="last-msg">Letzte Nachricht</th>
+	<th class="showall"></th>
+	<th class="answer"></th>
+      </tr>
+      <tr id="prototype-row">
+	<td class="date" id="col1"></td>
+	<td class="name" id="col2"></td>
+	<td class="dist" id="col3"></td>
+	<td class="match" id="col4"></td>
+	<td class="last-msg" id="col5"></td>
+	<td class="showall" id="col6"></td>
+	<td class="answer" id="col7"></td>
+
+      </tr>
+    </table>
+
+    <table id="new-messages-controller" class="result-controller">
+      <tr id="prototype-row">
+	<td class="col" id="col1"></td>
+	<td class="col" id="col2"></td>
+	<td class="col" id="col3"></td>
+	<td class="col" id="col4"></td>
+	<td class="col" id="col5"></td>
+	<td class="col" id="col6"></td>
+	<td class="col" id="col7"></td>
+	<td class="col" id="col8"></td>
+	<td class="col" id="col9"></td>
+	<td class="col" id="col10"></td>
+      </tr>
+    </table>
   </div>
 
   <div id="page2">
-    <h2>Gesendete Nachrichten</h2>
+    <h2>Alle Nachrichten</h2>
     <p>...</p>
   </div>
 
