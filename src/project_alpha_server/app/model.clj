@@ -636,6 +636,8 @@
   (add-msg :reference_msg_id 7 :from_user_id 360 :to_user_id 6 :text "Gruesse von Lisa")
   (add-msg :reference_msg_id 9 :from_user_id 6 :to_user_id 366 :text "Gruesse von Otto")
 
+  (add-msg :from_user_id 963 :to_user_id 6 :text "Gruesse von Lisa")
+
   (add-unread-msg :msg_id 3)
   (delete-unread-msg :msg_id 3)
   )
@@ -660,6 +662,66 @@
     (when (not (empty? msg-to-delete))
       (sql/delete unread_messages
                   (sql/where (in :unread_id msg-to-delete))))))
+
+
+(defn- get-received-messages
+  "retrieves all messages addressed to the user
+   with the id 'to_user_id'."
+  [user-id]
+  (sql/select messages
+                    (sql/where {:to_user_id user-id})
+                    (sql/order :creation_date :DESC)))
+
+
+(defn- filter-last-received-messages
+  "filters the lastest messages from the output of
+   (get-received-messages)."
+  [all-recv-msgs]
+  (let [all-senders (set (map :from_user_id all-recv-msgs))]
+    (map
+     (fn [from]
+       (last (sort-by :creation_date (filter #(= from (:from_user_id %)) all-recv-msgs))))
+     all-senders)))
+
+
+(defn- get-unanswered-messages
+  "retries all messages the user has sent but they have been
+   not answered yet. Expects output form (get-received-messages)
+   as second argument."
+  [user-id all-recv-msgs]
+  (let [all-sender-ids (reduce #(conj % (:from_user_id %2)) #{} all-recv-msgs)
+        all-sent-msgs
+        (sql/select messages
+                    (sql/where {:from_user_id user-id}))]
+    (filter identity
+            (map (fn [{to-user-id :to_user_id :as user}]
+                   (when-not (all-sender-ids to-user-id) user))
+                 all-sent-msgs))))
+
+
+(defn get-all-messages
+  "retrieves the lastest messages addressed to the user
+   with given id. Furthermore also message which have
+   been send out but are not ansered yet are given back."
+  [user-id]
+  (let [all-recv-msgs (get-received-messages user-id)
+        last-recv-msgs (filter-last-received-messages all-recv-msgs)
+        unanswered-messages (get-unanswered-messages user-id all-recv-msgs)]
+    (map #(let [[{from_user_name :name}] (find-user-by-id (:from_user_id %))]
+            (into % {:from_user_name from_user_name})) ;; attach user name
+         (concat last-recv-msgs unanswered-messages))))
+
+
+
+(comment usage-illustration
+
+         (def all-recv-msgs (get-received-messages 6))
+         (filter-last-received-messages all-recv-msgs)
+         (get-unanswered-messages 6 all-recv-msgs)
+
+         (get-all-messages 6 )
+
+         )
 
 
 (defn get-correspondence
