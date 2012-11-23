@@ -78,7 +78,9 @@
                  match-correlation (- 100 ((second %) "match_variance"))
                  distance ((second %) "distance")
                  message ((second %) "message")]
-             (vector created-at  name (str distance "km")
+             (vector created-at
+                     (partial render-table-button name :show-user-details (str id))
+                     (str distance "km")
                      (str match-correlation "%")
                      message
                      (partial render-table-button
@@ -104,6 +106,7 @@
      "new-messages-controller"
      (gen-table-data test-data))
 
+    (dispatch/fire :show-user-details (str 5061))
     )
 
 
