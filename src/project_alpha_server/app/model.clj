@@ -706,10 +706,24 @@
   [user-id]
   (let [all-recv-msgs (get-received-messages user-id)
         last-recv-msgs (filter-last-received-messages all-recv-msgs)
-        unanswered-messages (get-unanswered-messages user-id all-recv-msgs)]
-    (map #(let [[{from_user_name :name}] (find-user-by-id (:from_user_id %))]
-            (into % {:from_user_name from_user_name})) ;; attach user name
-         (concat last-recv-msgs unanswered-messages))))
+        unanswered-messages (get-unanswered-messages user-id all-recv-msgs)
+        res (map #(let [[{from_user_name :name}] (find-user-by-id (:from_user_id %))]
+                    (into % {:from_user_name from_user_name})) ;; attach user name
+                 (concat last-recv-msgs unanswered-messages))]
+    (map #(assoc % :creation_date (str (:creation_date %))) res)))
+
+
+(defn get-unread-messages
+  "retreives all messages that have not been read yet."
+  [user-id]
+  (let [res (sql/select unread_messages
+                        (sql/with messages)
+                        (sql/fields :msg_id :messages.reference_msg_id
+                                    :messages.from_user_id :messages.to_user_id
+                                    :messages.creation_date :messages.text)
+                        (sql/where
+                         {:user_id user-id}))]
+    (map #(assoc % :creation_date (str (:creation_date %))) res)))
 
 
 
@@ -720,7 +734,7 @@
          (get-unanswered-messages 6 all-recv-msgs)
 
          (get-all-messages 6 )
-
+         (get-unread-messages 1002)
          )
 
 
