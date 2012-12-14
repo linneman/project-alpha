@@ -34,9 +34,7 @@
 
 #status-pane .result-table .date { width:5%; }
 #status-pane .result-table .name { width:15%; }
-#status-pane .result-table .dist { width:5%; }
-#status-pane .result-table .match { width:5%; }
-#status-pane .result-table .last-msg { width:60%; }
+#status-pane .result-table .last-msg { width:70%; }
 #status-pane .result-table .showall { width:5%; }
 #status-pane .result-table .answer { width:5%; }
 

@@ -41,7 +41,6 @@
 
   ; -- new messages table ---
 
-  (defn unitstr2num [string] (apply js/Number (re-seq #"-?[\d.]+" string)))
   (defn german-date-str-to-ms
     [datestr]
     (let [[day month year] (map js/Number (. datestr (split ".")))]
@@ -54,13 +53,7 @@
      {"sort-by-date" (partial sort #(compare
                                      (german-date-str-to-ms (first %2))
                                      (german-date-str-to-ms (first %1))))
-      "sort-by-name" (partial sort #(compare (second %1) (second %2)))
-      "sort-by-dist" (partial sort #(compare
-                                     (unitstr2num (nth %1 2))
-                                     (unitstr2num (nth %2 2))))
-      "sort-by-match" (partial sort #(compare
-                                      (unitstr2num (nth %2 3))
-                                      (unitstr2num (nth %1 3))))}))
+      "sort-by-name" (partial sort #(compare (second %1) (second %2)))}))
 
 
   (defn- get-status-msg-text
@@ -73,15 +66,11 @@
     [data]
     (doall
      (map #(let [id (first %)
-                 name ((second %) "name")
-                 created-at ((second %) "created_at")
-                 match-correlation (- 100 ((second %) "match_variance"))
-                 distance ((second %) "distance")
-                 message ((second %) "message")]
+                 name ((second %) "from_user_name")
+                 created-at ((second %) "creation_date")
+                 message ((second %) "text")]
              (vector created-at
                      (partial render-table-button name :show-user-details (str id))
-                     (str distance "km")
-                     (str match-correlation "%")
                      message
                      (partial render-table-button
                               (get-status-msg-text "showall-user-msg")
@@ -95,14 +84,6 @@
   ;; result table objects
   (def new-messages-table-atom (atom nil))
 
-  (map #(hash-map ("from_user_id" %)
-                  {"name" ("from_user_name" %)
-                   "created_at" ("creation_date" %)
-                   "message" ("text" %)})
-   @new-messages-table-atom)
-
-  (select-keys {:a 1 :b 2 :c 3} [:a :b])
-
   (defn- request-new-messages []
     "retrieves new messages from server"
     (send-request "/all-messages"
@@ -110,16 +91,14 @@
                   (fn [ajax-evt]
                     (let [resp (. (. ajax-evt -target) (getResponseText))
                           resp (json/parse resp)]
-                      (reset! new-messages-table-atom resp))))
-    )
-
+                      (reset! new-messages-table-atom resp)))))
 
   (comment
 
     (def test-data
       {
-       "6" {"name" "Otto" "created_at" "1.11.2012" "distance" "12" "match_variance" "57" "message" "message 6"}
-       "5061" {"name" "Sabinchen" "created_at" "2.11.2012" "distance" "13" "match_variance" "58" "message" "message 5061"}
+       "6" {"from_user_name" "Otto" "creation_date" "1.11.2012" "text" "message 6" "status" "unanswered"}
+       "5061" {"from_user_name" "Sabinchen" "creation_date" "2.11.2012" "text" "message 5061"}
        }
       )
 
@@ -127,6 +106,12 @@
      "new-messages-table"
      "new-messages-controller"
      (gen-table-data test-data))
+
+    (render-table
+     "new-messages-table"
+     "new-messages-controller"
+     (gen-table-data @new-messages-table-atom))
+
 
     (dispatch/fire :show-user-details (str 5061))
 
@@ -209,7 +194,6 @@
                           msg-title (str msg-title receiver-name)]
                       (set! (. msg-compose-dialog -comm-stream) user-data)
                       (when msg-array
-                        (def x user-data)
                         (set-ref-mail-html-txt msg-compose-dialog
                                                (render-msg-stream-html msg-array))
                         (. msg-compose-dialog (setTitle msg-title))

@@ -62,3 +62,32 @@
   [& args]
   (binding [*out* *err*]
     (apply println args)))
+
+
+(defn sql-resp-transform-date
+  "trim date string to year-month-day"
+  [sql-res key]
+  (map
+   #(assoc-in % [key] (. (str (% key)) substring 0 10))
+   sql-res))
+
+
+(defn sql-resp-transform-to-german-date
+  "trim date string to day.month.year"
+  [sql-res key]
+  (map
+   #(assoc-in % [key]
+              (let [us-date-str (str (% key))
+                    year (. us-date-str substring 0 4)
+                    month (. us-date-str substring 5 7)
+                    day (. us-date-str substring 8 10)]
+                (str day "." month "." year)))
+   sql-res))
+
+
+(defn sql-resp-2-hash-by-id
+  "transforns the sql response data set to a hash set
+   where the id is assigned to the key and all other
+   entries are assigned to the values."
+  [sql-res key]
+  (reduce #(assoc %1 (%2 key) (dissoc %2 key)) {} sql-res))

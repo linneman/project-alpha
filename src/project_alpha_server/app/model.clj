@@ -672,37 +672,6 @@
                     (sql/where {:to_user_id user-id})
                     (sql/order :creation_date :DESC)))
 
-(comment
-
-  (defn- get-received-messages2
-    "retrieves all messages addressed to the user
-   with the id 'to_user_id'."
-    [user-id]
-    (sqlreq
-     "SELECT messages.msg_id, messages.from_user_id, messages.creation_date, messages.text,
-     ACOS(
-       SIN(RADIANS(profiles.user_lat)) * SIN(RADIANS(50.11))
-       + COS(RADIANS(profiles.user_lat)) * COS(RADIANS(50.11)) * COS(RADIANS(profiles.user_lon)
-       - RADIANS(8.68))
-       ) * 6380 AS distance,
-
-     FROM messages
-     LEFT JOIN users
-     ON users.id = messages.from_user_id
-     LEFT JOIN profiles
-     ON profiles.id = messages.from_user_id
-     WHERE messages.to_user_id = 6
-     ORDER BY messages.creation_date DESC;")
-    )
-
-  (reduce
-   #(str %1 "+" (format "POW(users.question_%d-profiles.question_%d,2)" %2 %2))
-   ""
-   (range 1 (inc setup/nr-questions)))
-
-  )
-
-
 
 (defn- filter-last-received-messages
   "filters the lastest messages from the output of
@@ -730,6 +699,18 @@
                  all-sent-msgs))))
 
 
+(defn- transform-sql-resp
+  "transform sql response to application specific json
+   object"
+  [sql-res]
+  (let [hash-by-from_id #(sql-resp-2-hash-by-id % :from_user_id)
+        ger-creation-date #(sql-resp-transform-to-german-date % :creation_date)]
+    (-> sql-res
+        ger-creation-date
+        hash-by-from_id
+        )))
+
+
 (defn get-all-messages
   "retrieves the lastest messages addressed to the user
    with given id. Furthermore also message which have
@@ -738,10 +719,11 @@
   (let [all-recv-msgs (get-received-messages user-id)
         last-recv-msgs (filter-last-received-messages all-recv-msgs)
         unanswered-messages (get-unanswered-messages user-id all-recv-msgs)
+        unanswered-messages (map #(assoc % :status :unanswered) unanswered-messages)
         res (map #(let [[{from_user_name :name}] (find-user-by-id (:from_user_id %))]
                     (into % {:from_user_name from_user_name})) ;; attach user name
                  (concat last-recv-msgs unanswered-messages))]
-    (map #(assoc % :creation_date (str (:creation_date %))) res)))
+    (transform-sql-resp res)))
 
 
 (defn get-unread-messages
@@ -754,7 +736,7 @@
                                     :messages.creation_date :messages.text)
                         (sql/where
                          {:user_id user-id}))]
-    (map #(assoc % :creation_date (str (:creation_date %))) res)))
+    (transform-sql-resp res)))
 
 
 
@@ -766,6 +748,7 @@
 
          (get-all-messages 6 )
          (get-unread-messages 1002)
+
          )
 
 
