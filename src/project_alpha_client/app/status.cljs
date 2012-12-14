@@ -92,6 +92,28 @@
           data)))
 
 
+  ;; result table objects
+  (def new-messages-table-atom (atom nil))
+
+  (map #(hash-map ("from_user_id" %)
+                  {"name" ("from_user_name" %)
+                   "created_at" ("creation_date" %)
+                   "message" ("text" %)})
+   @new-messages-table-atom)
+
+  (select-keys {:a 1 :b 2 :c 3} [:a :b])
+
+  (defn- request-new-messages []
+    "retrieves new messages from server"
+    (send-request "/all-messages"
+                  {}
+                  (fn [ajax-evt]
+                    (let [resp (. (. ajax-evt -target) (getResponseText))
+                          resp (json/parse resp)]
+                      (reset! new-messages-table-atom resp))))
+    )
+
+
   (comment
 
     (def test-data
@@ -107,6 +129,8 @@
      (gen-table-data test-data))
 
     (dispatch/fire :show-user-details (str 5061))
+
+    (request-new-messages)
     )
 
 

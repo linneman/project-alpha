@@ -672,6 +672,37 @@
                     (sql/where {:to_user_id user-id})
                     (sql/order :creation_date :DESC)))
 
+(comment
+
+  (defn- get-received-messages2
+    "retrieves all messages addressed to the user
+   with the id 'to_user_id'."
+    [user-id]
+    (sqlreq
+     "SELECT messages.msg_id, messages.from_user_id, messages.creation_date, messages.text,
+     ACOS(
+       SIN(RADIANS(profiles.user_lat)) * SIN(RADIANS(50.11))
+       + COS(RADIANS(profiles.user_lat)) * COS(RADIANS(50.11)) * COS(RADIANS(profiles.user_lon)
+       - RADIANS(8.68))
+       ) * 6380 AS distance,
+
+     FROM messages
+     LEFT JOIN users
+     ON users.id = messages.from_user_id
+     LEFT JOIN profiles
+     ON profiles.id = messages.from_user_id
+     WHERE messages.to_user_id = 6
+     ORDER BY messages.creation_date DESC;")
+    )
+
+  (reduce
+   #(str %1 "+" (format "POW(users.question_%d-profiles.question_%d,2)" %2 %2))
+   ""
+   (range 1 (inc setup/nr-questions)))
+
+  )
+
+
 
 (defn- filter-last-received-messages
   "filters the lastest messages from the output of
