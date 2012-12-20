@@ -684,45 +684,29 @@
      all-senders)))
 
 
-(defn- get-unanswered-messages
-  "retries all messages the user has sent but they have been
-   not answered yet. Expects output form (get-received-messages)
-   as second argument."
-  [user-id all-recv-msgs]
-  (let [all-sender-ids (reduce #(conj % (:from_user_id %2)) #{} all-recv-msgs)
-        all-sent-msgs
-        (sql/select messages
-                    (sql/where {:from_user_id user-id}))]
-    (filter identity
-            (map (fn [{to-user-id :to_user_id :as user}]
-                   (when-not (all-sender-ids to-user-id) user))
-                 all-sent-msgs))))
-
-
 (defn- transform-sql-resp
   "transform sql response to application specific json
    object"
-  [sql-res]
-  (let [hash-by-from_id #(sql-resp-2-hash-by-id % :from_user_id)
-        ger-creation-date #(sql-resp-transform-to-german-date % :creation_date)]
-    (-> sql-res
-        ger-creation-date
-        hash-by-from_id
-        )))
+  ([sql-res] (transform-sql-resp sql-res :from_user_id))
+  ([sql-res key]
+      (let [hash-by-from_id #(sql-resp-2-hash-by-id % key)
+            ger-creation-date #(sql-resp-transform-to-german-date % :creation_date)]
+        (-> sql-res
+            ger-creation-date
+            hash-by-from_id
+            ))))
 
 
-(defn get-all-messages
+(defn get-read-messages
   "retrieves the lastest messages addressed to the user
    with given id. Furthermore also message which have
    been send out but are not ansered yet are given back."
   [user-id]
   (let [all-recv-msgs (get-received-messages user-id)
         last-recv-msgs (filter-last-received-messages all-recv-msgs)
-        unanswered-messages (get-unanswered-messages user-id all-recv-msgs)
-        unanswered-messages (map #(assoc % :status :unanswered) unanswered-messages)
         res (map #(let [[{from_user_name :name}] (find-user-by-id (:from_user_id %))]
                     (into % {:from_user_name from_user_name})) ;; attach user name
-                 (concat last-recv-msgs unanswered-messages))]
+                 last-recv-msgs)]
     (transform-sql-resp res)))
 
 
@@ -739,15 +723,29 @@
     (transform-sql-resp res)))
 
 
+(defn get-unanswered-messages
+  "retries all messages the user has sent but they have been
+   not answered yet."
+  [user-id]
+  (let [all-recv-msgs (get-received-messages user-id)
+        all-sender-ids (reduce #(conj % (:from_user_id %2)) #{} all-recv-msgs)
+        all-sent-msgs
+        (sql/select messages
+                    (sql/where {:from_user_id user-id}))
+        res (filter identity
+                    (map (fn [{to-user-id :to_user_id :as user}]
+                           (when-not (all-sender-ids to-user-id) user))
+                         all-sent-msgs))]
+    (def x res)
+    (transform-sql-resp res :to_user_id)))
+
 
 (comment usage-illustration
 
-         (def all-recv-msgs (get-received-messages 6))
-         (filter-last-received-messages all-recv-msgs)
-         (get-unanswered-messages 6 all-recv-msgs)
-
-         (get-all-messages 6 )
+         (get-read-messages 6)
+         (get-unread-messages 6)
          (get-unread-messages 1002)
+         (get-unanswered-messages 6)
 
          )
 

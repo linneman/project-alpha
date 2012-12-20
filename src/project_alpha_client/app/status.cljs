@@ -86,7 +86,7 @@
 
   (defn- request-new-messages []
     "retrieves new messages from server"
-    (send-request "/all-messages"
+    (send-request "/read-messages"
                   {}
                   (fn [ajax-evt]
                     (let [resp (. (. ajax-evt -target) (getResponseText))
@@ -298,6 +298,7 @@
   (def tabpane (goog.ui.TabPane. (get-element "msg-tab-pane" status-pane)))
   (. tabpane (addPage (TabPane/TabPage. (get-element "page1" status-pane))))
   (. tabpane (addPage (TabPane/TabPage. (get-element "page2" status-pane))))
+  (. tabpane (addPage (TabPane/TabPage. (get-element "page3" status-pane))))
 
   ) ; (when status-pane)
 
