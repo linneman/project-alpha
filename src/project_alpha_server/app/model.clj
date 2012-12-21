@@ -684,6 +684,16 @@
      all-senders)))
 
 
+(defn- filter-read-messages
+  "filters messages that have been read already"
+  [msgs user-id]
+  (let [unread-msg-ids
+        (set (map :msg_id
+                  (sql/select unread_messages
+                              (sql/where {:user_id user-id}))))]
+    (filter #(not (contains? unread-msg-ids (:msg_id %))) msgs)))
+
+
 (defn- transform-sql-resp
   "transform sql response to application specific json
    object"
@@ -699,11 +709,11 @@
 
 (defn get-read-messages
   "retrieves the lastest messages addressed to the user
-   with given id. Furthermore also message which have
-   been send out but are not ansered yet are given back."
+   with given id."
   [user-id]
   (let [all-recv-msgs (get-received-messages user-id)
         last-recv-msgs (filter-last-received-messages all-recv-msgs)
+        last-recv-msgs (filter-read-messages last-recv-msgs user-id)
         res (map #(let [[{from_user_name :name}] (find-user-by-id (:from_user_id %))]
                     (into % {:from_user_name from_user_name})) ;; attach user name
                  last-recv-msgs)]
@@ -719,7 +729,10 @@
                                     :messages.from_user_id :messages.to_user_id
                                     :messages.creation_date :messages.text)
                         (sql/where
-                         {:user_id user-id}))]
+                         {:user_id user-id}))
+        res (map #(let [[{from_user_name :name}] (find-user-by-id (:from_user_id %))]
+                    (into % {:from_user_name from_user_name})) ;; attach user name
+                 res)]
     (transform-sql-resp res)))
 
 

@@ -83,10 +83,11 @@
 
   ;; result table objects
   (def new-messages-table-atom (atom nil))
+  (def read-messages-table-atom (atom nil))
 
   (defn- request-new-messages []
     "retrieves new messages from server"
-    (send-request "/read-messages"
+    (send-request "/unread-messages"
                   {}
                   (fn [ajax-evt]
                     (let [resp (. (. ajax-evt -target) (getResponseText))
@@ -95,6 +96,7 @@
                        (get-element "msg_request_progress" status-pane) true)
                       (when @new-messages-table-atom
                         (release-sortable-search-result-table @new-messages-table-atom))
+                      (def x resp)
                       (reset! new-messages-table-atom
                               (render-table
                                "new-messages-table"
@@ -104,7 +106,30 @@
                        (get-element "msg_request_progress" status-pane) false)
                       ))))
 
+
+  (defn- request-read-messages []
+    "retrieves read messages from server"
+    (send-request "/read-messages"
+                  {}
+                  (fn [ajax-evt]
+                    (let [resp (. (. ajax-evt -target) (getResponseText))
+                          resp (json/parse resp)]
+                      (style/showElement
+                       (get-element "msg_request_progress" status-pane) true)
+                      (when @read-messages-table-atom
+                        (release-sortable-search-result-table @read-messages-table-atom))
+                      (reset! read-messages-table-atom
+                              (render-table
+                               "read-messages-table"
+                               "read-messages-controller"
+                               (gen-table-data resp)))
+                      (style/showElement
+                       (get-element "msg_request_progress" status-pane) false)
+                      ))))
+
+
   (request-new-messages)
+  (request-read-messages)
 
   (comment
 
@@ -119,7 +144,7 @@
             (render-table
              "new-messages-table"
              "new-messages-controller"
-             (gen-table-data test-data)))
+             (gen-table-data test-data )))
     )
 
 

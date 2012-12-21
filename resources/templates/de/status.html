@@ -62,7 +62,33 @@
 
   <div id="page2">
     <h2>Gelesene Nachrichten</h2>
-    <p>...</p>
+    <table id="read-messages-table" class="result-table">
+      <tr id="header-row">
+	<th class="date" id="sort-by-date">Datum</th>
+	<th class="name" id="sort-by-name">Name</th>
+	<th class="last-msg" id="last-msg">Letzte Nachricht</th>
+	<th class="showall"></th>
+	<th class="answer"></th>
+      </tr>
+      <tr id="prototype-row">
+	<td class="date" id="col1"></td>
+	<td class="name" id="col2"></td>
+	<td class="last-msg" id="col3"></td>
+	<td class="showall" id="col4"></td>
+	<td class="answer" id="col5"></td>
+
+      </tr>
+    </table>
+
+    <table id="read-messages-controller" class="result-controller">
+      <tr id="prototype-row">
+	<td class="col" id="col1"></td>
+	<td class="col" id="col2"></td>
+	<td class="col" id="col3"></td>
+	<td class="col" id="col4"></td>
+	<td class="col" id="col5"></td>
+      </tr>
+    </table>
   </div>
 
   <div id="page3">
