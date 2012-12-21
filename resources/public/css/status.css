@@ -8,6 +8,7 @@
 #status-pane {
   /* display:none; */
   opacity:0;
+  position:relative;
 }
 
 
@@ -112,4 +113,27 @@
 #status-pane #status-messages {
     position:absolute;
     opacity:0;
+}
+
+#status-pane #msg_request_progress {
+    position:absolute;
+    width:100%;
+    height:100%;
+    background-color:#E0E0E0;
+    top:0px;
+    left:0px;
+    opacity:1;
+}
+
+#status-pane #msg_request_progress h3 {
+    text-align:center;
+    margin-top:15%;
+}
+
+#status-pane #msg_request_progress img {
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:32px;
+    height:32px;
 }

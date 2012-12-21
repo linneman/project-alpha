@@ -91,7 +91,20 @@
                   (fn [ajax-evt]
                     (let [resp (. (. ajax-evt -target) (getResponseText))
                           resp (json/parse resp)]
-                      (reset! new-messages-table-atom resp)))))
+                      (style/showElement
+                       (get-element "msg_request_progress" status-pane) true)
+                      (when @new-messages-table-atom
+                        (release-sortable-search-result-table @new-messages-table-atom))
+                      (reset! new-messages-table-atom
+                              (render-table
+                               "new-messages-table"
+                               "new-messages-controller"
+                               (gen-table-data resp)))
+                      (style/showElement
+                       (get-element "msg_request_progress" status-pane) false)
+                      ))))
+
+  (request-new-messages)
 
   (comment
 
@@ -102,20 +115,11 @@
        }
       )
 
-    (render-table
-     "new-messages-table"
-     "new-messages-controller"
-     (gen-table-data test-data))
-
-    (render-table
-     "new-messages-table"
-     "new-messages-controller"
-     (gen-table-data @new-messages-table-atom))
-
-
-    (dispatch/fire :show-user-details (str 5061))
-
-    (request-new-messages)
+    (reset! new-messages-table-atom
+            (render-table
+             "new-messages-table"
+             "new-messages-controller"
+             (gen-table-data test-data)))
     )
 
 
