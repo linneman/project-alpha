@@ -19,6 +19,7 @@
             [goog.events :as events]
             [goog.ui.Button :as Button]
             [goog.ui.TabPane :as TabPane]
+            [goog.Timer :as timer]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.utils :only [get-button-group-value
                                                set-button-group-value
@@ -63,22 +64,23 @@
 
   (defn- gen-table-data
     "transforms ajax response data in input for table-controller functions"
-    [data]
-    (doall
-     (map #(let [id (first %)
-                 name ((second %) "from_user_name")
-                 created-at ((second %) "creation_date")
-                 message ((second %) "text")]
-             (vector created-at
-                     (partial render-table-button name :show-user-details (str id))
-                     message
-                     (partial render-table-button
-                              (get-status-msg-text "showall-user-msg")
-                              :showall-user-msg (str id))
-                     (partial render-table-button
-                              (get-status-msg-text "reply-user-msg")
-                              :send-msg-to-user (str id))))
-          data)))
+    ([data] (gen-table-data data "from_user_name"))
+    ([data username]
+        (doall
+         (map #(let [id (first %)
+                     name ((second %) username)
+                     created-at ((second %) "creation_date")
+                     message ((second %) "text")]
+                 (vector created-at
+                         (partial render-table-button name :show-user-details (str id))
+                         message
+                         (partial render-table-button
+                                  (get-status-msg-text "showall-user-msg")
+                                  :showall-user-msg (str id))
+                         (partial render-table-button
+                                  (get-status-msg-text "reply-user-msg")
+                                  :send-msg-to-user (str id))))
+              data))))
 
 
   ;; result table objects
@@ -96,7 +98,6 @@
                        (get-element "msg_request_progress" status-pane) true)
                       (when @new-messages-table-atom
                         (release-sortable-search-result-table @new-messages-table-atom))
-                      (def x resp)
                       (reset! new-messages-table-atom
                               (render-table
                                "new-messages-table"
@@ -104,7 +105,8 @@
                                (gen-table-data resp)))
                       (style/showElement
                        (get-element "msg_request_progress" status-pane) false)
-                      ))))
+                      (style/showElement
+                       (get-element "msg_no_new_messages" status-pane) (empty? resp))))))
 
 
   (defn- request-read-messages []
@@ -114,6 +116,7 @@
                   (fn [ajax-evt]
                     (let [resp (. (. ajax-evt -target) (getResponseText))
                           resp (json/parse resp)]
+                      (def y resp)
                       (style/showElement
                        (get-element "msg_request_progress" status-pane) true)
                       (when @read-messages-table-atom
@@ -125,11 +128,33 @@
                                (gen-table-data resp)))
                       (style/showElement
                        (get-element "msg_request_progress" status-pane) false)
+                      (style/showElement
+                       (get-element "msg_no_read_messages" status-pane) (empty? resp))
                       ))))
 
 
-  (request-new-messages)
-  (request-read-messages)
+  (defn- request-unanswered-messages []
+    "retrieves that have not been answered yet from server"
+    (send-request "/unanswered-messages"
+                  {}
+                  (fn [ajax-evt]
+                    (let [resp (. (. ajax-evt -target) (getResponseText))
+                          resp (json/parse resp)]
+                      (style/showElement
+                       (get-element "msg_request_progress" status-pane) true)
+                      (when @unanswered-messages-table-atom
+                        (release-sortable-search-result-table @unanswered-messages-table-atom))
+                      (reset! unanswered-messages-table-atom
+                              (render-table
+                               "unanswered-messages-table"
+                               "unanswered-messages-controller"
+                               (gen-table-data resp "to_user_name")))
+                      (style/showElement
+                       (get-element "msg_request_progress" status-pane) false)
+                      (style/showElement
+                       (get-element "msg_no_unanswered_messages" status-pane) (empty? resp))
+                      ))))
+
 
   (comment
 
@@ -346,6 +371,14 @@
       (style/setOpacity status-pane 1) ;; important for first load only
       (style/showElement status-pane true)
       (nav/enable-nav-pane)
+
+      ;; request new messages, will be improved (polling, etc.)
+      (timer/callOnce #(do
+                         (request-new-messages)
+                         (request-read-messages)
+                         (request-unanswered-messages)
+                         ) 10)
+
       (loginfo "status page enabled"))
     (do
       (pages/reload-url "/status.html")

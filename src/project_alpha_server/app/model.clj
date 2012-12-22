@@ -737,7 +737,7 @@
 
 
 (defn get-unanswered-messages
-  "retries all messages the user has sent but they have been
+  "retrieves all messages the user has sent but they have been
    not answered yet."
   [user-id]
   (let [all-recv-msgs (get-received-messages user-id)
@@ -748,8 +748,10 @@
         res (filter identity
                     (map (fn [{to-user-id :to_user_id :as user}]
                            (when-not (all-sender-ids to-user-id) user))
-                         all-sent-msgs))]
-    (def x res)
+                         all-sent-msgs))
+        res (map #(let [[{to_user_name :name}] (find-user-by-id (:to_user_id %))]
+                    (into % {:to_user_name to_user_name})) ;; attach user name
+                 res)]
     (transform-sql-resp res :to_user_id)))
 
 
@@ -759,7 +761,6 @@
          (get-unread-messages 6)
          (get-unread-messages 1002)
          (get-unanswered-messages 6)
-
          )
 
 

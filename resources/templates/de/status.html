@@ -31,6 +31,12 @@
 
   <div id="page1">
     <h2>Neue Nachrichten</h2>
+
+    <div id="msg_no_new_messages" class="status-msg-in-pane">
+      <h3>Es sind noch keine neuen Nachrichten eingegangen!</h3>
+      <p>Alle zuletzt eingegangenen Nachrichten werden zunächst unter diesem Reiter gelistet. Die vollständige Nachricht und die gesamte Korrepondenz mit dem jeweiligen Absender wird angezeigt, sobald auf eine der Schaltfläche 'Details' oder 'Antworten' geklickt wird, worauf der entsprechende Listeneintrag nach 'Gelesene Nachrichten' verschoben wird.</p>
+    </div>
+
     <table id="new-messages-table" class="result-table">
       <tr id="header-row">
 	<th class="date" id="sort-by-date">Datum</th>
@@ -62,6 +68,12 @@
 
   <div id="page2">
     <h2>Gelesene Nachrichten</h2>
+
+    <div id="msg_no_read_messages" class="status-msg-in-pane">
+      <h3>Im Moment keine Einträge</h3>
+      <p>Gelesene Korrespondenz wird unter diesem Reiter gelistet.</p>
+    </div>
+
     <table id="read-messages-table" class="result-table">
       <tr id="header-row">
 	<th class="date" id="sort-by-date">Datum</th>
@@ -93,8 +105,41 @@
 
   <div id="page3">
     <h2>Unbeantworte Nachrichten</h2>
-    <p>...</p>
+
+    <div id="msg_no_unanswered_messages" class="status-msg-in-pane">
+      <h3>Im Moment keine Einträge</h3>
+      <p>Sämtliche Nachrichten, die Sie abgesendet haben und die bisher unbeantwortet geblieben sind, werden hier aufgeführt.</p>
+    </div>
+
+    <table id="unanswered-messages-table" class="result-table">
+      <tr id="header-row">
+	<th class="date" id="sort-by-date">Datum</th>
+	<th class="name" id="sort-by-name">Name</th>
+	<th class="last-msg" id="last-msg">Letzte Nachricht</th>
+	<th class="showall"></th>
+	<th class="answer"></th>
+      </tr>
+      <tr id="prototype-row">
+	<td class="date" id="col1"></td>
+	<td class="name" id="col2"></td>
+	<td class="last-msg" id="col3"></td>
+	<td class="showall" id="col4"></td>
+	<td class="answer" id="col5"></td>
+
+      </tr>
+    </table>
+
+    <table id="unanswered-messages-controller" class="result-controller">
+      <tr id="prototype-row">
+	<td class="col" id="col1"></td>
+	<td class="col" id="col2"></td>
+	<td class="col" id="col3"></td>
+	<td class="col" id="col4"></td>
+	<td class="col" id="col5"></td>
+      </tr>
+    </table>
   </div>
+
 
   <div id="msg_request_progress">
     <h3>Daten werden aktualisiert ...</h3>
