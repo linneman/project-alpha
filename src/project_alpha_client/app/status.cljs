@@ -86,6 +86,7 @@
   ;; result table objects
   (def new-messages-table-atom (atom nil))
   (def read-messages-table-atom (atom nil))
+  (def unanswered-messages-table-atom (atom nil))
 
   (defn- request-new-messages []
     "retrieves new messages from server"
@@ -347,6 +348,34 @@
        (loginfo (pr-str evt data)))))
 
 
+  (def
+    ^{:private true
+      :doc "timer for updating new messages,
+            see watched-correspondence-reactor"}
+    update-new-messages-atom (atom nil))
+
+  (def
+    ^{:private true
+      :doc "whenever the correspondence with somebody has been watched
+            either by clicking the corresponding details or by clicking
+            the answer button, a 10 seconds timer is started which
+            triggers updating of new messages. The timer is used to
+            give the user a chance to hit the answer button. Without the
+            timer corresponding correspondece would immediately appear
+            within another pane which might distract the user."}
+    watched-correspondence-reactor
+    (dispatch/react-to
+     #{:showall-user-msg :send-msg-to-user}
+     (fn [evt data]
+       (when @update-new-messages-atom ; clear any previously defined timer
+         (timer/clear @update-new-messages-atom))
+       (reset! update-new-messages-atom
+               (timer/callOnce
+                #(do (request-new-messages)
+                     (request-read-messages)
+                     (reset! update-new-messages-atom nil))
+                10000)))))
+
 
   ; --- receive and sent messages tab pane ---
   (def tabpane (goog.ui.TabPane. (get-element "msg-tab-pane" status-pane)))
@@ -355,6 +384,9 @@
   (. tabpane (addPage (TabPane/TabPage. (get-element "page3" status-pane))))
 
   ) ; (when status-pane)
+
+
+
 
 (def site-enabled-reactor (dispatch/react-to
                            #{:page-switched}
@@ -373,11 +405,9 @@
       (nav/enable-nav-pane)
 
       ;; request new messages, will be improved (polling, etc.)
-      (timer/callOnce #(do
-                         (request-new-messages)
-                         (request-read-messages)
-                         (request-unanswered-messages)
-                         ) 10)
+      (request-new-messages)
+      (request-read-messages)
+      (request-unanswered-messages)
 
       (loginfo "status page enabled"))
     (do
