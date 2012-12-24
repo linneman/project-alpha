@@ -63,25 +63,42 @@
     (goog.dom.getTextContent (get-element dom-id-str status-pane))
     )
 
-  (defn- gen-table-data
-    "transforms ajax response data in input for table-controller functions"
-    ([data] (gen-table-data data "from_user_name"))
-    ([data username]
-        (doall
-         (map #(let [id (first %)
-                     name ((second %) username)
-                     created-at ((second %) "creation_date")
-                     message ((second %) "text")]
-                 (vector created-at
-                         (partial render-table-button name :show-user-details (str id))
-                         message
-                         (partial render-table-button
-                                  (get-status-msg-text "showall-user-msg")
-                                  :showall-user-msg (str id))
-                         (partial render-table-button
-                                  (get-status-msg-text "reply-user-msg")
-                                  :send-msg-to-user (str id))))
-              data))))
+  (defn- gen-received-msg-table-data
+    "transforms ajax response of receveived message data in input
+     for table-controller functions"
+    [data]
+    (doall
+     (map #(let [id (first %)
+                 name ((second %) "from_user_name")
+                 created-at ((second %) "creation_date")
+                 message ((second %) "text")]
+             (vector created-at
+                     (partial render-table-button name :show-user-details (str id))
+                     message
+                     (partial render-table-button
+                              (get-status-msg-text "showall-user-msg")
+                              :showall-user-msg (str id))
+                     (partial render-table-button
+                              (get-status-msg-text "reply-user-msg")
+                              :send-msg-to-user (str id))))
+          data)))
+
+  (defn- gen-send-msg-table-data
+    "transforms ajax response of receveived message data in input
+     for table-controller functions"
+    [data]
+    (doall
+     (map #(let [id (first %)
+                 name ((second %) "to_user_name")
+                 created-at ((second %) "creation_date")
+                 message ((second %) "text")]
+             (vector created-at
+                     (partial render-table-button name :show-user-details (str id))
+                     message
+                     (partial render-table-button
+                              (get-status-msg-text "showall-user-msg")
+                              :showall-user-msg (str id))))
+          data)))
 
 
   ;; result table objects
@@ -106,7 +123,7 @@
                               (render-table
                                "new-messages-table"
                                "new-messages-controller"
-                               (gen-table-data resp)))
+                               (gen-received-msg-table-data resp)))
                       (style/showElement
                        (get-element "msg_request_progress" status-pane) false)
                       (style/showElement
@@ -128,7 +145,7 @@
                               (render-table
                                "read-messages-table"
                                "read-messages-controller"
-                               (gen-table-data resp)))
+                               (gen-received-msg-table-data resp)))
                       (style/showElement
                        (get-element "msg_request_progress" status-pane) false)
                       (style/showElement
@@ -151,7 +168,7 @@
                               (render-table
                                "unanswered-messages-table"
                                "unanswered-messages-controller"
-                               (gen-table-data resp "to_user_name")))
+                               (gen-send-msg-table-data resp)))
                       (style/showElement
                        (get-element "msg_request_progress" status-pane) false)
                       (style/showElement
@@ -358,6 +375,14 @@
 
   (def
     ^{:private true
+      :doc "timer for updating messages, that
+            have not been answered yet.
+            see send-new-message-reactor"}
+    update-unanswered-messages-atom (atom nil))
+
+
+  (def
+    ^{:private true
       :doc "whenever the correspondence with somebody has been watched
             either by clicking the corresponding details or by clicking
             the answer button, a 10 seconds timer is started which
@@ -378,6 +403,25 @@
                      (reset! update-new-messages-atom nil))
                 10000)))))
 
+  (def
+    ^{:private true
+      :doc "whenever the user send a message, the list of
+            of unanswered messages is updated with a delay
+            to ensure that this message appears there."}
+    send-new-message-reactor
+    (dispatch/react-to
+     #{:msg-compose-dialog-confirmed}
+     (fn [evt data]
+       (when @update-unanswered-messages-atom ; clear any previously defined timer
+         (timer/clear @update-unanswered-messages-atom))
+       (reset! update-unanswered-messages-atom
+               (timer/callOnce
+                #(do
+                   (loginfo "*** request new list for unanswered contacts! ***")
+                   (request-unanswered-messages)
+                   (reset! update-unanswered-messages-atom nil))
+                4000)))))
+
 
   (defn- request-new-messages-when-available
     "checks whether new messages are available by first
@@ -392,8 +436,9 @@
                         ; (loginfo (str "server-sha1: " @new-messages-sha1-atom))
                         ; (loginfo (str "client-sha1: " resp-sha1))
                         (loginfo "sha of new messages hash changed, request new list from server")
-                        (request-new-messages))
-                      ))))
+                        (request-new-messages)
+                        (request-unanswered-messages)))
+                      )))
 
 
   (defn- poll-new-msgs
