@@ -32,7 +32,8 @@
          :only [init-sortable-search-result-table
                 release-sortable-search-result-table
                 render-table-button
-                create-test-data]]))
+                create-test-data]]
+        [project-alpha-client.lib.auth :only [base64-sha1]]))
 
 ;;; the profile page (client side equivalent to index.html)
 (def status-pane (dom/get-element "status-pane"))
@@ -85,6 +86,7 @@
 
   ;; result table objects
   (def new-messages-table-atom (atom nil))
+  (def new-messages-sha1-atom (atom nil))
   (def read-messages-table-atom (atom nil))
   (def unanswered-messages-table-atom (atom nil))
 
@@ -93,8 +95,9 @@
     (send-request "/unread-messages"
                   {}
                   (fn [ajax-evt]
-                    (let [resp (. (. ajax-evt -target) (getResponseText))
-                          resp (json/parse resp)]
+                    (let [resp-txt (. (. ajax-evt -target) (getResponseText))
+                          resp (json/parse resp-txt)]
+                      (reset! new-messages-sha1-atom (base64-sha1 resp-txt))
                       (style/showElement
                        (get-element "msg_request_progress" status-pane) true)
                       (when @new-messages-table-atom
@@ -117,7 +120,6 @@
                   (fn [ajax-evt]
                     (let [resp (. (. ajax-evt -target) (getResponseText))
                           resp (json/parse resp)]
-                      (def y resp)
                       (style/showElement
                        (get-element "msg_request_progress" status-pane) true)
                       (when @read-messages-table-atom
@@ -375,6 +377,38 @@
                      (request-read-messages)
                      (reset! update-new-messages-atom nil))
                 10000)))))
+
+
+  (defn- request-new-messages-when-available
+    "checks whether new messages are available by first
+     polling the sha1 hash over the new messages string.
+     Only in case the sha1 does not match, reload them."
+    []
+    (send-request "/unread-messages-sha1"
+                  {}
+                  (fn [ajax-evt]
+                    (let [resp-sha1 (. (. ajax-evt -target) (getResponseText))]
+                      (when-not (= resp-sha1 @new-messages-sha1-atom)
+                        ; (loginfo (str "server-sha1: " @new-messages-sha1-atom))
+                        ; (loginfo (str "client-sha1: " resp-sha1))
+                        (loginfo "sha of new messages hash changed, request new list from server")
+                        (request-new-messages))
+                      ))))
+
+
+  (defn- poll-new-msgs
+    "polling function checking for new messages"
+    []
+    (when-not @update-new-messages-atom
+      ; (loginfo "*** poll sha of new messages ***")
+      (request-new-messages-when-available)
+      ))
+
+
+  ;; start polling for new messages
+  (def poll-for-new-msgs-timer (goog.Timer. 3000))
+  (events/listen poll-for-new-msgs-timer goog.Timer.TICK poll-new-msgs)
+  (. poll-for-new-msgs-timer (start))
 
 
   ; --- receive and sent messages tab pane ---

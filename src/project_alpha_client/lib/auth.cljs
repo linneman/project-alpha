@@ -13,7 +13,9 @@
 ;;; 2011-11-23, Otto Linnemann
 
 (ns project-alpha-client.lib.auth
-  (:require [goog.net.cookies :as cookies]))
+  (:require [goog.net.cookies :as cookies]
+            [goog.crypt.Sha1 :as sha1]
+            [goog.crypt.base64 :as base64]))
 
 
 (defn authenticated?
@@ -36,3 +38,16 @@
   []
   (. goog.net.cookies (remove "authenticated"))
   (. goog.net.cookies (remove "registered")))
+
+
+(defn base64-sha1
+  "computes base64 string of sha1 hash value of given string"
+  [str]
+  (let [sha1-obj (goog.crypt.Sha1.)
+        str-array (js/eval "[]")
+        str-map (doall
+                 (map #(. str-array (push (. % (charCodeAt 0)))) str))]
+    (. sha1-obj (update str-array))
+    (base64/encodeByteArray (. sha1-obj (digest)))
+    ))
+

@@ -15,6 +15,7 @@
   (:use ring.middleware.session.store)
   (:require [ring.util.codec :as codec])
   (:import java.security.SecureRandom
+           java.security.MessageDigest
            (javax.crypto Cipher Mac)
            (javax.crypto.spec SecretKeySpec IvParameterSpec)))
 
@@ -117,6 +118,10 @@
 )
 
 
-; (use 'swank.core)
-; (set-bp decrypt-pass)
+(defn base64-sha1
+  "computes base64 string of sha1 hash value of given string"
+  [str]
+  (let [sha1 (MessageDigest/getInstance "SHA1")
+        digest (. sha1 (digest (.getBytes str)))]
+    (codec/base64-encode digest)))
 

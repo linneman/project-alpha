@@ -33,6 +33,7 @@
         [clojure.data.json :only [json-str write-json read-json]]
         [cljs.repl :only (repl)]
         [cljs.repl.browser :only (repl-env)]
+        [project-alpha-server.lib.crypto :only (base64-sha1)]
         [macros.macros]))
 
 
@@ -177,6 +178,7 @@
   (GET "/correspondence/:id" {session :session params :route-params} (json-str (get-correspondence (:id session) (:id params))))
   (GET "/read-messages" {session :session params :params} (json-str (get-read-messages (:id session))))
   (GET "/unread-messages" {session :session params :params} (json-str (get-unread-messages (:id session))))
+  (GET "/unread-messages-sha1" {session :session params :params} (base64-sha1 (json-str (get-unread-messages (:id session)))))
   (GET "/unanswered-messages" {session :session params :params} (json-str (get-unanswered-messages (:id session))))
   (GET "/" _ (forward-url (str "/" setup/default-language "/index.html")))
   (route/resources "/")
