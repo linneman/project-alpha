@@ -71,16 +71,19 @@
      (map #(let [id (first %)
                  name ((second %) "from_user_name")
                  created-at ((second %) "creation_date")
-                 message ((second %) "text")]
+                 message ((second %) "text")
+                 answered ((second %) "answered")]
              (vector created-at
                      (partial render-table-button name :show-user-details (str id))
                      message
                      (partial render-table-button
                               (get-status-msg-text "showall-user-msg")
                               :showall-user-msg (str id))
-                     (partial render-table-button
-                              (get-status-msg-text "reply-user-msg")
-                              :send-msg-to-user (str id))))
+                     (if answered
+                       " "
+                       (partial render-table-button
+                                (get-status-msg-text "reply-user-msg")
+                                :send-msg-to-user (str id)))))
           data)))
 
   (defn- gen-send-msg-table-data
@@ -137,6 +140,7 @@
                   (fn [ajax-evt]
                     (let [resp (. (. ajax-evt -target) (getResponseText))
                           resp (json/parse resp)]
+                      (def x resp)
                       (style/showElement
                        (get-element "msg_request_progress" status-pane) true)
                       (when @read-messages-table-atom

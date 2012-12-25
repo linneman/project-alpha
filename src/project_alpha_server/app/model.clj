@@ -674,7 +674,7 @@
 
 
 (defn- filter-last-received-messages
-  "filters the lastest messages from the output of
+  "filters the latest messages from the output of
    (get-received-messages)."
   [all-recv-msgs]
   (let [all-senders (set (map :from_user_id all-recv-msgs))]
@@ -714,8 +714,12 @@
   (let [all-recv-msgs (get-received-messages user-id)
         last-recv-msgs (filter-last-received-messages all-recv-msgs)
         last-recv-msgs (filter-read-messages last-recv-msgs user-id)
-        res (map #(let [[{from_user_name :name}] (find-user-by-id (:from_user_id %))]
-                    (into % {:from_user_name from_user_name})) ;; attach user name
+        res (map #(let [[{from_user_name :name}] (find-user-by-id (:from_user_id %))
+                        answered (not
+                                  (empty?
+                                   (sql/select messages
+                                               (sql/where {:reference_msg_id (:msg_id %)}))))]
+                    (into % {:from_user_name from_user_name :answered answered})) ;; attach user name and answered flag
                  last-recv-msgs)]
     (transform-sql-resp res)))
 
