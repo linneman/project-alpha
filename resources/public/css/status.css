@@ -102,15 +102,20 @@
     border: 1px solid grey;
 }
 
-#compose-msg-dialog #ref-msgs {
+#compose-msg-dialog #ref-msgs-half, #compose-msg-dialog #ref-msgs-full
+{
     font-variant:normal;
     font-size:medium;
     width:100%;
-    height:200px;
+    height:450px;
     margin:5px;
     overflow:auto;
 }
 
+#compose-msg-dialog #ref-msgs-half
+{
+    height:200px;
+}
 
 #compose-msg-dialog #compose_request_progress {
     position:absolute;

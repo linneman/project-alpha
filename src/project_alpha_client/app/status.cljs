@@ -220,8 +220,8 @@
 
   (defn- set-ref-mail-html-txt
     "renders user data"
-    [dialog html-txt]
-    (let [html-txt-elem (get-element "ref-msgs" (. dialog (getContentElement)))]
+    [dialog html-txt elem]
+    (let [html-txt-elem (get-element elem (. dialog (getContentElement)))]
       (set! (. html-txt-elem -innerHTML) html-txt)
       ))
 
@@ -242,7 +242,13 @@
        enabled)
       (style/showElement
        (get-element "buttons" elem)
-       enabled)))
+       enabled)
+      (style/showElement
+       (get-element "ref-msgs-half" elem)
+       enabled)
+      (style/showElement
+       (get-element "ref-msgs-full" elem)
+       (not enabled))))
 
 
   (defn- render-msg-stream-html
@@ -262,7 +268,7 @@
     "Compose a new message for user with given id. Function retrieves all
      previous messages with ajax request before opening the compose message
      dialog."
-    [id msg-title]
+    [id msg-title comm-stream-elem]
     (style/showElement (get-element "compose_request_progress") true)
     (open-modal-dialog msg-compose-dialog)
     (send-request (str "/correspondence/" id)
@@ -282,7 +288,8 @@
                         (set-ref-mail-html-txt msg-compose-dialog
                                                (render-msg-stream-html msg-array
                                                                        {receiver-id receiver-name
-                                                                        sender-id sender-name}))
+                                                                        sender-id sender-name})
+                                               comm-stream-elem)
                         (. msg-compose-dialog (setTitle msg-title))
                         (style/showElement (get-element "compose_request_progress") false)
                         )
@@ -302,7 +309,7 @@
           msg-title (goog.dom.getTextContent msg-title)]
       (set-compose-enabled-state true)
       (. editor (setHtml false "" true))
-      (render-communication-stream-with id msg-title)
+      (render-communication-stream-with id msg-title "ref-msgs-half")
       )
     )
 
@@ -314,7 +321,7 @@
     (let [msg-title (get-element "show-msg-dialog-title" status-pane)
           msg-title (goog.dom.getTextContent msg-title)]
       (set-compose-enabled-state false)
-      (render-communication-stream-with id msg-title)
+      (render-communication-stream-with id msg-title "ref-msgs-full")
       )
     )
 
