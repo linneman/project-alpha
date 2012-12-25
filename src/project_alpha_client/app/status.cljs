@@ -140,7 +140,6 @@
                   (fn [ajax-evt]
                     (let [resp (. (. ajax-evt -target) (getResponseText))
                           resp (json/parse resp)]
-                      (def x resp)
                       (style/showElement
                        (get-element "msg_request_progress" status-pane) true)
                       (when @read-messages-table-atom
@@ -250,8 +249,13 @@
     "generates the html stream for the array of the
      message data stream received by
      render-communication-stream-with"
-    [msg-array]
-    (reduce #(str %1 ("text" %2) "<br />") "" msg-array))
+    [msg-array id-name-hash]
+    (reduce #(str %1
+                  "<small>"
+                  ("creation_date" %2) ", "
+                  (id-name-hash ("from_user_id" %2))
+                  "<br /><br /></small>"
+                  ("text" %2) "<br /><hr />") "" msg-array))
 
 
   (defn- render-communication-stream-with
@@ -264,16 +268,21 @@
     (send-request (str "/correspondence/" id)
                   ""
                   (fn [ajax-evt]
-                    (let [resp (. (. ajax-evt -target) (getResponseText))
-                          user-data (json/parse resp)
+                    (let [respt (. (. ajax-evt -target) (getResponseText))
+                          user-data (json/parse respt)
                           header (first user-data)
+                          receiver-id ("to-id" header)
                           receiver-name ("to-name" header)
+                          sender-id ("from-id" header)
+                          sender-name ("from-name" header)
                           msg-array (second user-data)
                           msg-title (str msg-title receiver-name)]
                       (set! (. msg-compose-dialog -comm-stream) user-data)
                       (when msg-array
                         (set-ref-mail-html-txt msg-compose-dialog
-                                               (render-msg-stream-html msg-array))
+                                               (render-msg-stream-html msg-array
+                                                                       {receiver-id receiver-name
+                                                                        sender-id sender-name}))
                         (. msg-compose-dialog (setTitle msg-title))
                         (style/showElement (get-element "compose_request_progress") false)
                         )

@@ -788,7 +788,7 @@
         (delete-from-unread-msg from_user_id to_user_id)
         [{:from-id from_user_id :from-name from_user_name
           :to-id to_user_id :to-name to_user_name}
-         (map #(assoc % :creation_date (str (:creation_date %))) db_res)]))))
+         (sql-resp-transform-to-german-date db_res :creation_date)]))))
 
 
 (comment usage illustration

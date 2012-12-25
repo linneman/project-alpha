@@ -81,6 +81,7 @@
   (fn [request]
     (let [response (handler request)]
       (println (str "REQUEST -> " (request :uri)))
+      ;(println response)
       response)))
 
 
@@ -168,7 +169,7 @@
   (GET "/counter" args (session-counter args))
   (POST "/profile" {params :params session :session} (do (println (json2clj-hash params)) (update-profile (:id session) (json2clj-hash params)) "OK"))
   (GET "/profile" {session :session} (profile-resp-for (:id session)))
-  (GET "/profile/:id" {params :route-params} (profile-resp-for (:id params)))
+  (GET "/profile/:id" {params :route-params} (profile-resp-for (Integer/parseInt (:id params))))
   (POST "/flush-profile" {session :session} (json-str (flush-profile (:id session))))
   (GET "/user-matches" {session :session} (json-str (find-all-matches :user-id (:id session))))
   (GET "/user-favorites" {session :session} (json-str (find-all-favorites :user-id (:id session))))
@@ -176,7 +177,7 @@
   (POST "/add-fav-user" {params :params session :session} (add-fav-user :user_id (:id session) :match_id (params "match_id")) "OK")
   (POST "/del-fav-user" {params :params session :session} (delete-fav-user :user_id (:id session) :match_id (params "match_id")) "OK")
   (POST "/new-message" {session :session params :params}  (apply-hash (merge {:sender-id (:id session)} (json2clj-hash params)) new-message))
-  (GET "/correspondence/:id" {session :session params :route-params} (json-str (get-correspondence (:id session) (:id params))))
+  (GET "/correspondence/:id" {session :session params :route-params} (json-str (get-correspondence (:id session) (Integer/parseInt (:id params)))))
   (GET "/read-messages" {session :session params :params} (json-str (get-read-messages (:id session))))
   (GET "/unread-messages" {session :session params :params} (json-str (get-unread-messages (:id session))))
   (GET "/unread-messages-sha1" {session :session params :params} (base64-sha1 (json-str (get-unread-messages (:id session)))))
