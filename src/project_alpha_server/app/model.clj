@@ -134,7 +134,7 @@
 
 ;; --- favorite users ---
 
-(defn create-user-fav-movies
+(defn create-user-fav-users
   "creates relation table for favorite users"
   []
   (create-table
@@ -142,7 +142,7 @@
    [:user_id :integer]
    [:match_id :integer]))
 
-(defn drop-user-fav-movies
+(defn drop-user-fav-users
   "deletes relation table for favorite users"
   []
   (drop-table :user_fav_users))
@@ -162,8 +162,8 @@
   (create-user-fav-movies)
   (drop-user_fav-movies)
 
-  (create-user-fav-movies)
-  (drop-user-fav-movies)
+  (create-user-fav-users)
+  (drop-user-fav-users)
   )
 
 (defn create-messages

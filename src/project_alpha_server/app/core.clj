@@ -25,6 +25,7 @@
         [project-alpha-server.app.escape-handlers]
         [project-alpha-server.lib.model]
         [project-alpha-server.app.model]
+        [project-alpha-server.app.tests :only (create-test-users)]
         [project-alpha-server.lib.auth]
         [project-alpha-server.lib.utils]
         [project-alpha-server.app.find-users]
@@ -220,6 +221,24 @@
   "starts up the clojurescript repl"
   []
   (repl (repl-env)))
+
+
+(defn create-all-tables
+  "creates all application specific tables.
+   note: the open geo data base needs to
+         be initialized separately."
+  []
+  (create-users)
+  (create-user-fav-users)
+  (create-sessions)
+  (create-profiles)
+  (create-books)
+  (create-user-fav-books)
+  (create-movies)
+  (create-user-fav-movies)
+  (create-messages)
+  (create-unread-messages)
+  )
 
 
 (defn -main [& args]

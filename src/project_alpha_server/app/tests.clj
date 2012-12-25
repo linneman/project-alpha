@@ -32,7 +32,7 @@
          (apply add-user (mapcat #(vector (key %) (val %)) user-fields))
          profile-fields (dissoc fields :name :email :password :created_at)]
      (update-profile id profile-fields)
-     (flush-profile-cache @profile-cache))))
+     (flush-profile id))))
 
 (comment
   (create-test-user :name "Anton" :email "Otto.Linnemann@google.de" :password "avatar"
