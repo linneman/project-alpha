@@ -25,6 +25,8 @@
 (defmacro apply-hash
   "like apply but uses a hash list instead of a vector
    example (f :a 42 :b 43) is equivalent to
-           (apply-hash {:a 42 :b 43} f)"
+           (apply-hash {:a 42 :b 43} f)
+
+   Attention: does not work under clojurescript!"
     [h f]
     `(apply ~f (mapcat #(vector (key %) (val %)) ~h)))
