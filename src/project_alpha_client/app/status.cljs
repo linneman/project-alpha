@@ -426,8 +426,11 @@
   (def
     ^{:private true
       :doc "whenever the user send a message, the list of
-            of unanswered messages is updated with a delay
-            to ensure that this message appears there."}
+            of unanswered messages is updated with very short
+            delay to ensure that this message appears there.
+            Furthermore the read message list has to be
+            updated, too in order to ensure that the reply
+            button disappears."}
     send-new-message-reactor
     (dispatch/react-to
      #{:msg-compose-dialog-confirmed}
@@ -439,8 +442,9 @@
                 #(do
                    (loginfo "*** request new list for unanswered contacts! ***")
                    (request-unanswered-messages)
+                   (request-read-messages) ; in order to update the send button
                    (reset! update-unanswered-messages-atom nil))
-                4000)))))
+                2000)))))
 
 
   (defn- request-new-messages-when-available
