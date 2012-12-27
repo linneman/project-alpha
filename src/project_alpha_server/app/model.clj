@@ -694,17 +694,41 @@
     (filter #(not (contains? unread-msg-ids (:msg_id %))) msgs)))
 
 
+(defn- html-to-short-txt
+  "Removes all html attributes in a given string and cuts this
+   string to the given length. This is required for listing
+   exclusively the first sentence of a couple of messages."
+  [html len]
+  (let [txt (-> html
+                (.replaceAll "<div>" " ")
+                (.replaceAll "<[^>]+>" ""))]
+    (if (> (.length txt) len)
+      (str (.substring txt 0 (- len 4)) " ...")
+      txt)))
+
+
+(defn- sql-resp-transform-html-to-short-txt
+  "Shortens message text for table view by applying the function
+   html-to-short-txt to strings for given key in a sql response."
+  [sql-res key]
+  (map
+   #(assoc-in % [key]
+              (html-to-short-txt (str (% key)) 80))
+   sql-res))
+
+
 (defn- transform-sql-resp
   "transform sql response to application specific json
    object"
   ([sql-res] (transform-sql-resp sql-res :from_user_id))
   ([sql-res key]
-      (let [hash-by-from_id #(sql-resp-2-hash-by-id % key)
-            ger-creation-date #(sql-resp-transform-to-german-date % :creation_date)]
-        (-> sql-res
-            ger-creation-date
-            hash-by-from_id
-            ))))
+     (let [hash-by-from_id #(sql-resp-2-hash-by-id % key)
+           ger-creation-date #(sql-resp-transform-to-german-date % :creation_date)
+           html-to-short-txt #(sql-resp-transform-html-to-short-txt % :text)]
+       (-> sql-res
+           ger-creation-date
+           html-to-short-txt
+           hash-by-from_id))))
 
 
 (defn get-read-messages
