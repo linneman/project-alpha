@@ -54,22 +54,37 @@
 
 
   <body>
+    <div id="outer-frame">
 
-    <div id="header">
-      <h1>Projekt Alpha</h1>
+      <div id="header">
+        <div id="logo">Projekt Alpha</div>
+
+        <div id="header-nav-pane" class="header-nav-pane">
+
+          <div id="logout-button-pane" align="center">
+	    <div id="nav-logout-button" class="goog-toggle-button"
+	         title="Von dieser Seite Abmelden">Abmelden</div>
+          </div>
+
+          <div id="imprint-button-pane" align="center">
+	    <div id="nav-imprint-button" class="goog-toggle-button"
+	         title="Imprintum">Impressum</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="content_pane">
+      </div>
+
+      <div id="global-scripts">
+        <script type="text/javascript" src="goog/base.js"></script>
+        <script type="text/javascript" src="project_alpha.js"></script>
+        <script type="text/javascript">
+	  goog.require('project_alpha_client.app.core');
+	  goog.require('project_alpha_client.lib.repl');
+        </script>
+      </div>
+
     </div>
-
-    <div id="content_pane">
-    </div>
-
-    <div id="global-scripts">
-      <script type="text/javascript" src="goog/base.js"></script>
-      <script type="text/javascript" src="project_alpha.js"></script>
-      <script type="text/javascript">
-	goog.require('project_alpha_client.app.core');
-	goog.require('project_alpha_client.lib.repl');
-      </script>
-    </div>
-
   </body>
 </html>

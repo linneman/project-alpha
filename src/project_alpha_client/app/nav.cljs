@@ -29,6 +29,7 @@
 
 ;;; the index page (client side equivalent to index.html)
 (def nav-pane (dom/get-element "nav-pane"))
+(def header-nav-pane (dom/get-element "header-nav-pane"))
 
 
 (defn enable-nav-pane
@@ -36,6 +37,7 @@
   []
   (style/setOpacity nav-pane 1) ;; important for first load only
   (style/showElement nav-pane true)
+  (style/showElement header-nav-pane true)
   (loginfo "nav pane enabled")
   )
 
@@ -45,6 +47,7 @@
   []
   (when nav-pane
     (style/showElement nav-pane false)
+    (style/showElement header-nav-pane false)
     (loginfo "nav pane disabled")))
 
 

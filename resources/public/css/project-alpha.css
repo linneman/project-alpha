@@ -11,9 +11,15 @@
 @import url(http://fonts.googleapis.com/css?family=PT+Serif);
 
 body {
-  margin-left:100px;
-  margin-right:100px;
+  background: #7F7;
+  width:960px;
+  margin-left:auto;
+  margin-right:auto;
   font-family: 'PT Serif', serif;
+}
+
+#outer-frame {
+  background: #AFA;
 }
 
 body h1 {
@@ -24,13 +30,31 @@ body h2 {
   font-size:36px;
 }
 
+#header {
+    height:60;
+    }
+
+#header #logo {
+    font-size:44px;
+    float:left;
+    width:500px;
+}
+
+#header #header-nav-pane {
+    float:right;
+    margin-right:10px;
+}
+
 
 /* global navigation button style */
 
 #nav-pane {
   /* display:none; */
   opacity:1;
-  padding-bottom:30px;
+  padding-bottom:10px;
+  width:70%;
+  margin-left:auto;
+  margin-right:auto;
 }
 
 
@@ -76,17 +100,22 @@ body h2 {
     font-size:20px;
 }
 
-.nav-pane .goog-custom-button {
+.header-nav-pane .goog-custom-button-inner-box {
+    width:130px;
+    font-size:15px;
 }
 
-.nav-pane .goog-custom-button-hover {
+.nav-pane .goog-custom-button, .header-nav-pane .goog-custom-button {
+}
+
+.nav-pane .goog-custom-button-hover, .header-nav-pane .goog-custom-button-hover {
     background: #57c142;
     background: -webkit-gradient(linear, 0 0, 0 bottom, from(#43ad2e), to(#57c142));
     background: -moz-linear-gradient(#43ad2e, #57c142);
     background: linear-gradient(#43ad2e, #57c142);
 }
 
-.nav-pane .goog-custom-button-checked {
+.nav-pane .goog-custom-button-checked, .header-nav-pane .goog-custom-button-checked {
     color:white;
     background: #43ad2e;
     border: solid 1px #6e883f;
