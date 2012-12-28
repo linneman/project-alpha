@@ -468,6 +468,7 @@
   (defn- poll-new-msgs
     "polling function checking for new messages"
     []
+    ;(loginfo "*** Poll New Messages ***")
     (when-not @update-new-messages-atom
       ; (loginfo "*** poll sha of new messages ***")
       (request-new-messages-when-available)
@@ -477,7 +478,6 @@
   ;; start polling for new messages
   (def poll-for-new-msgs-timer (goog.Timer. 3000))
   (events/listen poll-for-new-msgs-timer goog.Timer.TICK poll-new-msgs)
-  (. poll-for-new-msgs-timer (start))
 
 
   ; --- receive and sent messages tab pane ---
@@ -511,6 +511,7 @@
       (request-new-messages)
       (request-read-messages)
       (request-unanswered-messages)
+      (. poll-for-new-msgs-timer (start))
 
       (loginfo "status page enabled"))
     (do
@@ -522,5 +523,6 @@
   "hides the status-page, activates the status"
   []
   (when status-pane
+    (. poll-for-new-msgs-timer (stop))
     (style/showElement status-pane false)
     (loginfo "status page disabled")))
