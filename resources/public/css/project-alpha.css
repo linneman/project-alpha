@@ -11,15 +11,22 @@
 @import url(http://fonts.googleapis.com/css?family=PT+Serif);
 
 body {
-  background: #7F7;
-  width:960px;
-  margin-left:auto;
-  margin-right:auto;
-  font-family: 'PT Serif', serif;
+    background: #1e5799; /* Old browsers */
+    background: -moz-radial-gradient(center, ellipse cover,  #1e5799 0%, #2989d8 50%, #207cca 51%, #7db9e8 100%); /* FF3.6+ */
+    background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#1e5799), color-stop(50%,#2989d8), color-stop(51%,#207cca), color-stop(100%,#7db9e8)); /* Chrome,Safari4+ */
+    background: -webkit-radial-gradient(center, ellipse cover,  #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-radial-gradient(center, ellipse cover,  #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%); /* Opera 12+ */
+    background: -ms-radial-gradient(center, ellipse cover,  #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%); /* IE10+ */
+    background: radial-gradient(ellipse at center,  #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1e5799', endColorstr='#7db9e8',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+    width:960px;
+    margin-left:auto;
+    margin-right:auto;
+    font-family: 'PT Serif', serif;
 }
 
 #outer-frame {
-  background: #AFA;
+  /* background: #AFA; */
 }
 
 body h1 {
@@ -31,18 +38,14 @@ body h2 {
 }
 
 #header {
-    height:60;
+    height:40;
+    padding-bottom:10px;
     }
 
 #header #logo {
-    font-size:44px;
+    font-size:36px;
     float:left;
-    width:500px;
-}
-
-#header #header-nav-pane {
-    float:right;
-    margin-right:10px;
+    width:100%;
 }
 
 
@@ -51,10 +54,9 @@ body h2 {
 #nav-pane {
   /* display:none; */
   opacity:1;
-  padding-bottom:10px;
-  width:70%;
-  margin-left:auto;
-  margin-right:auto;
+  padding-top:0px;
+  padding-bottom:0px;
+  background: #445;
 }
 
 
@@ -95,30 +97,63 @@ body h2 {
  * Navigation buttons
  */
 
+.nav-pane table {
+    border-collapse:collapse;
+}
+
+.nav-pane table td {
+    border-spacing:0px;
+    padding:0px;
+}
+
+.nav-pane table tbody {
+    border-spacing:0px;
+    border:0px;
+}
+
+.nav-pane .goog-custom-button {
+    margin: 0px;
+}
+
 .nav-pane .goog-custom-button-inner-box {
     width:170px;
+    height:40px;
+    line-height:40px;
     font-size:20px;
+    border: none;
+}
+
+.nav-pane .goog-custom-button-outer-box {
+    border: none;
+    padding: 0;
 }
 
 .header-nav-pane .goog-custom-button-inner-box {
-    width:130px;
+    width:100%;
+    height:100%;
     font-size:15px;
+    border: none;
 }
 
 .nav-pane .goog-custom-button, .header-nav-pane .goog-custom-button {
+    background: none;
+    border: none;
+    color: #CCC;
 }
 
 .nav-pane .goog-custom-button-hover, .header-nav-pane .goog-custom-button-hover {
+    /*
     background: #57c142;
     background: -webkit-gradient(linear, 0 0, 0 bottom, from(#43ad2e), to(#57c142));
     background: -moz-linear-gradient(#43ad2e, #57c142);
     background: linear-gradient(#43ad2e, #57c142);
+    */
+    color: red;
 }
 
 .nav-pane .goog-custom-button-checked, .header-nav-pane .goog-custom-button-checked {
     color:white;
-    background: #43ad2e;
-    border: solid 1px #6e883f;
+    background: #223;
 }
 
 /**

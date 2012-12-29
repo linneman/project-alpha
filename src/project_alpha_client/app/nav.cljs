@@ -29,7 +29,6 @@
 
 ;;; the index page (client side equivalent to index.html)
 (def nav-pane (dom/get-element "nav-pane"))
-(def header-nav-pane (dom/get-element "header-nav-pane"))
 
 
 (defn enable-nav-pane
@@ -37,7 +36,6 @@
   []
   (style/setOpacity nav-pane 1) ;; important for first load only
   (style/showElement nav-pane true)
-  (style/showElement header-nav-pane true)
   (loginfo "nav pane enabled")
   )
 
@@ -47,7 +45,6 @@
   []
   (when nav-pane
     (style/showElement nav-pane false)
-    (style/showElement header-nav-pane false)
     (loginfo "nav pane disabled")))
 
 
@@ -57,8 +54,9 @@
   {:status  { :dom-id-str "nav-status-button"  :action :nav-status-clicked }
    :profile { :dom-id-str "nav-profile-button" :action :nav-profile-clicked }
    :search  { :dom-id-str "nav-search-button" :action :nav-search-clicked }
-   :logout  { :dom-id-str "nav-logout-button"  :action :nav-logout-clicked }
-   :imprint { :dom-id-str "nav-imprint-button" :action :nav-imprint-clicked }})
+   ; :logout  { :dom-id-str "nav-logout-button"  :action :nav-logout-clicked }
+   :imprint { :dom-id-str "nav-imprint-button" :action :nav-imprint-clicked }
+   })
 
 
 (def button-group (radio/init-radio-button-group button-spec))
