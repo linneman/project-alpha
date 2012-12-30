@@ -163,7 +163,7 @@
   (GET "/:lang/reset_pw.html" [lang] (apply site lang "register.html" "reset_pw.html" standard-pages))
   ;; --- json handlers ---
   (GET "/status" _ "server-running")
-  (GET "/confirm" args (confirm args (str "/" (args :lang) "/index.html")))
+  (GET "/confirm" args (confirm args (str "/" (args :lang) "/profile.html")))
   (GET "/reset_pw_conf" args (confirm args (str "/" (args :lang) "/reset_pw.html")))
   (GET "/session" args (str "<body>" args "</body>"))
   (GET "/counter" args (session-counter args))

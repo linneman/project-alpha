@@ -48,10 +48,19 @@
     (loginfo "nav pane disabled")))
 
 
+(defn set-nav-pane-login-enabled
+  "when state argument true then show status, profile and
+   search buttons, otherwise disable them. The latter case
+   is required when the user is logged out."
+  [state]
+  (dorun (map
+          #(. (second %) (setEnabled state))
+          (select-keys button-group [:status :profile :search]))))
 
 
 (def button-spec
-  {:status  { :dom-id-str "nav-status-button"  :action :nav-status-clicked }
+  {:index { :dom-id-str "nav-start-button"  :action :nav-start-clicked }
+   :status  { :dom-id-str "nav-status-button"  :action :nav-status-clicked }
    :profile { :dom-id-str "nav-profile-button" :action :nav-profile-clicked }
    :search  { :dom-id-str "nav-search-button" :action :nav-search-clicked }
    ; :logout  { :dom-id-str "nav-logout-button"  :action :nav-logout-clicked }
@@ -70,13 +79,18 @@
 ; (dispatch/delete-reaction page-switched-reactor)
 
 (def nav-button-reactor (dispatch/react-to
-                         #{:nav-status-clicked
+                         #{:nav-start-clicked
+                           :nav-status-clicked
                            :nav-profile-clicked
                            :nav-search-clicked
                            :nav-logout-clicked
                            :nav-imprint-clicked}
                            (fn [evt data] (loginfo evt))))
 ;(dispatch/delete-reaction nav-button-reactor)
+
+(def nav-start-reactor (dispatch/react-to
+                         #{:nav-start-clicked}
+                           #(pages/switch-to-page :index)))
 
 (def nav-status-reactor (dispatch/react-to
                          #{:nav-status-clicked}

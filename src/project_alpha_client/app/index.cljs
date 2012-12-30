@@ -70,7 +70,8 @@
     (style/showElement logout-pane true)
     (style/showElement register-pane false)
     (style/showElement forgot-password-pane false)
-    (pages/switch-to-page-deferred :status))
+    ;(pages/switch-to-page-deferred :status)
+    )
 
 
   (def button-states (atom []))
@@ -115,8 +116,12 @@
                       (fn [evt data]
                         (let [{:keys [state name]} data]
                           (condp = state
-                            :login (loginfo "index-page in login state")
-                            :logout (loginfo "index-page in logout state")
+                            :login (do (nav/set-nav-pane-login-enabled true)
+                                       (pages/switch-to-page :status)
+                                       (loginfo "index-page in login state"))
+                            :logout (do (nav/set-nav-pane-login-enabled false)
+                                        (pages/switch-to-page :index)
+                                        (loginfo "index-page in logout state"))
                             :registered (loginfo "index-page in registered state")
                             nil)
                           (update-status)))))
@@ -161,7 +166,9 @@
   []
   (style/setOpacity index-pane 1) ;; important for first load only
   (style/showElement index-pane true)
-  (nav/disable-nav-pane)
+  (if (authenticated?)
+    (nav/set-nav-pane-login-enabled true)
+    (nav/set-nav-pane-login-enabled false))
   (loginfo "index page enabled")
   (update-status)
   )
