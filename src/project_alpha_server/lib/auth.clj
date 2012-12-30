@@ -13,6 +13,7 @@
             [compojure.handler :as handler]
             [ring.middleware.json-params :as json-params]
             [ring.util.codec :as codec]
+            [clojure.string :as str]
             [project-alpha-server.local-settings :as setup])
   (:use [compojure.core :only [GET POST PUT DELETE]]
         [ring.util.response :only [response status set-cookie]]
@@ -23,6 +24,17 @@
         [project-alpha-server.lib.utils]
         [swank.core :only [break]]))
 
+
+(defn- double-escape [^String x]
+  (.replace x "\\" "\\\\"))
+
+(defn- url-encode
+  "same as codec/url-encode but plus sign is encoded, too!"
+  [unencoded & [encoding]]
+  (str/replace
+   unencoded
+   #"[^A-Za-z0-9_~.-]+"
+   #(double-escape (codec/percent-encode % encoding))))
 
 (defn register
   "utility function for processing the POST request for
@@ -226,7 +238,7 @@
               (and (not (uri-json-request? uri)) (not is-url-request)) ; json and html are forbidden
               (not (not-any? #(re-seq
                                (re-pattern
-                                (str "^" (.replace % "/" "\\/") "([\\?|/][\\w=_&]+)?$"))
+                                (str "^" (.replace % "/" "\\/") "([\\?|/][\\w=_&%+]+)?$"))
                                uri) uri-white-list)))
         (handler request)
         (if is-url-request
