@@ -11,18 +11,23 @@
 @import url(http://fonts.googleapis.com/css?family=PT+Serif);
 
 body {
-    background: #1e5799; /* Old browsers */
-    background: -moz-radial-gradient(center, ellipse cover,  #1e5799 0%, #2989d8 50%, #207cca 51%, #7db9e8 100%); /* FF3.6+ */
-    background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#1e5799), color-stop(50%,#2989d8), color-stop(51%,#207cca), color-stop(100%,#7db9e8)); /* Chrome,Safari4+ */
-    background: -webkit-radial-gradient(center, ellipse cover,  #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-radial-gradient(center, ellipse cover,  #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%); /* Opera 12+ */
-    background: -ms-radial-gradient(center, ellipse cover,  #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%); /* IE10+ */
-    background: radial-gradient(ellipse at center,  #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%); /* W3C */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1e5799', endColorstr='#7db9e8',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+    background: rgb(15,180,231); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(15,180,231,1) 0%, rgba(244,244,244,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(15,180,231,1)), color-stop(100%,rgba(244,244,244,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(15,180,231,1) 0%,rgba(244,244,244,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(15,180,231,1) 0%,rgba(244,244,244,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(15,180,231,1) 0%,rgba(244,244,244,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(15,180,231,1) 0%,rgba(244,244,244,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0fb4e7', endColorstr='#f4f4f4',GradientType=0 ); /* IE6-9 */
+
     width:960px;
     margin-left:auto;
     margin-right:auto;
     font-family: 'PT Serif', serif;
+}
+
+#main-menu-space {
+    height:50px;
 }
 
 #outer-frame {
@@ -38,15 +43,15 @@ body h2 {
 }
 
 #header {
+    position:fixed;
+    top:50px;
     height:40;
     padding-bottom:10px;
     }
 
-#header #logo {
-    font-size:36px;
-    float:left;
-    width:100%;
-}
+#header-space {
+    height:50px;
+    }
 
 
 /* global navigation button style */
@@ -57,8 +62,13 @@ body h2 {
   padding-top:0px;
   padding-bottom:0px;
   background: #445;
+  z-index:1;
 }
 
+.pane-explanation {
+    height:65px;
+    font-size:16px;
+}
 
 /* modal dialog layout (e.g. login/register) */
 
@@ -96,8 +106,17 @@ body h2 {
 /*
  * Navigation buttons
  */
+.nav-pane {
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    width:100%;
+}
 
 .nav-pane table {
+    width:70%;
+    border:0;
     border-collapse:collapse;
 }
 
