@@ -1,5 +1,149 @@
 <div id="status-pane">
 
-  <h2>Nachrichten ( in Arbeit )</h2>
+  <p class="pane-explanation">Hier werden sämtliche Nachrichten, die Sie empfangen, bereits gelesen und selbst verfasst haben aufgelistet. Über die Schaltfläche "Details" wird die gesamte Kommunikation mit der jeweiligen Kontaktperson angezeigt. Die Personen werden jeweils nur in einem Reiter angezeigt, um den Überblick zu erleichtern.</p>
+
+  <div id="compose-msg-dialog" class="project-alpha-dialog">
+    <div id="cmp-msg-toolbar"></div>
+    <div id="cmp-msg-editor"></div>
+
+    <div id="buttons">
+      <div id="confirm-compose-msg" class="goog-flat-button goog-flat-button-disabled"
+	   title="Klicken Sie hier, wenn alle Einträge ausgefüllt sind!">Absenden</div>
+      <div id="cancel-compose-msg" class="goog-flat-button goog-flat-button-disabled"
+	   title="Schließt diesen Dialog">Abbruch</div>
+    </div>
+
+    <div id="ref-msgs-half"></div>
+    <div id="ref-msgs-full"></div>
+
+    <div id="compose_request_progress">
+      <h3>Daten werden aktualisiert ...</h3>
+      <img src="/img/spinner.gif">
+    </div>
+  </div>
+
+  <div id="status-messages" class="project-alpha-dialog">
+    <div id="compose-msg-dialog-title">Nachricht senden an: </div>
+    <div id="show-msg-dialog-title">Kommunikation mit: </div>
+    <div id="compose-msg-dialog-transmission-error">Fehler bei Datenübertragung zum Server aufgetreten!</div>
+    <div id="showall-user-msg">Details</div>
+    <div id="reply-user-msg">Antworten</div>
+  </div>
+
+  <div id="msg-tab-pane"></div>
+
+  <div id="page1">
+    <h2>Neue Nachrichten</h2>
+
+    <div id="msg_no_new_messages" class="status-msg-in-pane">
+      <h3>Es sind noch keine neuen Nachrichten eingegangen!</h3>
+      <p>Alle zuletzt eingegangenen Nachrichten werden zunächst unter diesem Reiter gelistet. Die vollständige Nachricht und die gesamte Korrepondenz mit dem jeweiligen Absender wird angezeigt, sobald auf eine der Schaltfläche 'Details' oder 'Antworten' geklickt wird, worauf der entsprechende Listeneintrag nach 'Gelesene Nachrichten' verschoben wird.</p>
+    </div>
+
+    <table id="new-messages-table" class="result-table">
+      <tr id="header-row">
+	<th class="date" id="sort-by-date">Datum</th>
+	<th class="name" id="sort-by-name">Name</th>
+	<th class="last-msg" id="last-msg">Letzte Nachricht</th>
+	<th class="showall"></th>
+	<th class="answer"></th>
+      </tr>
+      <tr id="prototype-row">
+	<td class="date" id="col1"></td>
+	<td class="name" id="col2"></td>
+	<td class="last-msg" id="col3"></td>
+	<td class="showall" id="col4"></td>
+	<td class="answer" id="col5"></td>
+
+      </tr>
+    </table>
+
+    <table id="new-messages-controller" class="result-controller">
+      <tr id="prototype-row">
+	<td class="col" id="col1"></td>
+	<td class="col" id="col2"></td>
+	<td class="col" id="col3"></td>
+	<td class="col" id="col4"></td>
+	<td class="col" id="col5"></td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="page2">
+    <h2>Gelesene Nachrichten</h2>
+
+    <div id="msg_no_read_messages" class="status-msg-in-pane">
+      <h3>Im Moment keine Einträge</h3>
+      <p>Gelesene Korrespondenz wird unter diesem Reiter gelistet.</p>
+    </div>
+
+    <table id="read-messages-table" class="result-table">
+      <tr id="header-row">
+	<th class="date" id="sort-by-date">Datum</th>
+	<th class="name" id="sort-by-name">Name</th>
+	<th class="last-msg" id="last-msg">Letzte Nachricht</th>
+	<th class="showall"></th>
+	<th class="answer"></th>
+      </tr>
+      <tr id="prototype-row">
+	<td class="date" id="col1"></td>
+	<td class="name" id="col2"></td>
+	<td class="last-msg" id="col3"></td>
+	<td class="showall" id="col4"></td>
+	<td class="answer" id="col5"></td>
+
+      </tr>
+    </table>
+
+    <table id="read-messages-controller" class="result-controller">
+      <tr id="prototype-row">
+	<td class="col" id="col1"></td>
+	<td class="col" id="col2"></td>
+	<td class="col" id="col3"></td>
+	<td class="col" id="col4"></td>
+	<td class="col" id="col5"></td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="page3">
+    <h2>Bisher unbeantworte Kontaktanfragen</h2>
+
+    <div id="msg_no_unanswered_messages" class="status-msg-in-pane">
+      <h3>Im Moment keine Einträge</h3>
+      <p>Sämtliche Kontaktanfragen, die Sie abgesendet haben und die bisher unbeantwortet geblieben sind, werden hier aufgeführt.</p>
+    </div>
+
+    <table id="unanswered-messages-table" class="result-table">
+      <tr id="header-row">
+	<th class="date" id="sort-by-date">Datum</th>
+	<th class="name" id="sort-by-name">Name</th>
+	<th class="last-msg" id="last-msg">Letzte Nachricht</th>
+	<th class="showall"></th>
+      </tr>
+      <tr id="prototype-row">
+	<td class="date" id="col1"></td>
+	<td class="name" id="col2"></td>
+	<td class="last-msg" id="col3"></td>
+	<td class="showall" id="col4"></td>
+
+      </tr>
+    </table>
+
+    <table id="unanswered-messages-controller" class="result-controller">
+      <tr id="prototype-row">
+	<td class="col" id="col1"></td>
+	<td class="col" id="col2"></td>
+	<td class="col" id="col3"></td>
+	<td class="col" id="col4"></td>
+      </tr>
+    </table>
+  </div>
+
+
+  <div id="msg_request_progress">
+    <h3>Daten werden aktualisiert ...</h3>
+    <img src="/img/spinner.gif">
+  </div>
 
 </div>

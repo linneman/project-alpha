@@ -16,6 +16,7 @@
             [clojure.browser.dom :as dom]
             [goog.style :as style]
             [goog.events :as events]
+            [goog.events.EventType :as event-type]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.login :only [open-login-dialog
                                                open-pw-forgotten-dialog
@@ -96,6 +97,28 @@
     []
     (dorun (map #(set-alpha-button-enabled (first %) (second %))
                 @button-states)))
+
+  (defn- init-lang-change-button
+    "helper function which initializes the button for
+     changing the language"
+    []
+    (when-not lang-changed-button
+      (let [pane (get-element "change-lang-button-pane")
+            attributes (. pane -attributes)
+            lang-attr (. attributes (getNamedItem "data-lang"))
+            lang (. lang-attr -value)]
+        (def lang-changed-button pane)
+        (events/listen lang-changed-button event-type/CLICK #(do (dispatch/fire :lang-changed lang))))))
+
+  ;; language change button is invoked here
+  (init-lang-change-button)
+
+  ;; event listener for language change
+  (def lang-changed-reactor (dispatch/react-to
+                             #{:lang-changed}
+                             (fn [evt data]
+                               (loginfo (str "language changed to: " data))
+                               (pages/switch-lang data))))
 
 
   (defn- update-status

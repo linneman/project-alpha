@@ -22,6 +22,26 @@
   margin-top:-5px;
 }
 
+#change-lang-button-pane {
+  position:fixed;
+  top:50px;
+  right:10px;
+  background-color:transparent;
+  border-style: none;
+  border-width: 0px 0px 0px 0px;
+  text-align:center;
+}
+
+#change-lang-button-pane p {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 80%;
+  line-height: 1;
+}
+
 #index-pane h2 {
   color: #3c4764;
   font-size: 2em;
