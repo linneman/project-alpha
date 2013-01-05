@@ -134,7 +134,9 @@
   [id]
   (let [prof (dissoc (get-profile id) :modified)
         name ((first (find-user-by-id id)) :name)]
-    (json-str (merge prof {:name name}))))
+    (if prof
+      (json-str (merge prof {:name name}))
+      (json-str "cleaned"))))
 
 
 (def ^{:private true :doc "provides templates which are used for all sites"}
@@ -162,6 +164,9 @@
   (GET "/:lang/mprint.html" [lang] (apply site lang standard-pages))
   (GET "/:lang/reset_pw.html" [lang] (apply site lang "register.html" "reset_pw.html" standard-pages))
   ;; --- json handlers ---
+  (GET "/clear-session" args (-> (response (forward-url (str "/" setup/default-language "/index.html")))
+               (assoc :session "")
+               (assoc :cookies "")))
   (GET "/status" _ "server-running")
   (GET "/confirm" args (confirm args (str "/" (args :lang) "/profile.html")))
   (GET "/reset_pw_conf" args (confirm args (str "/" (args :lang) "/reset_pw.html")))
@@ -171,6 +176,7 @@
   (GET "/profile" {session :session} (profile-resp-for (:id session)))
   (GET "/profile/:id" {params :route-params} (profile-resp-for (Integer/parseInt (:id params))))
   (POST "/flush-profile" {session :session} (json-str (flush-profile (:id session))))
+  (POST "/delete-all-profile-data" {session :session} (delete-all-user-data (:id session)))
   (GET "/user-matches" {session :session} (json-str (find-all-matches :user-id (:id session))))
   (GET "/user-favorites" {session :session} (json-str (find-all-favorites :user-id (:id session))))
   (GET "/user-fav-user-ids" {session :session} (json-str (get-all-fav-users-of (:id session))))

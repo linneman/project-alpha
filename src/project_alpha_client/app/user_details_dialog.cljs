@@ -153,6 +153,65 @@
         (set! (. (. nodelist (item i)) -innerHTML) string)
         (when (> i 0) (recur (dec i))))))
 
+
+  (defn- render-message-user-profile-removed
+    "helper function for render-user-with-id"
+    [user-data]
+    (let [user-details (dom/get-element "user-details")
+          profile-remove-msg (goog.dom.getTextContent (get-element "user-profile-removed"))
+          controls (get-element "user-details-controls" user-details)
+          controls-style (. controls -style)]
+      (set! (. controls-style -display) "none")
+      (render-user-data user-details-dialog (str "<p>" profile-remove-msg "</p>"))))
+
+
+  (defn- render-user-detail-dialog-content
+    "helper function for render-user-with-id"
+    [user-data]
+    (let [controls (get-element "user-details-controls" (dom/get-element "user-details"))
+          controls-style (. controls -style)
+          root (get-element "user-details-content")
+          free-text-elem (get-element "ud-html-text" root)
+          fav-books-sec (get-element "ud-fav-books-sec" root)
+          fav-movies-sec (get-element "ud-fav-movies-sec" root)
+          fav-books-by-rank (hash-col-by-key (user-data "user_fav_books")
+                                             "rank")
+          fav-movies-by-rank (hash-col-by-key (user-data "user_fav_movies")
+                                              "rank")]
+      (set! (. controls-style -display) "")
+      (set! (. free-text-elem -innerHTML) (user-data "text"))
+      (if (empty? fav-books-by-rank) (style/showElement fav-books-sec false)
+          (style/showElement fav-books-sec true))
+      (if (empty? fav-movies-by-rank) (style/showElement fav-movies-sec false)
+          (style/showElement fav-movies-sec true))
+      (doseq [k [1 2 3]]
+        (set! (. (get-element (str "ud-favbook-auth" k) root) -innerHTML)
+              ((fav-books-by-rank k {}) "author"))
+        (set! (. (get-element (str "ud-favbook-title" k) root) -innerHTML)
+              ((fav-books-by-rank k {}) "title"))
+        (set! (. (get-element (str "ud-favmovie-auth" k) root) -innerHTML)
+              ((fav-movies-by-rank k {}) "author"))
+        (set! (. (get-element (str "ud-favmovie-title" k) root) -innerHTML)
+              ((fav-movies-by-rank k {}) "title")))
+      (set-all-span-elems! "ud-name" (user-data "name"))
+      (set-all-span-elems! "ud-age-min" (age-range-min (user-data "user_age")))
+      (set-all-span-elems! "ud-age-max" (age-range-max (user-data "user_age")))
+      (set-all-span-elems! "ud-zip" (user-data "user_zip"))
+      (set-all-span-elems! "ud-cities" (profile/zip-cities-hash
+                                        (user-data "user_zip")))
+      (. (user-details-dialog :dialog) (setTitle (user-data "name")))
+      (doseq [k (range 1 11)]
+        (let [rating (user-data (str "question_" k))
+              quest-txt (. (get-element (str "prof-quest" k)) -innerText)
+              answ-txt (if rating (. (get-element
+                                      (str "prof-rating" rating)
+                                      ) -innerText)
+                           " - ")]
+          (set! (. (get-element (str "ud-quest" k)) -innerText) quest-txt)
+          (set! (. (get-element (str "ud-answer" k)) -innerText) answ-txt)))
+      (render-user-data user-details-dialog (. root -innerHTML))))
+
+
   (defn render-user-with-id
     "renders all user details data. In a first step
      we push the different aspects into an invisible
@@ -164,46 +223,10 @@
                   ""
                   (fn [ajax-evt]
                     (let [resp (. (. ajax-evt -target) (getResponseText))
-                          user-data (json/parse resp)
-                          root (get-element "user-details-content")
-                          free-text-elem (get-element "ud-html-text" root)
-                          fav-books-sec (get-element "ud-fav-books-sec" root)
-                          fav-movies-sec (get-element "ud-fav-movies-sec" root)
-                          fav-books-by-rank (hash-col-by-key (user-data "user_fav_books")
-                                                             "rank")
-                          fav-movies-by-rank (hash-col-by-key (user-data "user_fav_movies")
-                                                              "rank")]
-                      (set! (. free-text-elem -innerHTML) (user-data "text"))
-                      (if (empty? fav-books-by-rank) (style/showElement fav-books-sec false)
-                          (style/showElement fav-books-sec true))
-                      (if (empty? fav-movies-by-rank) (style/showElement fav-movies-sec false)
-                          (style/showElement fav-movies-sec true))
-                      (doseq [k [1 2 3]]
-                        (set! (. (get-element (str "ud-favbook-auth" k) root) -innerHTML)
-                              ((fav-books-by-rank k {}) "author"))
-                        (set! (. (get-element (str "ud-favbook-title" k) root) -innerHTML)
-                              ((fav-books-by-rank k {}) "title"))
-                        (set! (. (get-element (str "ud-favmovie-auth" k) root) -innerHTML)
-                              ((fav-movies-by-rank k {}) "author"))
-                        (set! (. (get-element (str "ud-favmovie-title" k) root) -innerHTML)
-                              ((fav-movies-by-rank k {}) "title")))
-                      (set-all-span-elems! "ud-name" (user-data "name"))
-                      (set-all-span-elems! "ud-age-min" (age-range-min (user-data "user_age")))
-                      (set-all-span-elems! "ud-age-max" (age-range-max (user-data "user_age")))
-                      (set-all-span-elems! "ud-zip" (user-data "user_zip"))
-                      (set-all-span-elems! "ud-cities" (profile/zip-cities-hash
-                                                        (user-data "user_zip")))
-                      (. (user-details-dialog :dialog) (setTitle (user-data "name")))
-                      (doseq [k (range 1 11)]
-                        (let [rating (user-data (str "question_" k))
-                              quest-txt (. (get-element (str "prof-quest" k)) -innerText)
-                              answ-txt (if rating (. (get-element
-                                                      (str "prof-rating" rating)
-                                                      ) -innerText)
-                                           " - ")]
-                          (set! (. (get-element (str "ud-quest" k)) -innerText) quest-txt)
-                          (set! (. (get-element (str "ud-answer" k)) -innerText) answ-txt)))
-                      (render-user-data user-details-dialog (. root -innerHTML))))
+                          user-data (json/parse resp)]
+                      (if (= user-data "cleaned")
+                        (render-message-user-profile-removed user-data)
+                        (render-user-detail-dialog-content user-data))))
                   "GET"))
 
   (comment

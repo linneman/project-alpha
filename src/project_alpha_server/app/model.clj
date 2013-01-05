@@ -22,7 +22,8 @@
         [project-alpha-server.lib.crypto :only
          [get-secret-key get-encrypt-pass-and-salt]]
         [clojure.data.json :only [json-str write-json read-json]]
-        [project-alpha-server.lib.utils])
+        [project-alpha-server.lib.utils]
+        [ring.util.response :only [response]])
   (:import [java.text DateFormat SimpleDateFormat]
            [java.util TimerTask Timer]))
 
@@ -428,6 +429,16 @@
   (sql/delete profiles (sql/where args)))
 
 
+(defn delete-all-user-data
+  "deletes everything expect user name and
+   sent messages of given user id
+   @todo: clean up favorite books, movies table."
+  [id]
+  (delete-profile :id id)
+  (update-user {:level 0 :confirmed 0 :password "" :salt ""} {:id id})
+  (response (forward-url "/clear-session")))
+
+
 (comment
   usage illustration
 
@@ -445,6 +456,7 @@
   (stop-profile-flush-cache-timer)
 
   (flush-profile-cache @profile-cache)
+  (delete-all-user-data 963)
   )
 
 (defn add-fav-user

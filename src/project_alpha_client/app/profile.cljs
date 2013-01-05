@@ -33,7 +33,7 @@
         [project-alpha-client.lib.utils :only [get-button-group-value
                                                set-button-group-value get-element]]
         [project-alpha-client.lib.ajax :only [send-request]]
-        [project-alpha-client.lib.auth :only [authenticated?]]))
+        [project-alpha-client.lib.auth :only [authenticated? clear-app-cookies]]))
 
 ;;; the profile page (client side equivalent to profile.html)
 (def profile-pane (dom/get-element "profile-pane"))
@@ -103,6 +103,16 @@
 
   (def editor (editor/create "editMe" "toolbar"))
 
+  (defn- render-button
+    [id evt data]
+    (let [button (goog.ui.decorate (dom/get-element id))]
+      (events/listen
+       button "action"
+       #(dispatch/fire evt data))
+      (. button (setEnabled true))
+      button))
+
+  (def delete-profile-data-button (render-button "delete-all-profile-data" :delete-all-profile-data ""))
 
   ; --- selection of the zip code ---
 
@@ -414,6 +424,19 @@
                                 (fn [evt data]
                                   (when data (update-content data))
                                   )))
+
+  (def delete-all-my-profile-data-reactor
+    (dispatch/react-to
+     #{:delete-all-profile-data}
+     (fn [evt data]
+       (loginfo "delete-all-profile-data")
+       (when (js/confirm (goog.dom.getTextContent (get-element "really-delete-profile" profile-pane)))
+         (send-request "/delete-all-profile-data"
+                       ""
+                       (fn [e]
+                         (clear-app-cookies)
+                         (pages/reload-url "/clear-session"))
+                       "POST")))))
 
   ) ; (when profile-pane
 

@@ -28,7 +28,7 @@
   page (atom nil))
 
 
-(defn- reload-url
+(defn reload-url
   "reloads the page (page is loaded from server)"
   [url]
   (js/eval (str "window.location.href='" url "';")))
