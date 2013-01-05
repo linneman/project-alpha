@@ -16,6 +16,7 @@
             [clojure.browser.dom :as dom]
             [goog.style :as style]
             [goog.events :as events]
+            [goog.events.EventType :as event-type]
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.login :only [open-login-dialog
                                                open-pw-forgotten-dialog
@@ -70,7 +71,8 @@
     (style/showElement logout-pane true)
     (style/showElement register-pane false)
     (style/showElement forgot-password-pane false)
-    (pages/switch-to-page-deferred :status))
+    ;(pages/switch-to-page-deferred :status)
+    )
 
 
   (def button-states (atom []))
@@ -96,6 +98,28 @@
     (dorun (map #(set-alpha-button-enabled (first %) (second %))
                 @button-states)))
 
+  (defn- init-lang-change-button
+    "helper function which initializes the button for
+     changing the language"
+    []
+    (when-not lang-changed-button
+      (let [pane (get-element "change-lang-button-pane")
+            attributes (. pane -attributes)
+            lang-attr (. attributes (getNamedItem "data-lang"))
+            lang (. lang-attr -value)]
+        (def lang-changed-button pane)
+        (events/listen lang-changed-button event-type/CLICK #(do (dispatch/fire :lang-changed lang))))))
+
+  ;; language change button is invoked here
+  (init-lang-change-button)
+
+  ;; event listener for language change
+  (def lang-changed-reactor (dispatch/react-to
+                             #{:lang-changed}
+                             (fn [evt data]
+                               (loginfo (str "language changed to: " data))
+                               (pages/switch-lang data))))
+
 
   (defn- update-status
     "initialize state according to cookie setup"
@@ -115,8 +139,12 @@
                       (fn [evt data]
                         (let [{:keys [state name]} data]
                           (condp = state
-                            :login (loginfo "index-page in login state")
-                            :logout (loginfo "index-page in logout state")
+                            :login (do (nav/set-nav-pane-login-enabled true)
+                                       (pages/switch-to-page :status)
+                                       (loginfo "index-page in login state"))
+                            :logout (do (nav/set-nav-pane-login-enabled false)
+                                        (pages/switch-to-page :index)
+                                        (loginfo "index-page in logout state"))
                             :registered (loginfo "index-page in registered state")
                             nil)
                           (update-status)))))
@@ -161,7 +189,9 @@
   []
   (style/setOpacity index-pane 1) ;; important for first load only
   (style/showElement index-pane true)
-  (nav/disable-nav-pane)
+  (if (authenticated?)
+    (nav/set-nav-pane-login-enabled true)
+    (nav/set-nav-pane-login-enabled false))
   (loginfo "index page enabled")
   (update-status)
   )

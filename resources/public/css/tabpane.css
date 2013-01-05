@@ -34,7 +34,8 @@
 
 .goog-tabpane-cont {
     overflow: auto;
-    background: threedface;
+    /* background: threedface; */
+    background: white;
     border: 1px solid;
     border-color: threedhighlight threedshadow threedshadow threedhighlight;
     padding: 2px;
@@ -82,6 +83,7 @@
 
 .goog-tabpane-tab-selected {
     font-weight: bold;
+    background: white;
 }
 
 .goog-tabpane-tab-selected,

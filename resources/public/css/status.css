@@ -145,6 +145,10 @@
     opacity:0;
 }
 
+#status-pane .status-msg-in-pane {
+    height:500px;
+}
+
 #status-pane #msg_request_progress {
     position:absolute;
     width:100%;
