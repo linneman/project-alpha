@@ -93,7 +93,7 @@
    given position and distance. For each hit the
    locations zip code, the locations name and the
    distance to the given position is returned."
-  [& {:keys [user_lon user_lat max-dist user_sex user_interest_sex limit] :as args}]
+  [& {:keys [user_lon user_lat max-dist user_sex user_interest_sex limit user-id] :as args}]
   (let [req (str
               "SELECT usr.id, usr.name, usr.created_at,
                ACOS(
@@ -103,7 +103,8 @@
                     ) * 6380 AS distance,"
               (generate-sql-match-as-exp)
               "FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id
-               WHERE ACOS(
+               WHERE usr.id NOT IN(SELECT match_id FROM user_banned_users WHERE user_id=$user-id$)
+               AND ACOS(
                     SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
                     + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
                     - RADIANS($user_lon$))
@@ -121,7 +122,7 @@
   "request all users with same sexual interest and
    best matching of the questionaire."
   [& {:keys [user_lon user_lat user_sex user_interest_sex
-             max-match-variance limit] :as args}]
+             max-match-variance limit user-id] :as args}]
   (let [req (str "SELECT usr.id, usr.name, usr.created_at,
                   ACOS(
                        SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
@@ -131,6 +132,7 @@
                  (generate-sql-match-as-exp)
                  "FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id"
                  (generate-sql-match-where-exp)
+                 "AND usr.id NOT IN(SELECT match_id FROM user_banned_users WHERE user_id=$user-id$)"
                  "AND prf.user_sex = \"$user_sex$\"
                   AND prf.user_interest_sex = \"$user_interest_sex$\"
                   AND usr.level = 1
@@ -146,7 +148,7 @@
              question_1 question_2 question_3
              question_4 question_5 question_6
              question_7 question_8 question_9
-             question_10 created-before-max-days limit] :as args}]
+             question_10 created-before-max-days limit user-id] :as args}]
   (let [req (str "SELECT usr.id, usr.name, usr.created_at,
                   ACOS(
                        SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
@@ -157,6 +159,7 @@
                  "FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id
                   WHERE DATE_SUB(CURDATE(),INTERVAL $created-before-max-days$ DAY)
                                 <= usr.created_at
+                  AND usr.id NOT IN(SELECT match_id FROM user_banned_users WHERE user_id=$user-id$)
                   AND prf.user_sex = \"$user_sex$\"
                   AND prf.user_interest_sex = \"$user_interest_sex$\"
                   AND usr.level = 1
@@ -180,6 +183,27 @@
                  "FROM profiles prf JOIN users usr ON prf.id = usr.id
                   JOIN user_fav_users fav ON fav.match_id = prf.id
                   WHERE fav.user_id = $id$
+                  AND usr.level = 1
+                  ORDER BY usr.created_at desc
+                  LIMIT $limit$;")
+        req (replace-dollar-template-by-keyvals req args)]
+    (sqlreq req)))
+
+
+(defn- find-banned-users
+  "request all banned users"
+  [& {:keys [user_lon user_lat user_sex user_interest_sex
+             created-before-max-days limit] :as args}]
+  (let [req (str "SELECT usr.id, usr.name, usr.created_at,
+                  ACOS(
+                       SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
+                       + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
+                       - RADIANS($user_lon$))
+                       ) * 6380 AS distance,"
+                 (generate-sql-match-as-exp)
+                 "FROM profiles prf JOIN users usr ON prf.id = usr.id
+                  JOIN user_banned_users banned ON banned.match_id = prf.id
+                  WHERE banned.user_id = $id$
                   AND usr.level = 1
                   ORDER BY usr.created_at desc
                   LIMIT $limit$;")
@@ -252,7 +276,7 @@
       (let [max-var 16
             per2var (fn [var] (* setup/nr-questions max-var (/ var 100.0)))
             max-match-variance (per2var max-match-variance)
-            usr-prf (first (find-profile :id user-id))
+            usr-prf (assoc (first (find-profile :id user-id)) :user-id user-id)
             trg-prf (map-sex-interest usr-prf)
             match-prf (mapcat #(vector (key %) (val %))
                               (merge trg-prf (hash-args max-dist max-match-variance created-before-max-days)))
@@ -279,10 +303,24 @@
       {:error (check-profile-integrity user-id)})))
 
 
+(defn find-all-banned
+  "database retrieval for banned matches."
+  [& {:keys [user-id limit] :or {limit 100} :as args}]
+  (if-let [[{:keys [level]}] (find-user-by-id user-id)]
+    (if (= level 1)
+      (let [usr-prf (first (find-profile :id user-id))
+            usr-prf (mapcat #(vector (key %) (val %))
+                            (merge usr-prf (hash-args limit)))
+            matches (transform-sql-resp (apply find-banned-users usr-prf))]
+        {:data matches})
+      {:error (check-profile-integrity user-id)})))
+
+
 (comment usage illustation
 
   (def x (find-all-matches :user-id 6))
-  (def y (find-all-favorites :user-id 6))
+  (def y (find-all-favorites :user-id 48))
+  (def z (find-all-banned :user-id 48))
 
   (def x (find-all-matches :user-id 5059))
 

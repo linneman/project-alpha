@@ -172,16 +172,24 @@
   (GET "/reset_pw_conf" args (confirm args (str "/" (args :lang) "/reset_pw.html")))
   (GET "/session" args (str "<body>" args "</body>"))
   (GET "/counter" args (session-counter args))
+
   (POST "/profile" {params :params session :session} (do (println (json2clj-hash params)) (update-profile (:id session) (json2clj-hash params)) "OK"))
   (GET "/profile" {session :session} (profile-resp-for (:id session)))
   (GET "/profile/:id" {params :route-params} (profile-resp-for (Integer/parseInt (:id params))))
   (POST "/flush-profile" {session :session} (json-str (flush-profile (:id session))))
   (POST "/delete-all-profile-data" {session :session} (delete-all-user-data (:id session)))
   (GET "/user-matches" {session :session} (json-str (find-all-matches :user-id (:id session))))
+
   (GET "/user-favorites" {session :session} (json-str (find-all-favorites :user-id (:id session))))
   (GET "/user-fav-user-ids" {session :session} (json-str (get-all-fav-users-of (:id session))))
   (POST "/add-fav-user" {params :params session :session} (add-fav-user :user_id (:id session) :match_id (params "match_id")) "OK")
   (POST "/del-fav-user" {params :params session :session} (delete-fav-user :user_id (:id session) :match_id (params "match_id")) "OK")
+
+  (GET "/user-banned" {session :session} (json-str (find-all-banned :user-id (:id session))))
+  (GET "/user-banned-user-ids" {session :session} (json-str (get-all-banned-users-of (:id session))))
+  (POST "/add-banned-user" {params :params session :session} (add-banned-user :user_id (:id session) :match_id (params "match_id")) "OK")
+  (POST "/del-banned-user" {params :params session :session} (delete-banned-user :user_id (:id session) :match_id (params "match_id")) "OK")
+
   (POST "/new-message" {session :session params :params}  (apply-hash (merge {:sender-id (:id session)} (json2clj-hash params)) new-message))
   (GET "/correspondence/:id" {session :session params :route-params} (json-str (get-correspondence (:id session) (Integer/parseInt (:id params)))))
   (GET "/read-messages" {session :session params :params} (json-str (get-read-messages (:id session))))

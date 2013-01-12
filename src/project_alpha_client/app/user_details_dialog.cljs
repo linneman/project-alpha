@@ -51,20 +51,28 @@
                             button))
           add-fav-button (render-button "add-user-to-fav" :add-user-to-fav)
           rm-fav-button (render-button "rm-user-from-fav" :rm-user-from-fav)
+          add-banned-button (render-button "add-user-to-banned" :add-user-to-banned)
+          rm-banned-button (render-button "rm-user-from-banned" :rm-user-from-banned)
           send-msg-button (render-button "send-msg-to-user" :send-msg-to-user)]
       {:dialog dialog ; provided macro hash-args but this is only available at compile time in clsc
        :add-fav-button add-fav-button
        :rm-fav-button rm-fav-button
+       :add-banned-button add-banned-button
+       :rm-banned-button rm-banned-button
        :send-msg-button send-msg-button}))
 
 
   (defn- open-user-details-dialog
     "opens dialog and assigns user id to dialog
        field 'userId'"
-    [dialog user-id & {:keys [is-in-fav-list] :or {is-in-fav-list false}}]
-    (let [{:keys [dialog add-fav-button rm-fav-button send-msg-button]} dialog]
-      (. add-fav-button (setVisible (not is-in-fav-list)))
+    [dialog user-id & {:keys [is-in-fav-list is-in-banned-list]
+                       :or {is-in-fav-list false is-in-banned-list false}}]
+    (let [{:keys [dialog add-fav-button rm-fav-button
+                  add-banned-button rm-banned-button send-msg-button]} dialog]
+      (. add-fav-button (setVisible (and (not is-in-fav-list) (not is-in-banned-list))))
       (. rm-fav-button (setVisible is-in-fav-list))
+      (. add-banned-button (setVisible (and (not is-in-banned-list) (not is-in-fav-list))))
+      (. rm-banned-button (setVisible is-in-banned-list))
       (set! (. dialog -userId) user-id)
       (. dialog (setVisible true))))
 
@@ -234,6 +242,8 @@
     ;(open-user-details-dialog user-details-dialog 100 :is-in-fav-list true)
 
     (open-dialog 100 :is-in-fav-list true)
+    (open-dialog 100 :is-in-banned-list true)
+    (open-dialog 100)
     (render-sample-user)
     (render-user-with-id 50)
     (close-user-details-dialog user-details-dialog)

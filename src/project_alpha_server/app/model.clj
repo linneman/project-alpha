@@ -148,6 +148,21 @@
   []
   (drop-table :user_fav_users))
 
+;; --- banned users ---
+
+(defn create-user-banned-users
+  "creates relation table for banned users"
+  []
+  (create-table
+   :user_banned_users
+   [:user_id :integer]
+   [:match_id :integer]))
+
+(defn drop-user-banned-users
+  "deletes relation table for banned users"
+  []
+  (drop-table :user_banned_users))
+
 
 (comment usage illustration
 
@@ -165,6 +180,8 @@
 
   (create-user-fav-users)
   (drop-user-fav-users)
+  (create-user-banned-users)
+  (drop-user-banned-users)
   )
 
 (defn create-messages
@@ -215,6 +232,7 @@
 (declare user_fav_books)
 (declare user_fav_movies)
 (declare user_fav_users)
+(declare user_banned_users)
 
 
 (sql/defentity profiles
@@ -242,6 +260,9 @@
 
 
 (sql/defentity user_fav_users
+  (sql/has-many profiles {:fk :id}))
+
+(sql/defentity user_banned_users
   (sql/has-many profiles {:fk :id}))
 
 (sql/defentity user_fav_movies
@@ -478,6 +499,25 @@
                    (sql/fields :match_id)
                    (sql/where {:user_id user-id}))))
 
+
+(defn add-banned-user
+  "add banned user pair (add-banned-user :user_id x :match_id y)"
+  [& {:as args}]
+  (sql/insert user_banned_users
+              (sql/values args)))
+
+(defn delete-banned-user
+  "delete banned user (delete-banned-user :user_id x :match_id y)"
+  [& {:as args}]
+  (sql/delete user_banned_users (sql/where args)))
+
+(defn get-all-banned-users-of
+  "returns all banned users of user with given id"
+  [user-id]
+  (map :match_id
+       (sql/select user_banned_users
+                   (sql/fields :match_id)
+                   (sql/where {:user_id user-id}))))
 
 (comment
   (add-fav-user :user_id 6 :match_id 562)

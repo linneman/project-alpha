@@ -49,9 +49,11 @@
   ;; too high initial delay
   (def result-table-atom (atom nil))
   (def favorite-table-atom (atom nil))
+  (def banned-table-atom (atom nil))
   (def fav-user-ids-atom (atom nil))
   (def fav-user-data-atom (atom nil))
-
+  (def banned-user-ids-atom (atom nil))
+  (def banned-user-data-atom (atom nil))
 
   ;; --- sortable search result table ---
 
@@ -76,20 +78,26 @@
                                       (unitstr2num (nth %2 3))
                                       (unitstr2num (nth %1 3))))}))
 
+
+
+
   (defn- gen-table-data
     "transforms ajax response data in input for table-controller functions"
     [data]
-    (doall
-     (map #(let [id (first %)
-                 name ((second %) "name")
-                 created-at ((second %) "created_at")
-                 match-correlation (- 100 ((second %) "match_variance"))
-                 distance ((second %) "distance")]
-             (vector created-at  name (str distance "km")
-                     (str match-correlation "%")
-                     (partial render-table-button
-                              (str "id-" id) :show-user-details (str id))))
-          data)))
+    (let [details-button-txt (goog.dom.getTextContent
+                              (get-element "show-details-button-txt" search-pane))]
+        (doall
+         (map #(let [id (first %)
+                     name ((second %) "name")
+                     created-at ((second %) "created_at")
+                     match-correlation (- 100 ((second %) "match_variance"))
+                     distance ((second %) "distance")]
+                 (vector created-at  name (str distance "km")
+                         (str match-correlation "%")
+                         (partial render-table-button
+                                  details-button-txt ;; (str "id-" id)
+                                  :show-user-details (str id))))
+              data))))
 
 
   (defn- flush-profile
@@ -241,6 +249,41 @@
                           (style/showElement no-fav-pane false))))
                     )))
 
+  (defn request-banned-pane [force-update]
+    "retrieves all filtered out and updates table view controller"
+    (when force-update
+      (when @banned-table-atom
+        (release-sortable-search-result-table @banned-table-atom)
+        (reset! banned-table-atom nil)))
+    (when-not @banned-table-atom
+      (style/showElement (dom/get-element
+                          "search_request_progress") true)
+      (send-request "/user-banned-user-ids"
+                    {}
+                    (fn [ajax-evt]
+                      (let [resp (. (. ajax-evt -target) (getResponseText))]
+                        (reset! banned-user-ids-atom (set (json/parse resp))))))
+      (send-request "/user-banned"
+                    {}
+                    (fn [ajax-evt]
+                      (let [resp (. (. ajax-evt -target) (getResponseText))
+                            resp (json/parse resp)
+                            no-banned-pane (dom/get-element "search_no_banned")]
+                        (if (resp "data")
+                          (do
+                            (reset! banned-user-data-atom (resp "data"))
+                            (reset! banned-table-atom
+                                    (render-table
+                                     "banned-table"
+                                     "banned-controller"
+                                     (gen-table-data (resp "data")))))
+                          (reset! @banned-user-data-atom nil))
+                        (style/showElement (dom/get-element
+                                            "search_request_progress") false)
+                        (if (empty? @banned-user-data-atom)
+                          (style/showElement no-banned-pane true)
+                          (style/showElement no-banned-pane false))))
+                    )))
 
   ;; --- @todo: update favorite list exclusively on client side ---
 
@@ -271,8 +314,9 @@
          (loginfo (str "detail button pressed for user id: " id))
                                         ;(user-details/render-sample-user)
          (user-details/render-user-with-id id)
-         (user-details/open-dialog data :is-in-fav-list
-                                   (contains? @fav-user-ids-atom id))))))
+         (user-details/open-dialog data
+                                   :is-in-fav-list (contains? @fav-user-ids-atom id)
+                                   :is-in-banned-list (contains? @banned-user-ids-atom id))))))
 
 
   (def ^{:private true
@@ -306,11 +350,46 @@
                        "POST")))))
 
 
+  (def ^{:private true
+         :doc "event handler for adding user to banned list"}
+    add-banned-user-reactor
+    (dispatch/react-to
+     #{:add-user-to-banned}
+     (fn [evt data]
+       (let [data (js/Number data)]
+         (loginfo (pr-str evt data))
+         (user-details/open-dialog data :is-in-banned-list true)
+         (send-request "/add-banned-user"
+                       (json/generate {:match_id data})
+                       (fn [e] (request-banned-pane true)
+                         (request-result-pane true))
+                       "POST")))))
+
+
+  (def ^{:private true
+         :doc "event handler for removing user from banned list"}
+    del-banned-user-reactor
+    (dispatch/react-to
+     #{:rm-user-from-banned}
+     (fn [evt data]
+       (let [data (js/Number data)]
+         (loginfo (pr-str evt data))
+         (request-favorite-pane true)
+         (user-details/open-dialog data :is-in-banned-list false)
+         (send-request "/del-banned-user"
+                       (json/generate {:match_id data})
+                       (fn [e] (request-banned-pane true)
+                         (request-result-pane true))
+                       "POST")))))
+
+
+
   ; --- the tab pane ---
 
   (def tabpane (goog.ui.TabPane. (get-element "tabpane-search" search-pane)))
   (. tabpane (addPage (TabPane/TabPage. (get-element "search-results" search-pane))))
   (. tabpane (addPage (TabPane/TabPage. (get-element "favorites" search-pane))))
+  (. tabpane (addPage (TabPane/TabPage. (get-element "banned" search-pane))))
   (. tabpane (addPage (TabPane/TabPage. (get-element "search-setup" search-pane))))
 
 
@@ -337,6 +416,7 @@
     [pane-id-str]
     (condp = pane-id-str
       "favorites" (request-favorite-pane false)
+      "banned" (request-banned-pane false)
       "search-results" (request-result-pane false)
       "search-setup" (loginfo "search-setup")))
 
