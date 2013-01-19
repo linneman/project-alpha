@@ -245,6 +245,7 @@
   []
   (create-users)
   (create-user-fav-users)
+  (create-user-banned-users)
   (create-sessions)
   (create-profiles)
   (create-books)
