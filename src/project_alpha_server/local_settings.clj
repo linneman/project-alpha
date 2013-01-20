@@ -7,7 +7,7 @@
 
 (ns project-alpha-server.local-settings)
 
-(def host-url "http://localhost:3000/")
+(def host-url "https://localhost:3443/")
 (def cookie-max-age (* 30 24 3600))
 
 ;;; --- Supported languages for localized html (resources/templates) ---

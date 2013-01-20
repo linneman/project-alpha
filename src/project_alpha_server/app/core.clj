@@ -196,7 +196,7 @@
   (GET "/unread-messages" {session :session params :params} (json-str (get-unread-messages (:id session))))
   (GET "/unread-messages-sha1" {session :session params :params} (base64-sha1 (json-str (get-unread-messages (:id session)))))
   (GET "/unanswered-messages" {session :session params :params} (json-str (get-unanswered-messages (:id session))))
-  (GET "/" _ (forward-url (str "/" setup/default-language "/index.html")))
+  (GET "/" _ (forward-url (str setup/host-url setup/default-language "/index.html")))
   (route/resources "/")
   (route/not-found "Page not found"))
 
@@ -220,9 +220,14 @@
   (start-profile-flush-cache-timer 60000)
 
   (defonce server (jetty/run-jetty #'app
-                                 {:port 3000 :join? false}))
+                                   {:port 3000 :join? false
+                                    :ssl? true
+                                    :ssl-port 3443
+                                    :keystore "keys/key_crt.jks"
+                                    :key-password "password"}))
   (.start server))
 
+; :configurator remove-non-ssl-connectors
 
 (defn stop-server
   "stop the webserver"

@@ -1,0 +1,24 @@
+TODO LIST
+=========
+
+* help text and maybe a screencast explaining how picture integration works
+* more precise feedback about missing profile data
+* body height date
+* final definition of the 10 questions for match algorithm
+* further layout improvement (background pictures)
+* pictures in contact tables
+* complete englisch version
+* image "Fork me on Github"
+* Bitcoin and Flattr buttons, where?
+* upload to github plus source documenation
+
+* organize a signed X509 certificate
+* hosting
+* further bugfixing
+
+--------
+
+* https support                                                                                    DONE
+* Clean Profile (in setup tab), do not display them anymore                                        DONE
+* Banned user list which not shown under all contacts                                              DONE
+* license text fix for all commits to GPL                                                          DONE
