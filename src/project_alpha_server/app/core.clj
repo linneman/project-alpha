@@ -32,8 +32,6 @@
         [project-alpha-server.lib.rewrite]
         [clojure.pprint :only [pprint]]
         [clojure.data.json :only [json-str write-json read-json]]
-        [cljs.repl :only (repl)]
-        [cljs.repl.browser :only (repl-env)]
         [project-alpha-server.lib.crypto :only (base64-sha1)]
         [macros.macros]))
 
@@ -240,7 +238,8 @@
 (defn cljs-repl
   "starts up the clojurescript repl"
   []
-  (repl (repl-env)))
+  ;(repl (repl-env))
+  )
 
 
 (defn create-all-tables

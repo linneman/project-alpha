@@ -20,7 +20,8 @@
             [project-alpha-client.app.playground :as playground]
             [project-alpha-client.lib.pages :as pages]
             [project-alpha-client.lib.ajax :as ajax]
-            [project-alpha-client.lib.repl :as repl])
+            [project-alpha-client.lib.repl :as repl]
+            )
   (:use [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.utils :only [current-url-keyword]]))
 
