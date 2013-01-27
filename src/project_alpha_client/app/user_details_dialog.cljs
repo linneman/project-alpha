@@ -42,7 +42,7 @@
                     :panel-id "user-details"
                     :title-id "user-details-dialog-title"
                     :ok-button-id "confirm-user-details")
-          render-button (fn [id evt data]
+          render-button (fn [id evt]
                           (let [button (goog.ui.decorate (dom/get-element id))]
                             (events/listen
                              button "action"

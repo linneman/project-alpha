@@ -281,7 +281,7 @@
         prototype-row (get-element "prototype-row" table-body)
         nr-buttons (count (htmlcoll2array (. prototype-row -cells)))
         crtlButtons (create-page-crtl-buttons start-idx last-idx nr-buttons nr-rows)]
-    (when-let [buttons (. table -crtlButtons)] (map #(. % (dispose))) buttons)
+    (when-let [buttons (. table -crtlButtons)] (map #(. % (dispose)) buttons))
     (dorun (map #(set! (. % -table-controller) table-id-str) crtlButtons)) ; backward ref
     (set! (. table -crtlButtons) crtlButtons)
     (clear-table table-id-str)
@@ -371,9 +371,9 @@
 (defn release-search-result-table
   "releases search result table objects and cleans the
      content and the controller table."
-  [{:keys [crtl-reactor table-controller table-content]} result-table-obj]
+  [{:keys [crtl-reactor table-controller table-content]}]
   (dispatch/delete-reaction crtl-reactor)
-  (when-let [buttons (. table-controller -crtlButtons)] (map #(. % (dispose))) buttons)
+  (when-let [buttons (. table-controller -crtlButtons)] (map #(. % (dispose)) buttons))
   (clear-table table-controller)
   (clear-table table-content))
 
@@ -493,7 +493,7 @@
 (defn release-sortable-search-result-table
   "releases sortable search result table objects and cleans the
      content and the controller table."
-  [{:keys [search-result-table-atom sort-buttons sort-reactor]} sortable-result-table-obj]
+  [{:keys [search-result-table-atom sort-buttons sort-reactor]}]
   (release-table-sort-buttons (@search-result-table-atom :table-content))
   (dispatch/delete-reaction sort-reactor)
   (release-search-result-table @search-result-table-atom)
