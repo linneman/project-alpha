@@ -11,7 +11,8 @@
                  [mysql/mysql-connector-java "5.1.6"]
                  [org.clojure/java.jdbc "0.1.1"]
                  [org.clojure/data.json "0.1.1"]
-                 [org.apache.commons/commons-email "1.2"]]
+                 [org.apache.commons/commons-email "1.2"]
+                 [swank-clojure "1.4.3"]]
   :dev-dependencies [[lein-clojurescript "1.1.0"]]
   :extra-classpath-dirs ["src"]
   :main project-alpha-server.app.core)
