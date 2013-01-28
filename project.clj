@@ -23,28 +23,16 @@
   :hooks [leiningen.cljsbuild]
   :cljsbuild {
               :repl-listen-port 9000
-              :repl-launch-commands
-                                        ; Launch command for connecting the page of choice to the REPL.
-                                        ; Only works if the page at URL automatically connects to the REPL,
-                                        ; like http://localhost:3000/repl-demo does.
-                                        ;     $ lein trampoline cljsbuild repl-launch firefox <URL>
-              {"firefox" ["firefox"
-                          :stdout ".repl-firefox-out"
-                          :stderr ".repl-firefox-err"]
-                                        ; Launch command for interacting with your ClojureScript at a REPL,
-                                        ; without browsing to the app (a static HTML file is used).
-                                        ;     $ lein trampoline cljsbuild repl-launch firefox-naked
-               }
               :crossovers [macros]
               :crossover-jar true
-              :builds {:prod
+              :builds {:release
                        {:source-paths ["src/project_alpha_client"]
-                        :compiler {:output-to "resources/public/project_alpha_optimized.js"
+                        :compiler {:output-to "resources/public/project_alpha.js"
                                    :optimizations :advanced
                                    :pretty-print false}}
                        :debug
                        {:source-paths ["src/project_alpha_client"]
-                        :compiler {:output-to "resources/public/project_alpha.js"
+                        :compiler {:output-to "resources/public/project_alpha_debug.js"
                                    :optimizations :whitespace
                                    :pretty-print true}}
                        }}
