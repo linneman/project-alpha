@@ -67,10 +67,10 @@
   "/register")
 
 (def ^{:private true
-       :doc "list of handlers which are not bloacked by authentication"}
+       :doc "list of handlers which are not blocked by authentication"}
   white-list-handlers
-  ["/" login-post-uri register-get-uri register-post-uri
-   "/user" "/confirm" "/reset_pw_req" "/reset_pw_conf"])
+  ["/" login-get-uri login-post-uri register-get-uri register-post-uri
+   "/user" "/confirm" "/reset_pw_req" "/reset_pw_conf" "/repl.html"])
 
 
 (defn log-request-handler
