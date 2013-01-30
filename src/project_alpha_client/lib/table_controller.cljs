@@ -404,8 +404,8 @@
         event (keyword (str table-id-str "-sort-search-results"))
         buttons (map
                  #(when (re-seq #"^sort" (. % -id))
-                    (let [txt (. % -innerText)]
-                      (set! (. % -innerText) "")
+                    (let [txt (or (. % -buttonText) (. % -innerHTML))]
+                      (set! (. % -innerHTML) "")
                       (render-table-button txt event (. % -id) %)))
                  cells)
         buttons (doall (filter identity buttons))]
