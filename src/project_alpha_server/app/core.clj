@@ -32,8 +32,6 @@
         [project-alpha-server.lib.rewrite]
         [clojure.pprint :only [pprint]]
         [clojure.data.json :only [json-str write-json read-json]]
-        [cljs.repl :only (repl)]
-        [cljs.repl.browser :only (repl-env)]
         [project-alpha-server.lib.crypto :only (base64-sha1)]
         [macros.macros]))
 
@@ -69,10 +67,10 @@
   "/register")
 
 (def ^{:private true
-       :doc "list of handlers which are not bloacked by authentication"}
+       :doc "list of handlers which are not blocked by authentication"}
   white-list-handlers
-  ["/" login-post-uri register-get-uri register-post-uri
-   "/user" "/confirm" "/reset_pw_req" "/reset_pw_conf"])
+  ["/" login-get-uri login-post-uri register-get-uri register-post-uri
+   "/user" "/confirm" "/reset_pw_req" "/reset_pw_conf" "/repl.html"])
 
 
 (defn log-request-handler
@@ -144,6 +142,13 @@
   ["login.html" "nav.html" "index.html" "status.html" "profile.html" "search.html"
    "user_details_dialog.html" "imprint.html"])
 
+(def ^{:private true :doc "provides optimized release scripts"}
+  release-scripts
+  ["release_scripts.html"])
+
+(def ^{:private true :doc "provides scripts for debugging via repl"}
+  debug-scripts
+  ["debug_scripts.html"])
 
 ;; --- application routes ---
 
@@ -157,12 +162,13 @@
   (GET ["/user/:name" :name #".*"] [name] (let [name (url-decode name)] (user-response name)))
   ; --- static html routes ---
   (GET "/:lang/test.html" [lang] (do (println lang) "OK"))
-  (GET "/:lang/index.html" [lang] (apply site lang "register.html" standard-pages))
-  (GET "/:lang/status.html" [lang] (apply site lang standard-pages))
-  (GET "/:lang/profile.html" [lang] (apply site lang standard-pages))
-  (GET "/:lang/search.html" [lang] (apply site lang standard-pages))
-  (GET "/:lang/mprint.html" [lang] (apply site lang standard-pages))
-  (GET "/:lang/reset_pw.html" [lang] (apply site lang "register.html" "reset_pw.html" standard-pages))
+  (GET "/:lang/index.html" [lang] (apply site lang "register.html" (concat standard-pages release-scripts)))
+  (GET "/:lang/status.html" [lang] (apply site lang (concat standard-pages release-scripts)))
+  (GET "/:lang/profile.html" [lang] (apply site lang (concat standard-pages release-scripts)))
+  (GET "/:lang/search.html" [lang] (apply site lang (concat standard-pages release-scripts)))
+  (GET "/:lang/mprint.html" [lang] (apply site lang (concat standard-pages release-scripts)))
+  (GET "/:lang/reset_pw.html" [lang] (apply site lang "register.html" "reset_pw.html" (concat standard-pages release-scripts)))
+  (GET "/:lang/repl.html" [lang] (apply site lang "register.html" "reset_pw.html" (concat standard-pages debug-scripts)))
   ;; --- json handlers ---
   (GET "/clear-session" args (-> (response (forward-url (str "/" setup/default-language "/index.html")))
                (assoc :session "")
@@ -235,12 +241,6 @@
   (.stop server)
   (stop-profile-flush-cache-timer)
   )
-
-
-(defn cljs-repl
-  "starts up the clojurescript repl"
-  []
-  (repl (repl-env)))
 
 
 (defn create-all-tables

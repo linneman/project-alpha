@@ -4,6 +4,13 @@
 (ns project-alpha-client.lib.repl
   (:require [clojure.browser.repl :as repl]))
 
-(let [compiled (js* "(function() { return COMPILED; })();")]
-  (if (not compiled)
-    (repl/connect "http://localhost:9000/repl")))
+
+(defn ^:export connect
+  "Exported to connect to repl server. Start a shell e.g. in emacs
+   by <M-x shell> and start the repl server there with the following
+   command: $ lein trampoline cljsbuild repl-listen
+   Afterwords you have to load the debug script by loading the
+   repl.html in your browser. You should then be able to evaluate
+   Clojurescript expressions in the context of the browser"
+  []
+  (repl/connect "http://localhost:9000/repl"))

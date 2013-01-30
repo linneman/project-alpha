@@ -19,3 +19,6 @@ resources/public/clojure
 resources/public/goog
 resources/public/project_alpha_client
 resources/public/project_alpha.js
+resources/public/project_alpha_debug.js
+target
+repl

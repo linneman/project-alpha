@@ -17,6 +17,7 @@
             [project-alpha-server.local-settings :as setup])
   (:use [compojure.core :only [GET POST PUT DELETE]]
         [ring.util.response :only [response status set-cookie]]
+        [clojure.string :only [split]]
         [project-alpha-server.lib.model]
         [project-alpha-server.lib.crypto :only [get-secret-key]]
         [project-alpha-server.lib.email :only [send-confirm-mail
@@ -224,10 +225,10 @@
   (fn [request]
     (let [uri (:uri request)
           lang (or (request :lang) setup/default-language)
+          uri-without-lang (str "/" (last (split uri #"\/" 3)))
           login-get-uri (str "/" lang login-get-uri)
           session (:session request)
           authenticated (:authenticated session)
-          uri-white-list (conj uri-white-list login-get-uri)
           uri-html? (fn [uri] (re-seq #"\.html$" uri))
           is-url-request (uri-html? uri)
           uri-json-request? (fn [uri] (not (re-seq #"\/.*\..*$" uri)))
@@ -239,7 +240,7 @@
               (not (not-any? #(re-seq
                                (re-pattern
                                 (str "^" (.replace % "/" "\\/") "([\\?|/][\\w=_&%+]+)?$"))
-                               uri) uri-white-list)))
+                               uri-without-lang) uri-white-list)))
         (handler request)
         (if is-url-request
           (-> (response (forward-url login-get-uri)) (assoc :session upd-session))
