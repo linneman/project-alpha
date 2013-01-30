@@ -215,8 +215,7 @@
   (def editor (editor/create "cmp-msg-editor" "cmp-msg-toolbar"))
   ;; (open-modal-dialog msg-compose-dialog)
   (. editor (setHtml false "" true))
-  (. editor (makeEditable))
-
+  ;; (. editor (makeEditable)) -> does not work on firefox!
 
   (defn- set-ref-mail-html-txt
     "renders user data"
@@ -271,6 +270,7 @@
     [id msg-title comm-stream-elem]
     (style/showElement (get-element "compose_request_progress") true)
     (open-modal-dialog msg-compose-dialog)
+    (when (. editor (isUneditable)) (. editor (makeEditable))) ; firefox does not support to activate when not displayed
     (send-request (str "/correspondence/" id)
                   ""
                   (fn [ajax-evt]

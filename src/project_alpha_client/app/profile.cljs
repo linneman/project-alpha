@@ -305,7 +305,7 @@
     [selected-page-idx]
     (let [id-str-left (get-page-id-str @active-pane-idx)
           id-str-active (get-page-id-str selected-page-idx)]
-      (if (= id-str-active "page2") ; firefox does not support to active when not displayed
+      (if (= id-str-active "page2") ; firefox does not support to activate when not displayed
         (when (. editor (isUneditable)) (. editor (makeEditable)))
         (when-not (. editor (isUneditable)) (. editor (makeUneditable)))
         )

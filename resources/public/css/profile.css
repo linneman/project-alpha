@@ -8,6 +8,12 @@
 
 /* index page 1 (sex, age, location) */
 
+#profile-pane {
+  /* display:none; */
+  opacity:0;
+  position:relative;
+}
+
 #profile-pane #page1 table {
    font-size:1.5em;
    /* width: 700px; */
@@ -178,4 +184,9 @@
     top:50%;
     width:32px;
     height:32px;
+}
+
+#profile-pane #status-messages {
+    position:absolute;
+    opacity:0;
 }
