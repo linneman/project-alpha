@@ -144,3 +144,8 @@
     width:32px;
     height:32px;
 }
+
+#search-pane #status-messages {
+    position:absolute;
+    opacity:1;
+}
