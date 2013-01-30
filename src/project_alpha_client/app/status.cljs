@@ -270,7 +270,6 @@
     [id msg-title comm-stream-elem]
     (style/showElement (get-element "compose_request_progress") true)
     (open-modal-dialog msg-compose-dialog)
-    (when (. editor (isUneditable)) (. editor (makeEditable))) ; firefox does not support to activate when not displayed
     (send-request (str "/correspondence/" id)
                   ""
                   (fn [ajax-evt]
@@ -310,6 +309,7 @@
       (set-compose-enabled-state true)
       (. editor (setHtml false "" true))
       (render-communication-stream-with id msg-title "ref-msgs-half")
+      (when (. editor (isUneditable)) (. editor (makeEditable))) ; firefox does not support to activate when not displayed
       )
     )
 

@@ -405,6 +405,7 @@
         buttons (map
                  #(when (re-seq #"^sort" (. % -id))
                     (let [txt (or (. % -buttonText) (. % -innerHTML))]
+                      (set! (. % -buttonText) txt) ; save text initially
                       (set! (. % -innerHTML) "")
                       (render-table-button txt event (. % -id) %)))
                  cells)
