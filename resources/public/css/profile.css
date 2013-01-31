@@ -91,6 +91,7 @@
     width:100%;
     border: 1px solid black;
     border-collapse:collapse;
+    height:400px;
 }
 
 #profile-pane #page3 #five-questions-tab * {

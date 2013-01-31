@@ -23,6 +23,11 @@
     border-right: 1px solid black;
 }
 
+#search-pane .result-table th,
+#search-pane .result-table td {
+    height:39px;
+}
+
 #search-pane #search-results table tr,
 #search-pane #favorites table tr {
    height: 2.4em;

@@ -24,6 +24,12 @@
     border-right: 1px solid black;
 }
 
+#status-pane .result-table th,
+#status-pane .result-table td {
+    height:39px;
+}
+
+
 #status-pane #search-results table tr,
 #status-pane #favorites table tr {
    height: 2.4em;
