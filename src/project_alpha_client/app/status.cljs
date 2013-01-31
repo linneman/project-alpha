@@ -80,7 +80,7 @@
                               (get-status-msg-text "showall-user-msg")
                               :showall-user-msg (str id))
                      (if answered
-                       " "
+                       "&nbsp;"
                        (partial render-table-button
                                 (get-status-msg-text "reply-user-msg")
                                 :send-msg-to-user (str id)))))
