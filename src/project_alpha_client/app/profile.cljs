@@ -73,7 +73,7 @@
     []
     (let [idx (. ageSelect (getSelectedIndex))]
       (when (>= idx 0)
-        { "user_age" (:age (second (nth idx-age-ranges idx))) })))
+        { "user_age" (:age (idx-age-ranges idx)) })))
 
   ; (get-selected-age)
 
