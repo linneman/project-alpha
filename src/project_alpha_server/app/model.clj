@@ -809,11 +809,12 @@
                                     :messages.from_user_id :messages.to_user_id
                                     :messages.creation_date :messages.text)
                         (sql/where
-                         {:user_id user-id}))
+                         {:user_id user-id :msg_id [> 0]}))
         res (map #(let [[{from_user_name :name}] (find-user-by-id (:from_user_id %))]
                     (into % {:from_user_name from_user_name})) ;; attach user name
                  res)]
-    (transform-sql-resp res)))
+    (when-not (empty? res)
+      (transform-sql-resp res))))
 
 
 (defn get-unanswered-messages
@@ -886,10 +887,11 @@
         ref-id (if corr
                  (:msg_id (first (second corr)))
                  0)]
-    (when-let [{id :GENERATED_KEY}
-               (add-msg :reference_msg_id ref-id :from_user_id sender-id :to_user_id
-                                            recv-id :text msg-txt)]
-      (add-unread-msg :user_id recv-id :msg_id id)
+    (let [sql-resp (add-msg :reference_msg_id ref-id :from_user_id sender-id :to_user_id
+                            recv-id :text msg-txt)
+          id (or (:GENERATED_KEY sql-resp) (:generated_key sql-resp))] ; sql versions behave different!
+      (when id
+        (add-unread-msg :user_id recv-id :msg_id id))
       "OK")))
 
 (comment
