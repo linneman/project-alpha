@@ -43,14 +43,15 @@
   ;;; --- age selection helpers ---
 
   (def age-ranges
-    (for [k (range 15 70 5)]
-      (cond (< k 20)
-        {:age 18 :sel-string "< 20" :range-min 18 :range-max 19}
-        (< k 65)
-        {:age (+ k 2) :sel-string (str k "..." (+ k 4))
-         :range-min k :range-max (+ k 4)}
-        (>= k 65)
-        {:age k :sel-string ">= 65" :range-min 65 :range-max 100})))
+    (vec
+     (for [k (range 15 70 5)]
+       (cond (< k 20)
+             {:age 18 :sel-string "< 20" :range-min 18 :range-max 19}
+             (< k 65)
+             {:age (+ k 2) :sel-string (str k "..." (+ k 4))
+              :range-min k :range-max (+ k 4)}
+             (>= k 65)
+             {:age k :sel-string ">= 65" :range-min 65 :range-max 100}))))
 
   (def idx-age-ranges
     (zipmap (range 0 (count age-ranges)) age-ranges))
@@ -72,6 +73,7 @@
     "retrieves age from selection field"
     []
     (let [idx (. ageSelect (getSelectedIndex))]
+      (loginfo (str "(. ageSelect (getSelectedIndex)) -> " idx ", (idx-age-ranges " idx ") -> " (:age (idx-age-ranges idx))))
       (when (>= idx 0)
         { "user_age" (:age (idx-age-ranges idx)) })))
 
@@ -85,6 +87,7 @@
                           (>= age (:range-min (second %)))
                           (<= age (:range-max (second %))))
                         idx-age-ranges)]
+      (loginfo (str "(set-selected-age " age ") -> (.ageSelect (setSelectedIndex " (first (first entry)) "))"))
       (. ageSelect (setSelectedIndex (first (first entry))))))
 
 

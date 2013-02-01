@@ -437,11 +437,13 @@
 
 
 (defn get-profile
-  "updates cache and retrieves profile data
+  "retrieves profile data from cache and database
    for given id."
   [id]
-  (flush-profile id)
-  (first (find-profile :id id)))
+  (let [c @profile-cache
+        u (if c (c id) {})
+        d (first (find-profile :id id))]
+    (merge d u)))
 
 
 (defn delete-profile
