@@ -28,8 +28,8 @@
        user-fields (assoc user-fields :confirmed 1)
        user-name (:name user-fields)]
    (when (not-empty (find-user :name user-name)) (delete-user :name user-name))
-   (let [{id :GENERATED_KEY}
-         (apply add-user (mapcat #(vector (key %) (val %)) user-fields))
+   (let [sql-resp (apply add-user (mapcat #(vector (key %) (val %)) user-fields))
+         id (or (:GENERATED_KEY sql-resp) (:generated_key sql-resp))
          profile-fields (dissoc fields :name :email :password :created_at)]
      (update-profile id profile-fields)
      (flush-profile id))))

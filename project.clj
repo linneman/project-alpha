@@ -20,7 +20,7 @@
                  "clojurescript/src/clj"
                  "clojurescript/src/cljs"
                  ]
-  :hooks [leiningen.cljsbuild]
+  ;; :hooks [leiningen.cljsbuild]
   :cljsbuild {
               :repl-listen-port 9000
               :crossovers [macros]

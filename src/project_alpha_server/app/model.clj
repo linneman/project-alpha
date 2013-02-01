@@ -574,7 +574,7 @@
                                 (sql/where (select-keys book [:author :title]))))]
       (if (not book-db-entry)
         (let [book-db-entry (sql/insert books (sql/values book-entry))
-              book-id (:GENERATED_KEY book-db-entry)]
+              book-id (or (:GENERATED_KEY book-db-entry) (:generated_key book-db-entry))]
           (println "insert new book id: " book-id " -> " book-entry)
           (update-user-fav-book-entry user-id book-id rank))
         (update-user-fav-book-entry user-id (:id book-db-entry) rank)))))
@@ -624,7 +624,7 @@
                                 (sql/where (select-keys movie [:author :title]))))]
       (if (not movie-db-entry)
         (let [movie-db-entry (sql/insert movies (sql/values movie-entry))
-              movie-id (:GENERATED_KEY movie-db-entry)]
+              movie-id (or (:GENERATED_KEY movie-db-entry) (:generated_key movie-db-entry))]
           (println "insert new movie id: " movie-id " -> " movie-entry)
           (update-user-fav-movie-entry user-id movie-id rank))
         (update-user-fav-movie-entry user-id (:id movie-db-entry) rank)))))
