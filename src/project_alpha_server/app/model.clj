@@ -286,9 +286,9 @@
    frequently invoked by a timer."
   [id h]
   (if-let [fields (h id)]
-    (let [fav-books (map json2clj-hash (:fav_books fields))
-          fav-movies (map json2clj-hash (:fav_movies fields))
-          fields (dissoc fields :fav_books :fav_movies)
+    (let [fav-books (map json2clj-hash (:user_fav_books fields))
+          fav-movies (map json2clj-hash (:user_fav_movies fields))
+          fields (dissoc fields :user_fav_books :user_fav_movies)
           zip (:user_zip fields)
           fields (if zip (merge fields (get-location-for-zip zip)) fields)]
       (write-user-fav-books id fav-books) ; no modification date check here
@@ -362,13 +362,13 @@
     (map (fn [profile]
            (let [fav-book-list
                  (sql/select user_fav_books
-                             (sql/fields :books.author :books.title :rank)
                              (sql/with books)
+                             (sql/fields :books.author :books.title :rank)
                              (sql/where {:user_id (:id profile)}))
                  fav-movie-list
                  (sql/select user_fav_movies
-                             (sql/fields :movies.author :movies.title :rank)
                              (sql/with movies)
+                             (sql/fields :movies.author :movies.title :rank)
                              (sql/where {:user_id (:id profile)}))
                  full-prof (assoc profile
                              :user_fav_books fav-book-list

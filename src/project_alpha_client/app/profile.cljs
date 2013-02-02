@@ -323,9 +323,9 @@
         )
       (if (= id-str-left "page4")
         (do
-          (post-as-json {"fav_books"
+          (post-as-json {"user_fav_books"
                          (get-fav-list "user_fav_auth_" "user_fav_book_")})
-          (post-as-json {"fav_movies"
+          (post-as-json {"user_fav_movies"
                          (get-fav-list "user_fav_director_" "user_fav_movie_")})
           (loginfo "favorite lists posted")))
       (reset! active-pane-idx selected-page-idx)))
