@@ -183,6 +183,7 @@
   (GET "/profile" {session :session} (profile-resp-for (:id session)))
   (GET "/profile/:id" {params :route-params} (profile-resp-for (Integer/parseInt (:id params))))
   (POST "/flush-profile" {session :session} (json-str (flush-profile (:id session))))
+  (POST "/check-profile" {session :session} (json-str (check-profile-integrity (:id session))))
   (POST "/delete-all-profile-data" {session :session} (delete-all-user-data (:id session)))
   (GET "/user-matches" {session :session} (json-str (find-all-matches :user-id (:id session))))
 

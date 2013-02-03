@@ -387,7 +387,7 @@
    are missed."
   [id]
   (println (str "-> check-profile-integrity for " id))
-  (let [[prf] (find-profile :id id)
+  (let [prf (get-profile id)
         [usr] (find-user-by-id id)
         chk-field-set #{:user_sex :user_interest_sex
                         :user_age :user_lon :user_lat}

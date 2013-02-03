@@ -100,22 +100,22 @@
               data))))
 
 
-  (defn- flush-profile
-    "ensures that profile data is synchronized and checked on server.
-     post the request to flush the user's profile 100ms delayed to
+  (defn- check-profile
+    "ensures that profile data is checked on server.
+     Post the request to check the user's profile 100ms delayed to
      give pending post requests send from the profile's pane a chance
      to complete.
-     The 'flush-profile' post request answers with a list of non formed
+     The 'check-profile' post request answers with a list of non formed
      profile's data which can be be used to direct users what is
      specifically missing."
     [callback]
     (timer/callOnce
-     #(send-request "/flush-profile"
+     #(send-request "/check-profile"
                     ""
                     (fn [ajax-evt]
                       (let [resp (. (. ajax-evt -target) (getResponseText))
                             missing (json/parse resp)]
-                        (loginfo (str "profile flushed and checked, result:" resp))
+                        (loginfo (str "profile checked, result:" resp))
                         (if (empty? missing)
                           (callback)
                           (do
@@ -136,7 +136,7 @@
     (when-not @result-table-atom
       (style/showElement (dom/get-element
                           "search_request_progress") true)
-      (flush-profile
+      (check-profile
        #(send-request "/user-matches"
                       {}
                       (fn [ajax-evt]
