@@ -377,6 +377,7 @@
                                           (range (inc setup/nr-questions) (count full-prof))))))
          _profiles)))
 
+(declare get-profile)
 
 (defn check-profile-integrity
   "checkes profile for missing and required data
