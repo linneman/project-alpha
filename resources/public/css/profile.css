@@ -82,7 +82,7 @@
 /* index page 3 (questionnaire) */
 
 #profile-pane #page3 {
-    padding-top:20px;
+    padding-top:3px;
     padding-left:60px;
     padding-right:60px;
 }
@@ -96,6 +96,11 @@
 
 #profile-pane #page3 #five-questions-tab * {
     border-bottom: 1px solid black;
+}
+
+#profile-pane #page3 #five-questions-tab * .tooltip {
+    background-color: transparent;
+    border-bottom: 0px;
 }
 
 #profile-pane #page3 #five-questions-tab .sel {

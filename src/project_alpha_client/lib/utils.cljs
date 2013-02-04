@@ -198,3 +198,17 @@
   [goog-button]
   (let [button (. goog-button (getElement))]
     (. goog-button (isEnabled))))
+
+
+(defn is-ios-device?
+  "true on ipad, phone, ipod"
+  []
+  (js/eval "navigator.userAgent.match(/(iPad|iPhone|iPod)/i) ? true : false"))
+
+
+(defn show-elements-of-class
+  "show (normally hidden) elements of given class"
+  [class]
+  (let [ios-nodes (gdom/findNodes (gdom/getDocument)
+                                  (fn [e] (= (. e -className) class)))]
+    (dorun (map #(set! (. (. % -style) -display) "inline") ios-nodes))))

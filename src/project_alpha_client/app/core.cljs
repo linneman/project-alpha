@@ -24,12 +24,15 @@
             [project-alpha-client.app.repl :as replpage]
             )
   (:use [project-alpha-client.lib.logging :only [loginfo]]
-        [project-alpha-client.lib.utils :only [current-url-keyword]]))
+        [project-alpha-client.lib.utils :only [current-url-keyword
+                                               is-ios-device? show-elements-of-class]]))
 
 
 (defn ^:export start
   "Start the application by switching to the index page"
   []
+  (when (is-ios-device?)
+    (show-elements-of-class "ios"))
   (pages/switch-to-page (current-url-keyword)))
 
 
