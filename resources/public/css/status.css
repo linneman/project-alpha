@@ -91,6 +91,15 @@
     margin-right:25%;
 }
 
+#status-pane .status-pic-in-pane {
+    position:absolute;
+    right:-60px;
+    top:-53px;
+    width:150px;
+    z-index:2;
+    opacity:1;
+    }
+
 
 #compose-msg-dialog {
     width:700px;

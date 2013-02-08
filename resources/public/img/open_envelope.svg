@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="open_envelope.svg">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient3805">
+      <stop
+         id="stop3807"
+         offset="0"
+         style="stop-color:#cc72f9;stop-opacity:1;" />
+      <stop
+         style="stop-color:#fb98b6;stop-opacity:1;"
+         offset="1"
+         id="stop3809" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient2890">
+      <stop
+         style="stop-color:#cc72f9;stop-opacity:1;"
+         offset="0"
+         id="stop2892" />
+      <stop
+         id="stop2898"
+         offset="1"
+         style="stop-color:#fb98b6;stop-opacity:1;" />
+      <stop
+         style="stop-color:#fe1b74;stop-opacity:1;"
+         offset="1"
+         id="stop2894" />
+    </linearGradient>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2890"
+       id="linearGradient3724"
+       gradientUnits="userSpaceOnUse"
+       x1="106.16516"
+       y1="244.17987"
+       x2="379.54047"
+       y2="244.17987"
+       gradientTransform="translate(84.97977,157.80579)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3805"
+       id="linearGradient3803"
+       x1="191.90067"
+       y1="247.55005"
+       x2="329.47653"
+       y2="215.40874"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.75354285"
+     inkscape:cx="344.54192"
+     inkscape:cy="842.81869"
+     inkscape:document-units="px"
+     inkscape:current-layer="g3711"
+     showgrid="false"
+     inkscape:window-width="1780"
+     inkscape:window-height="1035"
+     inkscape:window-x="4"
+     inkscape:window-y="22"
+     inkscape:window-maximized="0"
+     inkscape:snap-global="false"
+     inkscape:snap-bbox="true" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="opacity:1">
+    <path
+       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:none;fill-opacity:1;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
+       d="m 91.3125,369.4375 -0.5625,0.8125 0.0625,0.0625 c 0.395638,0.21415 0.689507,0.59346 1.0625,0.84375 l 3.3125,2.71875 c 3.792981,4.16999 6.38067,10.10037 9.125,14.90625 0.708,1.23985 2.40102,4.6942 4.25,8.40625 l -2.90625,-0.15625 -23.125,42.34375 31.44824,21.24045 20.83301,-62.1467 16.13054,-17.59392 c 0.36296,-1.6116 -31.29594,13.88874 -30.34929,13.25017 l 0.5625,-0.40625 -0.5,-0.40625 -24.59375,-20 c -1.373841,-1.52237 -2.900105,-2.8317 -4.6875,-3.8125 -0.02549,-0.014 -0.03691,-0.0487 -0.0625,-0.0625 z m 7.15625,7.125 20.96875,17.0625 c -3.56219,2.23271 -6.16843,2.45713 -8.3125,1.4375 -2.27284,-1.08087 -4.1586,-3.61132 -5.96875,-6.78125 -2.05878,-3.60533 -4.10415,-7.91395 -6.6875,-11.71875 z"
+       id="path2867"
+       sodipodi:nodetypes="cccccsccccccccccscccssc" />
+    <g
+       id="g3711"
+       transform="matrix(0.8660254,0.5,-0.5,0.8660254,125.34564,-96.748749)"
+       inkscape:export-xdpi="100"
+       inkscape:export-ydpi="100">
+      <path
+         inkscape:export-ydpi="97.42852"
+         inkscape:export-xdpi="97.42852"
+         inkscape:export-filename="/Users/ol/Desktop/closed_envelope.png"
+         sodipodi:nodetypes="ccc"
+         id="path2850"
+         d="M 466.13128,245.53098 C 333.34097,167.08138 333.94901,167.60255 333.94901,167.60255 L 191.97436,245.2868"
+         style="fill:url(#linearGradient3803);stroke:#000000;stroke-width:1.50000000000000000;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;fill-opacity:1" />
+      <path
+         inkscape:export-ydpi="97.42852"
+         inkscape:export-xdpi="97.42852"
+         inkscape:export-filename="/Users/ol/Desktop/closed_envelope.png"
+         id="path2852"
+         d="m 325.51079,319.58962 0,0 z"
+         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         inkscape:export-ydpi="97.42852"
+         inkscape:export-xdpi="97.42852"
+         inkscape:export-filename="/Users/ol/Desktop/closed_envelope.png"
+         id="text3686"
+         y="266.31714"
+         x="275.54367"
+         style="font-size:14px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="266.31714"
+           x="275.54367"
+           id="tspan3688"
+           sodipodi:role="line">Project Alpha</tspan></text>
+      <rect
+         style="fill:#f2f2f2;fill-opacity:1;stroke:#000000;stroke-width:2.40603995;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         id="rect3813"
+         width="220.96716"
+         height="220.91347"
+         x="187.88919"
+         y="251.12852"
+         transform="matrix(0.97822219,-0.20756045,0.13645969,0.99064562,0,0)" />
+      <text
+         xml:space="preserve"
+         style="font-size:14px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+         x="198.33768"
+         y="265.33139"
+         id="text3817"
+         transform="matrix(0.98480775,-0.17364817,0.17364817,0.98480775,0,0)"><tspan
+           sodipodi:role="line"
+           id="tspan3819"
+           x="198.33768"
+           y="265.33139">Hello my Dear,</tspan><tspan
+           sodipodi:role="line"
+           x="198.33768"
+           y="282.83139"
+           id="tspan3821">...</tspan><tspan
+           sodipodi:role="line"
+           x="198.33768"
+           y="300.33139"
+           id="tspan3823">...</tspan></text>
+      <rect
+         inkscape:export-ydpi="97.42852"
+         inkscape:export-xdpi="97.42852"
+         inkscape:export-filename="/Users/ol/Desktop/closed_envelope.png"
+         y="246.0462"
+         x="190.9751"
+         height="194.56674"
+         width="274.42624"
+         id="rect2848"
+         style="fill:url(#linearGradient3724);fill-opacity:1;stroke:#000000;stroke-width:2.70000005;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    </g>
+  </g>
+</svg>
