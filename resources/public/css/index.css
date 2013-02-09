@@ -58,6 +58,22 @@
   padding-top: 25px;
 }
 
+#index-pane #logo-pane {
+    position:absolute;
+    width:960px;
+    margin-left:auto;
+    margin-right:auto;
+    }
+
+#index-pane #logo-pane #logo {
+    position:absolute;
+    left:-140px;
+    top:10px;
+    width:100px;
+    }
+
+
+
 #index-pane .box {
   float: left;
   margin-left: 20px;
