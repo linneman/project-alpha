@@ -216,7 +216,7 @@
 (defn wrap-authentication
   "middleware for user authentication.
 
-  The first arguemnt is the ring handler followed
+  The first argument is the ring handler followed
   by the uri for requesting authentication data
   (username and password, open-id, etc.) and
   a whitelist of handlers which are not blocked.
@@ -224,10 +224,10 @@
   [handler login-get-uri uri-white-list]
   (fn [request]
     (let [uri (:uri request)
+          session (:session request)
           lang (or (request :lang) setup/default-language)
           uri-without-lang (str "/" (last (split uri #"\/" 3)))
           login-get-uri (str "/" lang login-get-uri)
-          session (:session request)
           authenticated (:authenticated session)
           uri-html? (fn [uri] (re-seq #"\.html$" uri))
           is-url-request (uri-html? uri)

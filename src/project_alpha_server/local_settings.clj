@@ -7,12 +7,21 @@
 
 (ns project-alpha-server.local-settings)
 
-(def host-url "https://localhost:3443/")
+
+;;; --- Port and Domain setup ---
+
+(def http-port 3000)
+(def https-port 3443)
+(def host-url (str "https://localhost:" https-port "/"))
 (def cookie-max-age (* 30 24 3600))
 
+(def ^{:doc "when true display maintenance page"} maintencance-mode false)
+
+
 ;;; --- Supported languages for localized html (resources/templates) ---
-(def languages #{"de" "en"})
-(def default-language "de")
+
+(def languages #{"de" "en"}) ;; supported languages currently German and English
+(def default-language "en")  ;; default language when browser reports other language than supported
 
 
 ;;; --- Definitions for send mail, currently only GMail has been tested ---

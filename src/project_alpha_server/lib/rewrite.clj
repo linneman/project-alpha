@@ -31,10 +31,13 @@
   [handler]
   (fn [request]
     (let [uri (request :uri)
+          headers (request :headers)
+          accept-lang (. (headers "accept-language") substring 0 2)
+          accept-lang (or (setup/languages accept-lang) setup/default-language)
           [[_ ext]] (re-seq #"\.([a-zA-Z0-9\-]+)$" uri)
           [[_ lang]] (re-seq #"^\/([a-z]+)\/" uri)
-          uri-def-lang (get setup/languages lang)
-          lang (or uri-def-lang setup/default-language)
+          uri-def-lang (setup/languages lang)
+          lang (or uri-def-lang accept-lang)
           request (if (= ext "html")
                     (if uri-def-lang ; only html remains lang-attribute
                       (assoc request :lang lang)

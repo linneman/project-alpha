@@ -17,7 +17,7 @@
             [swank.swank])
   (:use [clojure.string :only [split]]
         [compojure.core :only [GET POST PUT DELETE]]
-        [ring.util.response :only [response]]
+        [ring.util.response :only [response content-type charset]]
         [ring.util.codec :only [url-decode url-encode]]
         [ring.middleware.session :only [wrap-session]]
         [ring.middleware.cookies :only [wrap-cookies]]
@@ -118,6 +118,15 @@
     (apply (partial gen-site full-name-frame [:div#content_pane])
            full-name-sites)))
 
+(defn static-site
+  "returns static html file used e.g. for out of order respectively
+   browser not supported messages."
+  [lang name]
+  (let [templates-path (str templates-path "/" lang)
+        fullname (.toString (java.io.File. templates-path name))
+        res (html/html-resource fullname)]
+    (apply str (html/emit* res))))
+
 (defn user-response
   "used for ensuring that user name is unique"
   [name]
@@ -203,9 +212,30 @@
   (GET "/unread-messages" {session :session params :params} (json-str (get-unread-messages (:id session))))
   (GET "/unread-messages-sha1" {session :session params :params} (base64-sha1 (json-str (get-unread-messages (:id session)))))
   (GET "/unanswered-messages" {session :session params :params} (json-str (get-unanswered-messages (:id session))))
-  (GET "/" _ (forward-url (str setup/host-url setup/default-language "/index.html")))
+  (GET "/" args (do (println "") (forward-url (str setup/host-url (:lang args) "/index.html"))))
   (route/resources "/")
   (route/not-found "Page not found"))
+
+
+(defn not-supported-handler
+  "delivered special pages for not supported browsers (IE)
+   or when site is in maintenance mode."
+  [handler]
+  (fn [request]
+    (let [headers (request :headers)
+          lang (. (headers "accept-language") substring 0 2)
+          lang (or (setup/languages lang) setup/default-language)
+          agent (headers "user-agent")
+          is-ie-agent (re-seq #"(?i).*(msie).*" agent)]
+      (if (re-seq #"(\/|html)$" (request :uri)) ; filter out only html and /
+        (if is-ie-agent
+          (-> (response (static-site lang "not_supported.html"))
+              (content-type "text/html") (charset "utf-8"))
+          (if setup/maintencance-mode
+            (-> (response (static-site lang "in_maintenance.html"))
+                (content-type "text/html") (charset "utf-8"))
+            (handler request)))
+        (handler request)))))
 
 
 (def app
@@ -215,6 +245,7 @@
       (wrap-authentication login-get-uri white-list-handlers)
       (wrap-session {:store (db-session-store) :cookie-attrs {:max-age setup/cookie-max-age}})
       rewrite-handler
+      not-supported-handler
       json-params/wrap-json-params
       wrap-multipart-params
       handler/api))
@@ -227,9 +258,10 @@
   (start-profile-flush-cache-timer 60000)
 
   (defonce server (jetty/run-jetty #'app
-                                   {:port 3000 :join? false
+                                   {:port setup/http-port
+                                    :join? false
                                     :ssl? true
-                                    :ssl-port 3443
+                                    :ssl-port setup/https-port
                                     :keystore "keys/key_crt.jks"
                                     :key-password "password"}))
   (.start server))
