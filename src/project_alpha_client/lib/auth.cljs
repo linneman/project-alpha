@@ -37,7 +37,13 @@
   "removes cookies which is e.g. required for language change"
   []
   (. goog.net.cookies (remove "authenticated"))
-  (. goog.net.cookies (remove "registered")))
+
+  ;;; do not delete the registered cookie to avoid double registration
+  ;;; when language is changed. Unfortunately language prefix is
+  ;;; treated like domain selection causing cookies and session data
+  ;;; to be stored twice.
+  ;(. goog.net.cookies (remove "registered"))
+  )
 
 
 (defn base64-sha1
