@@ -33,7 +33,8 @@
                 release-sortable-search-result-table
                 render-table-button
                 create-test-data]]
-        [project-alpha-client.lib.auth :only [base64-sha1]]))
+        [project-alpha-client.lib.auth :only [base64-sha1]])
+  (:use-macros [macros.macros :only [hash-args]]))
 
 ;;; the profile page (client side equivalent to index.html)
 (def status-pane (dom/get-element "status-pane"))
@@ -217,6 +218,116 @@
   (. editor (setHtml false "" true))
   ;; (. editor (makeEditable)) -> does not work on firefox!
 
+
+
+  ;;
+  ;; glider animation for send mail
+  ;;
+
+  (defn- get-computed-style
+    "returns the calculated property"
+    [elem attribute]
+    (js/parseInt (first
+                  (re-seq #"[0-9]+"
+                          (style/getComputedStyle elem attribute)))))
+
+
+  (defn- get-animation-data-lower-left-upper-right
+    "function for animate object inside window or dialog
+     from lower left corner to upper right corner"
+    [animation-object window-object]
+    (let [animation-steps 50 ; 50 steps a 10ms corresponds to half a second animation time
+          animation-start-width  (. animation-object -width)
+          animation-end-width (* 0.1 animation-start-width)
+          animation-width-off (/ (- animation-end-width animation-start-width) animation-steps)
+          animation-start-height  (. animation-object -height)
+          animation-end-height (* 0.1 animation-start-height)
+          animation-height-off (/ (- animation-end-height animation-start-height) animation-steps)
+          animation-xpos (atom 0)
+          animation-ypos (atom 0)
+          animation-width (atom animation-start-width)
+          animation-height (atom animation-start-height)
+          dialog-width (get-computed-style window-object "width")
+          dialog-heigth (get-computed-style window-object "height")
+          animation-xoff (/ dialog-width animation-steps)
+          animation-yoff (/ dialog-heigth animation-steps)]
+      (hash-args animation-object window-object
+                 animation-xpos animation-ypos animation-width animation-height
+                 animation-xoff animation-yoff animation-width-off animation-height-off
+                 animation-start-width animation-start-height
+                 dialog-width dialog-height)))
+
+ (defn- animate
+   "animate function called by timer"
+   []
+   (let [stop-handler (. animation-timer -stopHandler)
+         animation-data (. animation-timer -animation-data)
+         {:keys [animation-object
+                 animation-xpos animation-ypos
+                 animation-width animation-height
+                 animation-xoff animation-yoff
+                 animation-width-off animation-height-off
+                 animation-start-width animation-start-height
+                 dialog-width dialog-height]}  animation-data]
+     ;(loginfo (str "-x->" @animation-xpos "-w->" @animation-width))
+     (if (< @animation-xpos dialog-width)
+       (do
+         (swap! animation-xpos + animation-xoff)
+         (swap! animation-ypos + animation-yoff)
+         (swap! animation-width + animation-width-off)
+         (swap! animation-height + animation-height-off)
+         (set! (. animation-object -hspace) @animation-xpos)
+         (set! (. animation-object -vspace) @animation-ypos)
+         (set! (. (. animation-object -style) -width) @animation-width)
+         (set! (. (. animation-object -style) -height) @animation-height))
+       (do
+         (reset! animation-xpos 0)
+         (reset! animation-ypos 0)
+         (reset! animation-width animation-start-width)
+         (reset! animation-height animation-start-height)
+         (set! (. animation-object -hspace) 0)
+         (set! (. animation-object -vspace) 0)
+         (set! (. (. animation-object -style) -width) animation-start-width)
+         (set! (. (. animation-object -style) -height) animation-start-height)
+         (stop-handler)
+         (dispatch/fire (. animation-timer -evt) nil)))))
+
+
+  (def animation-timer (goog.Timer. 10))
+  (events/listen animation-timer goog.Timer/TICK animate)
+
+  (defn- start-glider-animation
+    "start fields checking every 500ms to send button to be updated
+       even when last input field has not been left."
+    [evt]
+    (do
+      (let [paper-plane-obj (get-element "paper_plane")]
+        (style/setOpacity paper-plane-obj 1)
+        (set! (. animation-timer -stopHandler) stop-glider-animation)
+        (set! (. animation-timer -evt) evt)
+        (set! (. animation-timer -animation-data)
+              (get-animation-data-lower-left-upper-right
+               paper-plane-obj
+               (. msg-compose-dialog (getElement))))
+        (. animation-timer (start)))))
+
+
+  (defn- stop-glider-animation
+    "stops field checking"
+    []
+    (style/setOpacity (get-element "paper_plane") 0)
+    (. animation-timer (stop)))
+
+
+  (comment usage-illustration
+           (start-glider-animation :msg-compose-dialog-animation-finish)
+           )
+
+
+  ;;
+  ;; methods for compose message dialog
+  ;;
+
   (defn- set-ref-mail-html-txt
     "renders user data"
     [dialog html-txt elem]
@@ -349,7 +460,7 @@
                       (let [resp (. (. ajax-evt -target) (getResponseText))]
                         (loginfo resp)
                         (if (= resp "OK")
-                          (. msg-compose-dialog (setVisible false))
+                          (start-glider-animation :msg-compose-dialog-animation-finish)
                           (js/alert (. (get-element
                                         "compose-msg-dialog-transmission-error"
                                         status-pane) -textContent)))))
@@ -387,6 +498,15 @@
        (loginfo (pr-str evt data)))))
 
 
+  (def ^{:private true
+         :doc "event handler for closing compose dialog when glider animation completed."}
+    msg-compose-dialog-confirmend-animation-ended-reactor
+    (dispatch/react-to
+     #{:msg-compose-dialog-animation-finish}
+     (fn [evt data]
+      (. msg-compose-dialog (setVisible false)))))
+
+
   (def
     ^{:private true
       :doc "timer for updating new messages,
@@ -405,7 +525,7 @@
     ^{:private true
       :doc "whenever the correspondence with somebody has been watched
             either by clicking the corresponding details or by clicking
-            the answer button, a 10 seconds timer is started which
+            the answer button, a 3 seconds timer is started which
             triggers updating of new messages. The timer is used to
             give the user a chance to hit the answer button. Without the
             timer corresponding correspondece would immediately appear
@@ -421,7 +541,7 @@
                 #(do (request-new-messages)
                      (request-read-messages)
                      (reset! update-new-messages-atom nil))
-                10000)))))
+                3000)))))
 
   (def
     ^{:private true
@@ -433,7 +553,7 @@
             button disappears."}
     send-new-message-reactor
     (dispatch/react-to
-     #{:msg-compose-dialog-confirmed}
+     #{:msg-compose-dialog-animation-finish}
      (fn [evt data]
        (when @update-unanswered-messages-atom ; clear any previously defined timer
          (timer/clear @update-unanswered-messages-atom))

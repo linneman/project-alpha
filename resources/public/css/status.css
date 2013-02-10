@@ -16,6 +16,7 @@
     width:100%;
     height:90%;
     border: 1px solid black;
+    empty-cells:show;
     /* border-collapse:collapse; */
 }
 
@@ -154,6 +155,15 @@
     width:32px;
     height:32px;
 }
+
+#compose-msg-dialog #paper_plane {
+    position:absolute;
+    left:0px;
+    bottom:0px;
+    width:200px;
+    border: none;
+    opacity:0;
+    }
 
 #status-pane #status-messages {
     position:absolute;
