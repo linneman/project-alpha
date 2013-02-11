@@ -34,15 +34,11 @@
 
 
 (defn clear-app-cookies
-  "removes cookies which is e.g. required for language change"
+  "removes cookies which formerly required for language change
+   now deprecated"
   []
   (. goog.net.cookies (remove "authenticated"))
-
-  ;;; do not delete the registered cookie to avoid double registration
-  ;;; when language is changed. Unfortunately language prefix is
-  ;;; treated like domain selection causing cookies and session data
-  ;;; to be stored twice.
-  ;(. goog.net.cookies (remove "registered"))
+  (. goog.net.cookies (remove "registered"))
   )
 
 

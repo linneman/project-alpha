@@ -58,7 +58,7 @@
    zombies."
   [lang]
   (let [new-url (str "/" lang "/" (. (str @page) (substring 1)) ".html")]
-    (clear-app-cookies)
+    ;; (clear-app-cookies) ; not required anymore
     (reload-url new-url)))
 
 

@@ -54,7 +54,7 @@
                     protocol (.getProtocol URL)]
                 (.toString (java.net.URL. protocol host port method))))
         key (codec/base64-encode (get-secret-key {}))
-        confirmation_link (str "/" lang "/confirm?key=" (codec/url-encode key))
+        confirmation_link (str "/" lang "/confirm?key=" (url-encode key))
         session (:session ring-args)
         cookies (:cookies ring-args)
         cookies (assoc cookies
@@ -111,7 +111,7 @@
                                             {:max-age setup/cookie-max-age})
                       "registered" {:value "true" :max-age setup/cookie-max-age})
             session (assoc session :registered true)
-            confirmation_link (str "/" lang "/reset_pw_conf?key=" (codec/url-encode key))]
+            confirmation_link (str "/" lang "/reset_pw_conf?key=" (url-encode key))]
         (send-reset-passwd-mail lang email (cat setup/host-url confirmation_link))
         (-> (response "OK") (assoc :session session) (assoc :cookies cookies)))
       (response "NOT OK"))))
@@ -225,10 +225,12 @@
   (fn [request]
     (let [uri (:uri request)
           session (:session request)
+          cookies (:cookies request)
           lang (or (request :lang) setup/default-language)
           uri-without-lang (str "/" (last (split uri #"\/" 3)))
           login-get-uri (str "/" lang login-get-uri)
           authenticated (:authenticated session)
+          registered (:registered session)
           uri-html? (fn [uri] (re-seq #"\.html$" uri))
           is-url-request (uri-html? uri)
           uri-json-request? (fn [uri] (not (re-seq #"\/.*\..*$" uri)))
@@ -241,7 +243,14 @@
                                (re-pattern
                                 (str "^" (.replace % "/" "\\/") "([\\?|/][\\w=_&%+]+)?$"))
                                uri-without-lang) uri-white-list)))
-        (handler request)
+        ;; authenticated, if required update cookies, deliver requested handler result
+        (let [auth-cookie {:value (if authenticated "true" "false") :max-age setup/cookie-max-age}
+              reg-cookie {:value (if registered "true" "false") :max-age setup/cookie-max-age}
+              updated-cookies (assoc cookies "registered" reg-cookie "authenticated" auth-cookie)
+              resp (handler request)
+              resp (if is-url-request (-> resp (assoc :cookies updated-cookies)) resp)]
+          resp)
+        ;; not authenticated, when html request redirect to login side otherwise return error message
         (if is-url-request
           (-> (response (forward-url login-get-uri)) (assoc :session upd-session))
           (-> (set-cookie
