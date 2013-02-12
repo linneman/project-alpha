@@ -343,12 +343,22 @@
 
 
 (defn flush-profile
-  "writes profile data for a given id to the database. This is
-   e.g. required before accessing client functions which retrieve
-   this profile data (search)."
+  "writes profile data for a given id to the database asynchronously.
+   Function returns immediately"
   [id]
   (send-off profile-cache #(when % (flush-profile-cache-id id %)))
-  (println (str "flushed profile for user id " id))
+  (println (str "flushed profile for user id " id)))
+
+
+(defn check-profile
+  "writes profile data for a given id to the database and waits until
+   database operation has been completed (e.g. computation of coordinates
+   for given user. This is e.g. required before accessing client functions
+   which retrieve this profile data (search)."
+  [id]
+  (flush-profile id)
+  (await-for 2000 profile-cache)
+  (println (str "flush operation completed, now checked check profile for user id " id))
   (check-profile-integrity id))
 
 
@@ -379,7 +389,7 @@
 
 (declare get-profile)
 
-(defn check-profile-integrity
+(defn- check-profile-integrity
   "checkes profile for missing and required data
    such as sex, interest sex, age, location,
    and questionaire data. when all data is given

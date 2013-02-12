@@ -287,7 +287,7 @@
             matches (dissoc matches user-id) ; make sure not to integrate the user himself
             ]
         {:data matches})
-      {:error (check-profile-integrity user-id)})))
+      {:error (check-profile user-id)})))
 
 
 (defn find-all-favorites
@@ -300,7 +300,7 @@
                             (merge usr-prf (hash-args limit)))
             matches (transform-sql-resp (apply find-fav-users usr-prf))]
         {:data matches})
-      {:error (check-profile-integrity user-id)})))
+      {:error (check-profile user-id)})))
 
 
 (defn find-all-banned
@@ -313,7 +313,7 @@
                             (merge usr-prf (hash-args limit)))
             matches (transform-sql-resp (apply find-banned-users usr-prf))]
         {:data matches})
-      {:error (check-profile-integrity user-id)})))
+      {:error (check-profile user-id)})))
 
 
 (comment usage illustation

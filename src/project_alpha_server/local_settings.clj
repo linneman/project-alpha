@@ -8,11 +8,11 @@
 (ns project-alpha-server.local-settings)
 
 
-;;; --- Port and Domain setup ---
+;;; --- Port and domain setup ---
 
 (def http-port 3000)
 (def https-port 3443)
-(def host-url (str "https://localhost:" https-port "/"))
+(def host-url (str "https://localhost" (when-not (= https-port 443) (str ":" https-port)) "/"))
 (def cookie-max-age (* 30 24 3600))
 
 (def ^{:doc "when true display maintenance page"} maintencance-mode false)
