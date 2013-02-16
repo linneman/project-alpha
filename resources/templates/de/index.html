@@ -1,5 +1,87 @@
 <div id="index-pane">
 
+  <div id="support-dialog" class="project-alpha-dialog">
+    <h2>Projekt Alpha braucht Ihre Untersützung!</h2>
+
+    <p>Helfen Sie, das Projekt zu verbreiten, indem Sie andere darauf aufmerksam machen. Veröffentlichen Sie einen Kommentar über twitter oder google plus und beteiligen Sie sich an der Diskussion über Weiterentwicklung und Verbesserungsmöglichkeiten.</p>
+
+    <table id="announce-button-table" class="support-tables">
+      <tr>
+        <td class="twitter">
+          <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://project-alpha" data-text="Singles aufgepasst: Hier werdet Ihr nicht übers Ohr gehauen!" data-via="ol42" data-lang="de" data-size="large" data-count="none">Twittern</a>
+          <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+        </td>
+
+        <td class="gplus">
+          <!-- Place this tag where you want the +1 button to render. -->
+          <div class="g-plusone" data-annotation="inline" data-width="120"></div>
+
+          <!-- Place this tag after the last +1 button tag. -->
+          <script type="text/javascript">
+            window.___gcfg = {lang: 'de'};
+
+            (function() {
+            var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+            po.src = 'https://apis.google.com/js/plusone.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+            })();
+          </script>
+        </td>
+
+        <td class="gplus-community">
+          <div>
+            <a href="https://plus.google.com/u/0/communities/102197792811205416720" target="_blank">
+              <img src="img/gplus_community.png" width="120"></a>
+            </a>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <hr>
+
+    <p>Eine Spende über Flattr, Bitcoin- oder Paypalüberweisung hält das Angebot am Leben.</p>
+    <table id="donate-button-table" class="support-tables">
+      <tr>
+        <td class="flattr">
+          <div>
+            <a class="FlattrButton" style="display:none;" href="http://project-alpha.org"></a>
+            <noscript><a href="http://flattr.com/thing/1137039/project-alpha" target="_blank">
+                <img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a></noscript>
+          </div>
+        </td>
+
+        <td class="bitcoin">
+          <div>
+            <a href="bitcoin:1Kx9pBJN8RHKcJQa81yyrBy3BDEqYRfskE?amount=0.5&label=project-alpha">
+              <img src="img/bitcoin_euro-150px.png" width="75"></a>
+            <p style="font-size:xx-small">1KzTSfqjF2iKCduwz59nv2uqh1W2JsTxZH</p>
+          </div>
+        </td>
+
+        <td class="paypal">
+          <div>
+            <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+              <input type="hidden" name="cmd" value="_s-xclick">
+              <input type="hidden" name="hosted_button_id" value="96WYH6689SGWS">
+              <input type="image" src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Jetzt einfach, schnell und sicher online bezahlen – mit PayPal.">
+              <img alt="" border="0" src="https://www.paypalobjects.com/de_DE/i/scr/pixel.gif" width="1" height="1"></form>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <form>
+      <div id="confirm-support-dialog" class="goog-flat-button goog-flat-button-disabled project-alpha-dialog-button"
+	   title="Schließen">Schließen</div>
+    </form>
+  </div>
+
+  <div id="status-messages" class="project-alpha-dialog">
+    <div id="support-dialog-title">Unterstützung</div>
+  </div>
+
+
   <div id="logo-pane">
     <img id="logo" src="img/alpha.png" alt="logo"/>
   </div>
@@ -58,8 +140,14 @@
 
   <div class="box">
     <h3>Gebühren- und Werbungsfrei</h3>
-    <p>Diese Seite verzichtet vollständig auf Werbung und Gebühren. Es gibt z.B. keinen teuren "Premiumaccount", der zur Beantwortung interessante Anfragen zwingend abgeschlossen werden muss. Wir degradieren Sie nicht zum Produkt, in dem wir mit Ihren Daten Handel treiben oder Sie unerwünschter Werbung aussetzen.</p><p>Sie werden sich nun sicher fragen, wie diese Seite sich finanziert. Die Antwort ist einfach: Auf die gleiche Art und Weise, wie  Wikipedia, Linux und andere Open Source Projekte, nämlich über Spenden und die Arbeit Freiwilliger. Die Frage hätte somit vielleicht anders lauten müssen: Warum sind komerzielle Anbieter einer verhältnismässig einfach zu implementierenden Kontaktbörse derart teuer?</p>
+    <p>Diese Seite verzichtet vollständig auf Werbung und Gebühren. Es gibt z.B. keinen teuren "Premiumaccount", der zur Beantwortung interessante Anfragen zwingend abgeschlossen werden muss. Wir degradieren Sie nicht zum Produkt, in dem wir mit Ihren Daten Handel treiben oder Sie unerwünschter Werbung aussetzen. Da diese Eigenschaften im Widerspruch zur kommerziellen Interessen stehen, wird das Angebot ausschließlich durch Spenden und die Arbeit Freiwilliger finanziert. Eine Spende über Flattr, Bitcoin- oder Paypalüberweisung hält das Angebot am Leben:</p>
+    <div id="support-button">
+      <img src="img/support-icon.png" alt="support"/>
+      <p>Das Projekt unterstützen</p>
+    </div>
+    <p>Die Frage hätte somit vielleicht anders lauten müssen: Warum sind komerzielle Anbieter einer verhältnismässig einfach zu implementierenden Kontaktbörse derart teuer?</p>
   </div>
+
 
   <div class="box omega">
     <h3>Vollständige Anonymität</h3>

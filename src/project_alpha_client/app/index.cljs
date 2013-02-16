@@ -27,7 +27,8 @@
         [project-alpha-client.lib.utils :only [init-alpha-button
                                                set-alpha-button-enabled
                                                is-alpha-button-enabled
-                                               get-element]]))
+                                               get-element
+                                               get-modal-dialog open-modal-dialog]]))
 
 
 ;;; the index page (client side equivalent to index.html)
@@ -35,11 +36,22 @@
 
 (when index-pane
 
+  ;; instantiate support dialog and ok button
+  (let [[dialog ok-button cancel-button]
+        (get-modal-dialog
+         :panel-id "support-dialog"
+         :title-id "support-dialog-title"
+         :ok-button-id "confirm-support-dialog"
+         :dispatched-event :support-dialog-confirmed)]
+    (def support-dialog dialog)
+    (def confirm-support-button ok-button))
+
   ;;; buttons
   (def login-button (init-alpha-button "login-button" :login-button-clicked))
   (def register-button (init-alpha-button "register-button" :register-button-clicked))
   (def logout-button (init-alpha-button "logout-button" :logout-button-clicked))
   (def forgot-password-button (init-alpha-button "forgot-password-button" :forgot-password-button-clicked))
+  (def support-button (get-element "support-button" index-pane))
 
   ;;; button panes
   (def login-pane (get-element "login-button-pane" index-pane))
@@ -167,6 +179,58 @@
                                 :dialog-closed (enable-buttons)
                                 :dialog-opened (disable-buttons)))))
 
+  (def support-button-reactor (dispatch/react-to
+                               #{:support-button-clicked}
+                               #(open-modal-dialog support-dialog)))
+
+
+  ;;;
+  ;;; animated support button is handled separately
+  ;;;
+  (def support-button-opac-max 1)
+  (def support-button-opac-min 0.5)
+  (def support-button-delta (atom 0.1))
+  (def support-button-opac (atom support-button-opac-min))
+
+  (defn- set-support-button-animation-periods
+    [periods]
+    (reset! support-button-delta
+            (/ (- support-button-opac-max support-button-opac-min) periods)))
+
+  (set-support-button-animation-periods 100)
+  ;(. (. support-button -style) (setProperty "background-color" "green" "important"))
+  ;(. (. support-button -style) (setProperty "background-color" "rgb(136,255,136)" "important"))
+  ;(. (. support-button -style) (setProperty "opacity" 1 "important"))
+
+  (defn- animate
+    []
+    (let [opac (+ @support-button-opac @support-button-delta)
+          delta @support-button-delta
+          delta (if (> opac support-button-opac-max) (- delta) delta)
+          delta (if (< opac support-button-opac-min) (- delta) delta)
+          opac (min support-button-opac-max opac)
+          opac (max support-button-opac-min opac)]
+      (. (. support-button -style) (setProperty "opacity" opac "important"))
+      (reset! support-button-opac opac)
+      (reset! support-button-delta delta)))
+
+
+  (def animation-timer (goog.Timer. 10))
+  (events/listen animation-timer goog.Timer/TICK animate)
+
+  (defn- start-animation-timer
+    []
+    (. animation-timer (start)))
+
+  (defn- stop-animation-timer
+    []
+    (. animation-timer (stop)))
+
+
+  (events/listen support-button event-type/CLICK #(dispatch/fire :support-button-clicked nil))
+  (events/listen support-button event-type/MOUSEOUT #(set-support-button-animation-periods 100))
+  (events/listen support-button event-type/MOUSEOVER #(set-support-button-animation-periods 30))
+
   )  ; (when index-pane
 
 
@@ -194,6 +258,7 @@
     (nav/set-nav-pane-login-enabled false))
   (loginfo "index page enabled")
   (update-status)
+  (start-animation-timer)
   )
 
 
@@ -201,4 +266,5 @@
   "hides the index-page, activates the status"
   []
   (when index-pane
-    (style/showElement index-pane false)))
+    (style/showElement index-pane false)
+    (stop-animation-timer)))
