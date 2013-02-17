@@ -258,12 +258,7 @@
   (start-profile-flush-cache-timer 60000)
 
   (defonce server (jetty/run-jetty #'app
-                                   {:port setup/http-port
-                                    :join? false
-                                    :ssl? true
-                                    :ssl-port setup/https-port
-                                    :keystore "keys/key_crt.jks"
-                                    :key-password "password"}))
+                                   setup/jetty-setup))
   (.start server))
 
 ; :configurator remove-non-ssl-connectors
