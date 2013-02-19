@@ -31,8 +31,7 @@
    (let [sql-resp (apply add-user (mapcat #(vector (key %) (val %)) user-fields))
          id (or (:GENERATED_KEY sql-resp) (:generated_key sql-resp))
          profile-fields (dissoc fields :name :email :password :created_at)]
-     (update-profile id profile-fields)
-     (flush-profile id))))
+     (update-profile id profile-fields))))
 
 (comment
   (create-test-user :name "Anton" :email "Otto.Linnemann@google.de" :password "avatar"

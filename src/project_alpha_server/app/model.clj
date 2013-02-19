@@ -278,7 +278,7 @@
          (fn err-handler-fn [ag ex]
            (err-println "Exception" ex "occured while writing profile cache data" @ag))))
 
-(declare write-user-fav-books write-user-fav-movies check-profile-integrity)
+(declare write-user-fav-books write-user-fav-movies check-profile check-profile-integrity)
 
 
 (defn- flush-profile-cache-id
@@ -303,8 +303,7 @@
    frequently invoked by a timer."
   [h]
   (doseq [[id fields] h]
-    (flush-profile-cache-id id h)
-    (check-profile-integrity id)))
+    (check-profile id)))
 
 
 (defn start-profile-flush-cache-timer
@@ -313,7 +312,7 @@
   [period]
   (let [task (proxy [TimerTask] []
                (run []
-                 (send-off profile-cache flush-profile-cache)
+                 (flush-profile-cache @profile-cache)
                  (println "profile cache flushed")))]
     (def profile-flush-timer (new Timer))
     (. profile-flush-timer

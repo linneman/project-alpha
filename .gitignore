@@ -22,3 +22,4 @@ resources/public/project_alpha.js
 resources/public/project_alpha_debug.js
 target
 repl
+.lein-repl-history
