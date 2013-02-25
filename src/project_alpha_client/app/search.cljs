@@ -66,17 +66,26 @@
 
   (defn- render-table
     [table-id controller-id data]
-    (init-sortable-search-result-table controller-id table-id data 10
-     {"sort-by-date" (partial sort #(compare
-                                     (german-date-str-to-ms (first %2))
-                                     (german-date-str-to-ms (first %1))))
-      "sort-by-name" (partial sort #(compare (second %1) (second %2)))
-      "sort-by-dist" (partial sort #(compare
-                                     (unitstr2num (nth %1 2))
-                                     (unitstr2num (nth %2 2))))
-      "sort-by-match" (partial sort #(compare
-                                      (unitstr2num (nth %2 3))
-                                      (unitstr2num (nth %1 3))))}))
+    (let [outer-frame (get-element "outer-frame")
+          height (js/parseInt (style/getComputedStyle outer-frame "height"))
+          ;; .goog-tabpane-cont = 65% tot height;  header and bottom table line 90px;
+          ;; lineheight is 42px
+          nr-lines (Math/floor (/ (- (* .65 height) 90) 42))]
+      (init-sortable-search-result-table
+       controller-id
+       table-id
+       data
+       nr-lines
+       {"sort-by-date" (partial sort #(compare
+                                       (german-date-str-to-ms (first %2))
+                                       (german-date-str-to-ms (first %1))))
+        "sort-by-name" (partial sort #(compare (second %1) (second %2)))
+        "sort-by-dist" (partial sort #(compare
+                                       (unitstr2num (nth %1 2))
+                                       (unitstr2num (nth %2 2))))
+        "sort-by-match" (partial sort #(compare
+                                        (unitstr2num (nth %2 3))
+                                        (unitstr2num (nth %1 3))))})))
 
 
 

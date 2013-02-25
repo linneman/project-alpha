@@ -39,7 +39,8 @@
     border: 1px solid;
     border-color: threedhighlight threedshadow threedshadow threedhighlight;
     padding: 2px;
-    height: 500px;
+    /* height: 500px; */
+    height: 65%;
 }
 
 .goog-tabpane-tab, .goog-tabpane-tab-selected {

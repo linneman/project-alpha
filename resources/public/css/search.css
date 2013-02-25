@@ -13,7 +13,6 @@
 
 #search-pane .result-table {
     width:100%;
-    height:90%;
     border: 1px solid black;
     empty-cells:show;
     /* border-collapse:collapse; */

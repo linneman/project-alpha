@@ -52,11 +52,20 @@
 
   (defn- render-table
     [table-id controller-id data]
-    (init-sortable-search-result-table controller-id table-id data 10
-     {"sort-by-date" (partial sort #(compare
-                                     (german-date-str-to-ms (first %2))
-                                     (german-date-str-to-ms (first %1))))
-      "sort-by-name" (partial sort #(compare (second %1) (second %2)))}))
+    (let [outer-frame (get-element "outer-frame")
+          height (js/parseInt (style/getComputedStyle outer-frame "height"))
+          ;; .goog-tabpane-cont = 65% tot height;  header and bottom table line 90px;
+          ;; lineheight is 42px
+          nr-lines (Math/floor (/ (- (* .65 height) 90) 42))]
+      (init-sortable-search-result-table
+       controller-id
+       table-id
+       data
+       nr-lines
+       {"sort-by-date" (partial sort #(compare
+                                       (german-date-str-to-ms (first %2))
+                                       (german-date-str-to-ms (first %1))))
+        "sort-by-name" (partial sort #(compare (second %1) (second %2)))})))
 
 
   (defn- get-status-msg-text
