@@ -24,6 +24,11 @@
     opacity:1;
     }
 
+#profile-pane #election {
+    right:0px;
+    top:10px;
+}
+
 #profile-pane #page1 table {
    font-size:1.5em;
    /* width: 700px; */
