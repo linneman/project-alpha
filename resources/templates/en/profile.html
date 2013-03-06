@@ -2,6 +2,7 @@
 
   <div id="status-messages" class="project-alpha-dialog">
     <div id="really-delete-profile">Wollen Sie wirklich Ihr gesamtes Profil löschen?</div>
+    <div id="pic-info-dialog-title">Informationen zum Einfügen von Profilbildern</div>
   </div>
 
   <p class="pane-explanation">Machen Sie die wichtigsten Angaben zur Ihrer Person, zu Ihren Vorlieben und vergessen Sie insbesondere nicht, den Fragenkatalog vollständig zu beantworten. Erst wenn alle Angaben vollständig sind, können Sie nach Kontakten suchen.</p>
@@ -1061,8 +1062,34 @@
   <div id="page2">
     <h2>Freitext</h2>
 
+    <div id="pic-info-dialog" class="project-alpha-dialog">
+      <ol>
+        <li>Stellen Sie Ihr Profilbild ins Internet, z.B. über <a href="http://www.flickr.com" target="_blank">flickr</a>, <a href="http://pinterest.com" target="_blank">pinterest</a> oder einen anderen Dienst.</li>
+        <li>Öffnen Sie ein neues Browserfenster über das Rolladenmenü Ablage->Neus Fenster</li>
+        <li>Rufen Sie in diesem Fenster die Internetseite auf, die Ihr gewünschte Profilbild zeigt.
+          <div align="center">
+            <img id="help-pictures-illustration" src="img/help_pictures.png" alt="Darstellung bzgl. des Einfügens von Bildern"/>
+          </div>
+        </li>
+        <li>Ziehen Sie das Bild wie oben dargestellt mit der Maus in den Profileditor.</li>
+        <li>Bringen Sie den Profileditor wieder in den Vordergrund, indem Sie mit der Maus in das Editorfeld klicken und betätigen Sie die Eingabetaste.</li>
+        <li>Sie können in dieser Weise beliebig viele Profilbilder einfügen. Alle Bilder werden später rechts ausgerichtet dargestellt.</li>
+      </ol>
+      <p>Bilder können später in der gleichen Weise auch in Nachrichten an andere Nutzer eingefügt werden.</p>
+
+      <form>
+        <div id="confirm-pic-info-dialog-dialog" class="goog-flat-button goog-flat-button-disabled project-alpha-dialog-button"
+	     title="Schließen">Schließen</div>
+      </form>
+    </div>
+
+    <div id="pic-info-button">
+      <img src="img/info.png" alt="Informationen bzgl. Einsetzen von Bildern"/>
+      <p>Hilfe zum Bilder Einfügen</p>
+    </div>
+
     <img class="profile-pic-in-pane" src="img/lonely_hearts_ad.png" alt="lonely_hearts_ad"/>
-    <p>Schreiben Sie etwas über sich ...</p>
+    <p>Schreiben Sie etwas über sich, wen Sie suchen, Ihre Vorlieben, etc.</p>
     <div id="toolbar" style='width:602px'></div>
     <div id="editMe"></div>
   </div>

@@ -20,6 +20,7 @@
             [goog.dom :as gdom]
             [goog.style :as style]
             [goog.events :as events]
+            [goog.events.EventType :as event-type]
             [goog.ui.Button :as Button]
             [goog.ui.TabPane :as TabPane]
             [goog.ui.Select :as Select]
@@ -31,7 +32,8 @@
             [project-alpha-client.lib.dispatch :as dispatch])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.utils :only [get-button-group-value
-                                               set-button-group-value get-element]]
+                                               set-button-group-value get-element
+                                               get-modal-dialog open-modal-dialog]]
         [project-alpha-client.lib.ajax :only [send-request]]
         [project-alpha-client.lib.auth :only [authenticated? clear-app-cookies]]))
 
@@ -39,6 +41,17 @@
 (def profile-pane (dom/get-element "profile-pane"))
 
 (when profile-pane
+
+  ;; instantiate help dialog for inserting pictures
+  (let [[dialog ok-button cancel-button]
+        (get-modal-dialog
+         :panel-id "pic-info-dialog"
+         :title-id "pic-info-dialog-title"
+         :ok-button-id "confirm-pic-info-dialog-dialog"
+         :dispatched-event :pic-info-dialog-dialog-confirmed)]
+    (def pic-info-dialog dialog)
+    (def confirm-pic-info-button ok-button))
+
 
   ;;; --- age selection helpers ---
 
@@ -116,6 +129,24 @@
       button))
 
   (def delete-profile-data-button (render-button "delete-all-profile-data" :delete-all-profile-data ""))
+
+  ;;; button for opening a help dialogue explaining how to insert pictures
+
+  (def help-pic-ins-button (get-element "pic-info-button" profile-pane))
+
+  (defn- set-pic-ins-button-opacity
+    [opac]
+    (. (. help-pic-ins-button -style) (setProperty "opacity" opac "important")))
+
+  (events/listen help-pic-ins-button event-type/CLICK #(dispatch/fire :help-pic-ins-button-clicked nil))
+  (events/listen help-pic-ins-button event-type/MOUSEOUT #(set-pic-ins-button-opacity 0.8))
+  (events/listen help-pic-ins-button event-type/MOUSEOVER #(set-pic-ins-button-opacity 1.0))
+
+  (def help-pic-ins-button-clicked-reactor
+    (dispatch/react-to
+     #{:help-pic-ins-button-clicked}
+     #(open-modal-dialog pic-info-dialog)))
+
 
   ; --- selection of the zip code ---
 

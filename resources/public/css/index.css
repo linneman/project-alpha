@@ -4,11 +4,8 @@
 }
 
 #support-dialog {
-    width:700px;
-    height:500px;
-}
-
-#support-dialog {
+  width:700px;
+  height:500px;
   font-size:1em;
   line-height:1.4em;
 }

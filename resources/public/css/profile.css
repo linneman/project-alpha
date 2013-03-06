@@ -29,6 +29,11 @@
     top:10px;
 }
 
+#profile-pane .goog-tabpane-cont,
+#profile-pane .goog-tabpane-tab-selected {
+  background-color: #eef;
+}
+
 #profile-pane #page1 table {
    font-size:1.5em;
    /* width: 700px; */
@@ -91,6 +96,69 @@
     height: 70%;
     background-color: white;
     border: 1px solid grey;
+}
+
+
+#pic-info-button {
+  position:absolute;
+  top:120px;
+  right:30px;
+  width:220px;
+  margin-left:auto; margin-right:auto;
+  text-align:center;
+  border-style: solid;
+  border-width: 4px 4px 4px 4px;
+  background-color: #8f8;
+  border-color:#0f0;
+  border-radius: 2em;
+  opacity:0.8;
+}
+
+#pic-info-button p {
+  margin: 0;
+  margin-top:5px;
+  margin-bottom:2px;
+  padding: 0;
+  font-weight: bold;
+  font-size: 80%;
+  line-height: 1;
+}
+
+#pic-info-button img {
+  width:80px;
+  margin-top:2px;
+}
+
+
+#pic-info-dialog {
+  width:750px;
+  height:500px;
+  font-size:1em;
+  line-height:1.4em;
+  padding-top:0px;
+}
+
+#pic-info-dialog h2 {
+  color: #3c4764;
+  font-size: 2em;
+  text-align:center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 1.0);
+  margin-bottom:30px;
+}
+
+#pic-info-dialog * #help-pictures-illustration {
+    margin-top:15px;
+    height:200px;
+    }
+
+#pic-info-dialog p,
+#pic-info-dialog ol li {
+  font-size:16px;
+  line-height:1.4em;
+}
+
+#pic-info-dialog .project-alpha-dialog-button {
+    bottom:20px;
 }
 
 
