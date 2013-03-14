@@ -349,6 +349,13 @@
   (println (str "flushed profile for user id " id)))
 
 
+(defn flush-all-profile-data
+  "writes all cached data to db. currently exclusively required
+   for testing and maintenance purposes"
+  []
+  (flush-profile-cache @profile-cache))
+
+
 (defn check-profile
   "writes profile data for a given id to the database and waits until
    database operation has been completed (e.g. computation of coordinates

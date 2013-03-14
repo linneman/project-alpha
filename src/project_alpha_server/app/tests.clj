@@ -12,7 +12,8 @@
             [korma.core :as sql]
             [clojure.java.jdbc :as jdbc]
             [ring.util.codec :as codec]
-            [project-alpha-server.local-settings :as setup])
+            [project-alpha-server.local-settings :as setup]
+            [clojure.string :as string])
   (:use [project-alpha-server.lib.model]
         [project-alpha-server.app.model]
         [project-alpha-server.app.zip-de]
@@ -40,31 +41,28 @@
   )
 
 
-;; some male test forenames
-(def males ["Paul" "Andreas" "Gert" "Patrick" "Gustav" "Olaf"
-            "Ottmar" "Heiner" "Sebastian" "Christoph"
-            "Max" "Sepp" "Thorsten" "Karl" "Thomas" "Kai"])
+;; some male test nicknames
+(def males ["Amor" "Adonis" "Chico" "Frechdachs" "Glitzerstern"
+            "Hasenherz" "Hero" "Honigbär" "Jogibär"
+            "Nasenbär" "Prinz" "Teufelchen" "Jack" "Joe"
+            "Ben" "Nobody" "Pretty Boy" "Freak" "Dave"
+            "Hal" "Herbert" "Nobert" "Sommer" "Karl"
+            "Spaßmacher" "Frauenversteher" "Barni"
+            "Bart" "Buz" "Bruce" "Emil" "Edgar"])
 
-;; some female test forenames
-(def females ["Lisa" "Paula" "Gerda" "Sabine" "Monika""Andrea"
-              "Patricia" "Anna" "Gudrun""Silke" "Sandy"
-              "Helen" "Susanne" "Sandra" "Katarina" "karla"])
-
+;; some female test nicknames
+(def females ["Bambina" "Bienchen" "Biene" "Dreamgirl" "Fee" "Göttin" "Herzblatt"
+            "Mausi" "Mieze" "Morgenröte" "Morgentau" "Muffelchen"
+            "Muffelpuffel" "Mopsi" "Perle" "Prinzessin" "Sahnetörtchen"
+            "Schatzi" "Schmetterling" "Sonnenschein" "Schnuffel"
+            "Sternchen" "Sternschnuppe" "Süße" "Sweatheart"
+            "Traumprinzessin" "Übelchen" "Vögelchen"])
 
 (defn names []
-  "generates a lazy sequence of names unique names out from
-   the given male and female forenames. When more names are
-   requested as permutation between forenames and surnames
-   exists a counting id is concatenated to the end of the
-   name."
-  (let [first-names (into males females)
-        second-names ["Mueller" "Schmidt" "Bauer" "Schuhmacher"
-                      "Stein" "Pfennig" "Baecker" "Schuster"
-                      "Bleichert" "Schulz" "Ludwig" "Mai"
-                      "Roehl" "Richter" "Hofer" "Kling"
-                      "Hauser" "Kaindl" "Kiefer"]
-        name-vec (vec (for [first-name first-names second-name second-names]
-                        (str first-name " " second-name)))
+  "generates a lazy sequence of unique names out of the
+   given nicknames. When more names are requested as available
+   a counting id is concatenated to the end of the nickname."
+  (let [name-vec (into males females)
         nn (count name-vec)
         name-iter (fn [[n next-name]]
                     (let [idx (mod n nn)
@@ -119,11 +117,11 @@
 
 (defn sex-of-name
   "returns the sex of a users full name"
-  [full-name]
-  (let [[forename surname] (re-seq #"[A-Za-z0-9]+" full-name)
+  [complete-name]
+  (let [[nickname] (re-seq #"[A-Za-z]+" complete-name)
         males (set males)
         females (set females)]
-    (condp contains? forename
+    (condp contains? nickname
       males "male"
       females "female"
       (if (> 0.5 (rand 1)) "male" "female"))))
@@ -143,8 +141,7 @@
   "creates a lazy-seq of test users with the fieds
    given in the functions above."
   (let [gen-email (fn [name]
-                (let [[forname surname] (re-seq #"[A-Za-z0-9]+" name)]
-                  (str forname "." surname "@avatar.org")))]
+                    (str (string/replace name " " "_") "@avatar.org"))]
     (map (fn [name user_zip text
               question_1 question_2 question_3 question_4 question_5
               question_6 question_7 question_8 question_9 question_10
@@ -191,7 +188,8 @@
          (map
           (fn [fields]
             (apply create-test-user (mapcat #(vector (key %) (val %)) fields)))
-          (test-users)))))
+          (test-users))))
+  (flush-all-profile-data))
 
 
 (comment

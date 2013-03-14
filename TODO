@@ -1,13 +1,15 @@
 TODO LIST
 =========
 
-* help text and maybe a screencast explaining how picture integration works
-* more precise feedback about missing profile data
-* body height date
+* email notifications, especially important with sparce user base
 * final definition of the 10 questions for match algorithm
-* further layout improvement (background pictures)
-* pictures in contact tables
+* more precise feedback about missing profile data
 * complete englisch version
+
+* help text and maybe a screencast explaining how picture integration works                        DONE
+* body height date                                                                                 REJECTED
+* further layout improvement (background pictures)                                                 PARTLY
+* pictures in contact tables                                                                       POSTPONED
 * image "Fork me on Github"                                                                        DONE
 * Bitcoin and Flattr buttons, where?                                                               DONE
 * upload to github plus source documenation
