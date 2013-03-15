@@ -47,9 +47,9 @@
                    EditorCommand/JUSTIFY_LEFT
                    EditorCommand/JUSTIFY_CENTER
                    EditorCommand/JUSTIFY_RIGHT
-                   EditorCommand/SUBSCRIPT
-                   EditorCommand/SUPERSCRIPT
-                   EditorCommand/STRIKE_THROUGH
+                   ;; EditorCommand/SUBSCRIPT
+                   ;; EditorCommand/SUPERSCRIPT
+                   ;; EditorCommand/STRIKE_THROUGH
                    EditorCommand/REMOVE_FORMAT
                    ])
         myToolbar (DefaultToolbar/makeToolbar buttons (dom/get-element toolbar-id))
