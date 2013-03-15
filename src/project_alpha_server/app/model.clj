@@ -15,7 +15,8 @@
             [korma.core :as sql]
             [clojure.java.jdbc :as jdbc]
             [ring.util.codec :as codec]
-            [project-alpha-server.local-settings :as setup])
+            [project-alpha-server.local-settings :as setup]
+            [clojure.string :as string])
   (:use [project-alpha-server.lib.model]
         [project-alpha-server.app.zip-de]
         [ring.middleware.session.store :only [SessionStore]]
@@ -583,18 +584,21 @@
    already listed there and updates the relation table
    user_fav_books."
   [user-id fav-book-list]
-  (doseq [book fav-book-list]
-    (let [book-entry (select-keys book [:author :title])
-          rank (:rank book)
-          book-db-entry (first (sql/select
-                                books
-                                (sql/where (select-keys book [:author :title]))))]
-      (if (not book-db-entry)
-        (let [book-db-entry (sql/insert books (sql/values book-entry))
-              book-id (or (:GENERATED_KEY book-db-entry) (:generated_key book-db-entry))]
-          (println "insert new book id: " book-id " -> " book-entry)
-          (update-user-fav-book-entry user-id book-id rank))
-        (update-user-fav-book-entry user-id (:id book-db-entry) rank)))))
+  (let [fav-book-list (map #(assoc % :title (string/trim (:title %))
+                                   :author (string/trim (:author %))) fav-book-list)]
+    (doseq [book fav-book-list]
+      (when-not (empty? (:title book))
+        (let [book-entry (select-keys book [:author :title])
+              rank (:rank book)
+              book-db-entry (first (sql/select
+                                    books
+                                    (sql/where (select-keys book [:author :title]))))]
+          (if (not book-db-entry)
+            (let [book-db-entry (sql/insert books (sql/values book-entry))
+                  book-id (or (:GENERATED_KEY book-db-entry) (:generated_key book-db-entry))]
+              (println "insert new book id: " book-id " -> " book-entry)
+              (update-user-fav-book-entry user-id book-id rank))
+            (update-user-fav-book-entry user-id (:id book-db-entry) rank)))))))
 
 
 ;; --- user movies ---
@@ -633,18 +637,21 @@
    already listed there and updates the relation table
    user_fav_movies."
   [user-id fav-movie-list]
-  (doseq [movie fav-movie-list]
-    (let [movie-entry (select-keys movie [:author :title])
-          rank (:rank movie)
-          movie-db-entry (first (sql/select
-                                movies
-                                (sql/where (select-keys movie [:author :title]))))]
-      (if (not movie-db-entry)
-        (let [movie-db-entry (sql/insert movies (sql/values movie-entry))
-              movie-id (or (:GENERATED_KEY movie-db-entry) (:generated_key movie-db-entry))]
-          (println "insert new movie id: " movie-id " -> " movie-entry)
-          (update-user-fav-movie-entry user-id movie-id rank))
-        (update-user-fav-movie-entry user-id (:id movie-db-entry) rank)))))
+  (let [fav-movie-list (map #(assoc % :title (string/trim (:title %))
+                                    :author (string/trim (:author %))) fav-movie-list)]
+    (doseq [movie fav-movie-list]
+      (when-not (empty? (:title movie))
+        (let [movie-entry (select-keys movie [:author :title])
+              rank (:rank movie)
+              movie-db-entry (first (sql/select
+                                     movies
+                                     (sql/where (select-keys movie [:author :title]))))]
+          (if (not movie-db-entry)
+            (let [movie-db-entry (sql/insert movies (sql/values movie-entry))
+                  movie-id (or (:GENERATED_KEY movie-db-entry) (:generated_key movie-db-entry))]
+              (println "insert new movie id: " movie-id " -> " movie-entry)
+              (update-user-fav-movie-entry user-id movie-id rank))
+            (update-user-fav-movie-entry user-id (:id movie-db-entry) rank)))))))
 
 
 (comment

@@ -309,9 +309,9 @@
     [author-dom-str title-dom-str]
     (let [idx (range 1 4)
           fav_auth_keys (map #(str author-dom-str %) idx)
-          fav_auth_vals (map #(. (dom/get-element %) -value) fav_auth_keys)
+          fav_auth_vals (map #(string/trim (. (dom/get-element %) -value)) fav_auth_keys)
           fav_title_keys (map #(str title-dom-str %) idx)
-          fav_title_vals (map #(. (dom/get-element %) -value) fav_title_keys)
+          fav_title_vals (map #(string/trim (. (dom/get-element %) -value)) fav_title_keys)
           data (vec (map
                      #(hash-map "author" %1 "title" %2 "rank" %3)
                      fav_auth_vals fav_title_vals idx))]
