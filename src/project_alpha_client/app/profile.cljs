@@ -329,6 +329,26 @@
                         (fn [e] nil)
                         "POST"))
 
+  ;; profile cache data, see reset-page-caches below
+  (def age-and-sex-content-cache (atom {}))
+  (def questionnaire-answers-cache (atom {}))
+  (def fav-books-cache (atom {}))
+  (def fav-movies-cache (atom {}))
+
+
+  (defn- reset-page-caches
+    "When the profile data has been initialized by an
+     ajax request the data should be cached. When the
+     profile panes get out of focus and we need to
+     retransmit the data by an ajax post operation
+     we are able to find what has really changed and
+     thus save bandwith and serload."
+    []
+    (reset! age-and-sex-content-cache (get-age-and-sex-content))
+    (reset! questionnaire-answers-cache (get-questionnaire-answers))
+    (reset! fav-books-cache (get-fav-list "user_fav_auth_" "user_fav_book_"))
+    (reset! fav-movies-cache (get-fav-list "user_fav_director_" "user_fav_movie_")))
+
 
   (defn- update-tab-panes
     "post everything of the profiles pane
@@ -344,21 +364,27 @@
         (when-not (. editor (isUneditable)) (. editor (makeUneditable)))
         )
       (if (= id-str-left "page1") ; post page one content (age and sex) when left
-        (do
+        (when-not (= @age-and-sex-content-cache (get-age-and-sex-content))
           (post-as-json (get-age-and-sex-content))
+          (reset! age-and-sex-content-cache (get-age-and-sex-content))
           (loginfo "age-and-sex profile data posted")))
       (if (= id-str-left "page3") ; post questionaire when page left
-        (do
+        (when-not (= @questionnaire-answers-cache (get-questionnaire-answers))
           (post-as-json (get-questionnaire-answers))
-          (loginfo "questionnaire data posted"))
-        )
+          (reset! questionnaire-answers-cache (get-questionnaire-answers))
+          (loginfo "questionnaire data posted")))
       (if (= id-str-left "page4")
         (do
-          (post-as-json {"user_fav_books"
-                         (get-fav-list "user_fav_auth_" "user_fav_book_")})
-          (post-as-json {"user_fav_movies"
-                         (get-fav-list "user_fav_director_" "user_fav_movie_")})
-          (loginfo "favorite lists posted")))
+          (when-not (= @fav-books-cache (get-fav-list "user_fav_auth_" "user_fav_book_"))
+            (post-as-json {"user_fav_books"
+                           (get-fav-list "user_fav_auth_" "user_fav_book_")})
+            (reset! fav-books-cache (get-fav-list "user_fav_auth_" "user_fav_book_"))
+            (loginfo "favorite book list posted"))
+          (when-not (= @fav-movies-cache (get-fav-list "user_fav_director_" "user_fav_movie_"))
+            (post-as-json {"user_fav_movies"
+                           (get-fav-list "user_fav_director_" "user_fav_movie_")})
+            (reset! fav-movies-cache (get-fav-list "user_fav_director_" "user_fav_movie_"))
+            (loginfo "favorite movie list posted"))))
       (reset! active-pane-idx selected-page-idx)))
 
 
@@ -450,7 +476,8 @@
     (update-questionnaire data)
     (update-fav-list (data "user_fav_books") "user_fav_auth_" "user_fav_book_")
     (update-fav-list (data "user_fav_movies") "user_fav_director_" "user_fav_movie_")
-    (style/showElement (dom/get-element "profile_request_progress") false))
+    (style/showElement (dom/get-element "profile_request_progress") false)
+    (reset-page-caches))
 
 
   (def my-profile-resp-reactor (dispatch/react-to
