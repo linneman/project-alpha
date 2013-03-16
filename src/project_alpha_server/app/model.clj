@@ -59,7 +59,8 @@
    [:user_zip "varchar(10)"]
    [:user_lat :double]
    [:user_lon :double]
-   [:modified "timestamp"]
+   [:modified "timestamp" "NOT NULL" "DEFAULT CURRENT_TIMESTAMP"]
+   [:last_seek "timestamp" "NOT NULL" "DEFAULT '2013-01-01 8:00'"] ;; we need a valid ts here
    ))
 
 
@@ -337,8 +338,9 @@
   [id fields]
   (send-off profile-cache
          #(let [merged-fields (if % (merge (% id) fields) fields)
-                mf-and-modified (assoc merged-fields
-                                  :modified (java.util.Date.))]
+                mf-and-modified (if-not (empty? fields)
+                                  (assoc merged-fields :modified (java.util.Date.))
+                                  merged-fields)]
             (assoc % id mf-and-modified))))
 
 
@@ -418,6 +420,15 @@
       (update-user {:level 1 :created_at (java.util.Date.)} {:id id}))
     (map #(kw2str (key %)) missing-entries)))
 
+
+(defn update-profile-last-seek-to-now
+  "in order to notify about new profiles
+   this method allows to rember the timestamp
+   of the last seek operation."
+  [id]
+  (sql/update profiles
+              (sql/set-fields {:last_seek (java.util.Date.)})
+              (sql/where {:id id})))
 
 
 (comment usage illustration

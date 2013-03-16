@@ -139,7 +139,7 @@
 (defn- profile-resp-for
   "delivers ajax response for profile request for given id"
   [id]
-  (let [prof (dissoc (get-profile id) :modified)
+  (let [prof (dissoc (get-profile id) :modified :last_seek)
         name ((first (find-user-by-id id)) :name)]
     (if prof
       (json-str (merge prof {:name name}))

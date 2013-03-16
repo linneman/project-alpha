@@ -286,7 +286,9 @@
             matches (reduce merge matches)
             matches (dissoc matches user-id) ; make sure not to integrate the user himself
             ]
-        {:data matches})
+        (do
+          (update-profile-last-seek-to-now user-id)
+          {:data matches}))
       {:error (check-profile user-id)})))
 
 
