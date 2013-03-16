@@ -118,7 +118,7 @@
 (defn sex-of-name
   "returns the sex of a users full name"
   [complete-name]
-  (let [[nickname] (re-seq #"[A-Za-z]+" complete-name)
+  (let [[nickname] (re-seq #"[^0-9]+" complete-name)
         males (set males)
         females (set females)]
     (condp contains? nickname
