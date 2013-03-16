@@ -415,7 +415,7 @@
         missing-entries (filter #(not (val %)) prf)
         kw2str (fn [kw] (apply str (rest (str kw))))]
     (when (and (empty? missing-entries) (= 0 (usr :level)))
-      (update-user {:level 1} {:id id}))
+      (update-user {:level 1 :created_at (java.util.Date.)} {:id id}))
     (map #(kw2str (key %)) missing-entries)))
 
 
