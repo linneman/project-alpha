@@ -60,6 +60,12 @@
    [:user_zip "varchar(10)"]
    [:user_lat :double]
    [:user_lon :double]
+   [:max_dist :integer "DEFAULT 100"]
+   [:created_before_max_days :integer "DEFAULT 30"]
+   [:max_match_variance :integer "DEFAULT 50"]
+   [:max_hits_vicinity :integer "DEFAULT 245"]
+   [:max_hits_matching :integer "DEFAULT 245"]
+   [:max_hits_recently_created :integer "DEFAULT 10"]
    [:mail_new_messages :boolean "DEFAULT TRUE"]
    [:mail_new_matches :boolean "DEFAULT TRUE"]
    [:modified "timestamp" "NOT NULL" "DEFAULT CURRENT_TIMESTAMP"]
@@ -264,6 +270,11 @@
   (sql/has-many user_fav_movies {:fk :user_id})
   (sql/has-many user_fav_users {:fk :user_id}))
 
+;; db concatenation of user and profile table
+(sql/defentity user-profiles
+  (sql/pk :id)
+  (sql/table :users)
+  (sql/has-one profiles {:fk :id}))
 
 (sql/defentity books
   (sql/has-many user_fav_books))
@@ -417,6 +428,15 @@
              (apply dissoc full-prof (map #(keyword (str "question_" %))
                                           (range (inc setup/nr-questions) (count full-prof))))))
          _profiles)))
+
+
+(defn find-user-profile
+  "retrieves the joint tables user and profile"
+  [id]
+  (sql/select user-profiles
+              (sql/with profiles)
+              (sql/where (= :users.id id))))
+
 
 (declare get-profile)
 
@@ -726,13 +746,6 @@
 (sql/defentity unread_messages
   (sql/pk :msg_id)
   (sql/has-one messages {:fk :msg_id}))
-
-
-;; db concatenation of user and profile table
-(sql/defentity user-profiles
-  (sql/pk :id)
-  (sql/table :users)
-  (sql/has-one profiles {:fk :id}))
 
 (sql/defentity users-profiles-with-unread-messages
   (sql/pk :id)

@@ -83,9 +83,9 @@
          ...
 
          POW($question_<nr-questions>$ - prf.question_<nr-questions>, 2)
-         < $max-match-variance$"
+         < $max_match_variance$"
   []
-  (str "\nWHERE " (generate-sql-match-calc-exp) " < $max-match-variance$\n"))
+  (str "\nWHERE " (generate-sql-match-calc-exp) " < $max_match_variance$\n"))
 
 
 (defn- find-users-in-vicinity
@@ -93,7 +93,7 @@
    given position and distance. For each hit the
    locations zip code, the locations name and the
    distance to the given position is returned."
-  [& {:keys [user_lon user_lat max-dist user_sex user_interest_sex limit user-id] :as args}]
+  [& {:keys [user_lon user_lat max_dist user_sex user_interest_sex limit user-id] :as args}]
   (let [req (str
               "SELECT usr.id, usr.name, usr.created_at,
                ACOS(
@@ -108,7 +108,7 @@
                     SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
                     + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
                     - RADIANS($user_lon$))
-                    ) * 6380 < $max-dist$
+                    ) * 6380 < $max_dist$
                AND prf.user_sex = \"$user_sex$\"
                AND prf.user_interest_sex = \"$user_interest_sex$\"
                AND usr.level = 1
@@ -122,7 +122,7 @@
   "request all users with same sexual interest and
    best matching of the questionaire."
   [& {:keys [user_lon user_lat user_sex user_interest_sex
-             max-match-variance limit user-id] :as args}]
+             max_match_variance limit user-id] :as args}]
   (let [req (str "SELECT usr.id, usr.name, usr.created_at,
                   ACOS(
                        SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
@@ -148,7 +148,7 @@
              question_1 question_2 question_3
              question_4 question_5 question_6
              question_7 question_8 question_9
-             question_10 created-before-max-days limit user-id] :as args}]
+             question_10 created_before_max_days limit user-id] :as args}]
   (let [req (str "SELECT usr.id, usr.name, usr.created_at,
                   ACOS(
                        SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
@@ -157,7 +157,7 @@
                        ) * 6380 AS distance,"
                  (generate-sql-match-as-exp)
                  "FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id
-                  WHERE DATE_SUB(CURDATE(),INTERVAL $created-before-max-days$ DAY)
+                  WHERE DATE_SUB(CURDATE(),INTERVAL $created_before_max_days$ DAY)
                                 <= usr.created_at
                   AND usr.id NOT IN(SELECT match_id FROM user_banned_users WHERE user_id=$user-id$)
                   AND prf.user_sex = \"$user_sex$\"
@@ -172,7 +172,7 @@
 (defn- find-fav-users
   "request all favorite users"
   [& {:keys [user_lon user_lat user_sex user_interest_sex
-             created-before-max-days limit] :as args}]
+             created_before_max_days limit] :as args}]
   (let [req (str "SELECT usr.id, usr.name, usr.created_at,
                   ACOS(
                        SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
@@ -193,7 +193,7 @@
 (defn- find-banned-users
   "request all banned users"
   [& {:keys [user_lon user_lat user_sex user_interest_sex
-             created-before-max-days limit] :as args}]
+             created_before_max_days limit] :as args}]
   (let [req (str "SELECT usr.id, usr.name, usr.created_at,
                   ACOS(
                        SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
@@ -251,38 +251,38 @@
       (assoc-in [:user_interest_sex] (kv :user_sex))))
 
 
+
 (defn find-all-matches
   "database retrieval for profile matches. Matching is done under several
    aspects where sexual orientation must always match:
-   1. users who live in vicinity ('max-dist' kilometers away)
-   2. users whose profiles fit best (questionaire variance less than 'max-match-variance')
+   1. users who live in vicinity ('max_dist' kilometers away)
+   2. users whose profiles fit best (questionaire variance less than 'max_match_variance')
    3. recently created accounts (after 'created_before-max-days', to allow for tracking new members)
-   The results are limited to the values in the keys 'max-hits-vicinity',
-   'max-hits-matching' and max-hits-recently-created' and merged afterword.
-   The function returns all hits as hash table with the user-id as key and
-   the user's name, match_variance, distance and creation date as values
-   in JSON format. The client application (ClojureScript) allows to sort
-   the data presented in a table format without a new request afterwards."
-  [& {:keys [user-id max-dist max-match-variance created-before-max-days
-             max-hits-vicinity max-hits-matching max-hits-recently-created]
-      :or {max-dist 100
-           max-match-variance 50
-           created-before-max-days 30
-           max-hits-vicinity 245
-           max-hits-matching 245
-           max-hits-recently-created 10} :as args}]
-  (let [[{:keys [level]}] (find-user-by-id user-id)]
+   The results are limited to the values in the profile db keys 'max_hits_vicinity',
+   'max_hits_matching' and max_hits_recently_created' and merged afterword.
+   The function returns all hits as hash table with the user-id as key in JSON format.
+   The client application (ClojureScript) allows to sort the data presented in a table
+   format without a new request afterwards."
+  [& {:keys [user-id] :as args}]
+  (let [[{:keys [level
+                 max_dist
+                 created_before_max_days
+                 max_match_variance
+                 max_hits_vicinity
+                 max_hits_matching
+                 max_hits_recently_created] :as usr-prf}]
+        (find-user-profile user-id)]
     (if (= level 1)
       (let [max-var 16
             per2var (fn [var] (* setup/nr-questions max-var (/ var 100.0)))
-            max-match-variance (per2var max-match-variance)
-            usr-prf (assoc (first (find-profile :id user-id)) :user-id user-id)
+            max_match_variance (per2var max_match_variance)
+            usr-prf (assoc usr-prf :user-id user-id)
             trg-prf (map-sex-interest usr-prf)
             match-prf (mapcat #(vector (key %) (val %))
-                              (merge trg-prf (hash-args max-dist max-match-variance created-before-max-days)))
+                              (merge trg-prf (hash-args max_match_variance)))
             matches (map #(transform-sql-resp (apply %1 (conj match-prf %2 :limit)))
                          [find-users-in-vicinity find-matching-users find-recent-users]
-                         [max-hits-vicinity max-hits-matching max-hits-recently-created])
+                         [max_hits_vicinity max_hits_matching max_hits_recently_created])
             matches (reduce merge matches)
             matches (dissoc matches user-id) ; make sure not to integrate the user himself
             ]
@@ -347,7 +347,7 @@
   (def a
     (transform-sql-resp
      (find-users-in-vicinity
-      :user-id 6 :user_lon 8.7 :user_lat 50.5167 :max-dist 30
+      :user-id 6 :user_lon 8.7 :user_lat 50.5167 :max_dist 30
       :user_sex "female" :user_interest_sex "male"
       :question_1 1 :question_2 1 :question_3 1
       :question_4 1 :question_5 1 :question_6 1
@@ -359,7 +359,7 @@
   (def b
     (transform-sql-resp
      (find-matching-users
-      :user-id 6 :user_lon 8.7 :user_lat 50.5167 :max-match-variance 150
+      :user-id 6 :user_lon 8.7 :user_lat 50.5167 :max_match_variance 150
       :user_sex "female" :user_interest_sex "male"
       :question_1 1 :question_2 1 :question_3 1
       :question_4 1 :question_5 1 :question_6 1
@@ -370,7 +370,7 @@
   (def c
     (transform-sql-resp
      (find-recent-users
-      :user-id 6 :user_lon 8.7 :user_lat 50.5167 :created-before-max-days 30
+      :user-id 6 :user_lon 8.7 :user_lat 50.5167 :created_before_max_days 30
       :user_sex "female" :user_interest_sex "male"
       :question_1 1 :question_2 1 :question_3 1
       :question_4 1 :question_5 1 :question_6 1

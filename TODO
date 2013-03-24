@@ -4,7 +4,7 @@ TODO LIST
 * correct license tag in header of each source file to GPL
 * show a notification dialog box when no matches are present required when going online first
 * allow users to enable and disable email notification via profile pane
-* define match database selection limits "latest", "best fit", "vicinity" via db profile table
+* define match database selection limits "latest", "best fit", "vicinity" via db profile table     DONE
 * allow users to configure the limits for matches (latest, best fit, vicinity)
 * final definition of the 10 questions for match algorithm
 * more precise feedback about missing profile data
