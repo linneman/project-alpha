@@ -1,3 +1,11 @@
+;; Clojurescript event dispatching mechanism
+;;
+;; taken from ClojureScript One
+;; https://github.com/brentonashworth/one
+;; provided by Brenton Ashworth and Relevance, Inc
+;; under the Eclipse Public License, the same as Clojure uses
+;;
+
 (ns ^{:doc "Event dispatching.
 
   Provides a way for code to react to events. Terminology:

@@ -3,7 +3,7 @@
 ;;; https://github.com/clojure/clojurescript for further information.
 ;;;
 ;;; The use and distribution terms for this software are covered by
-;;; the Eclipse Public License 1.0, the same as clojure
+;;; the GNU General Public License
 ;;;
 ;;; functions for page navigation panel
 ;;;

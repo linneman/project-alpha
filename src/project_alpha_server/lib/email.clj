@@ -1,7 +1,7 @@
 ;;; project-alpha (server-side)
 ;;;
 ;;; The use and distribution terms for this software are covered by
-;;; the Eclipse Public License 1.0, the same as clojure
+;;; the GNU General Public License
 ;;;
 ;;; taken from William Groppe, many thanks for contributing this!
 ;;; http://will.groppe.us/post/406065542/sending-email-from-clojure

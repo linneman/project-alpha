@@ -1,7 +1,7 @@
 ;;; project-alpha (server-side)
 ;;;
 ;;; The use and distribution terms for this software are covered by
-;;; the GNU General Public License Version 3.
+;;; the GNU General Public License
 ;;;
 ;;; March 2013, Otto Linnemann
 

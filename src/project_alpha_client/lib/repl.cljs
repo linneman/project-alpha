@@ -1,5 +1,8 @@
 ;;; repl for interactive development
 ;;; only invoked when no optimizations used
+;;;
+;;; The use and distribution terms for this software are covered by
+;;; the GNU General Public License
 
 (ns project-alpha-client.lib.repl
   (:require [clojure.browser.repl :as repl]))

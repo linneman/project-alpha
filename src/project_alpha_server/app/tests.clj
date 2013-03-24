@@ -1,7 +1,7 @@
 ;;; project-alpha (server-side)
 ;;;
 ;;; The use and distribution terms for this software are covered by
-;;; the Eclipse Public License 1.0, the same as clojure
+;;; the GNU General Public License
 ;;;
 ;;; December 2012, Otto Linnemann
 ;;;
