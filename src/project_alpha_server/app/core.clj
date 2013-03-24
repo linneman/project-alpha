@@ -29,6 +29,7 @@
         [project-alpha-server.lib.auth]
         [project-alpha-server.lib.utils]
         [project-alpha-server.app.find-users]
+        [project-alpha-server.app.email-notification]
         [project-alpha-server.lib.rewrite]
         [clojure.pprint :only [pprint]]
         [clojure.data.json :only [json-str write-json read-json]]
@@ -238,8 +239,28 @@
         (handler request)))))
 
 
+(defn save-lang-handler
+  "we need to persistently store the preferred language to
+   be able to deliver email according to the last adjusted
+   language. Since the language can only be changed in the
+   main page (index.html) we have to catch only GET request
+   for this, retrieve the current language tag and update
+   the profiles table with it."
+  [handler]
+  (fn [request]
+    (let [uri (:uri request)
+          lang (:lang request)
+          session (:session request)
+          id (:id session)]
+      (when (and (re-seq #"index\.html$" uri) lang id)
+        (println "updating prefered languages to" (:lang request) "for user" id)
+        (update-profile-lang id lang)))
+    (handler request)))
+
+
 (def app
   (-> main-routes
+      save-lang-handler
       anti-xss-handler
       ;log-request-handler
       (wrap-authentication login-get-uri white-list-handlers)
@@ -256,7 +277,7 @@
   []
   ;;; start the profile cache flush timer
   (start-profile-flush-cache-timer 60000)
-
+  (start-email-notification-timer)
   (defonce server (jetty/run-jetty #'app
                                    setup/jetty-setup))
   (.start server))
@@ -268,6 +289,7 @@
   []
   (.stop server)
   (stop-profile-flush-cache-timer)
+  (stop-email-notification-timer)
   )
 
 
@@ -287,6 +309,7 @@
   (create-user-fav-movies)
   (create-messages)
   (create-unread-messages)
+  (create-email-notification-table)
   )
 
 

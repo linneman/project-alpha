@@ -41,6 +41,7 @@
   (create-table
    :profiles
    [:id :integer "PRIMARY KEY"]
+   [:lang "varchar(3)" "DEFAULT 'de'"]
    [:text "text"]
    [:question_1 :tinyint]
    [:question_2 :tinyint]
@@ -59,6 +60,8 @@
    [:user_zip "varchar(10)"]
    [:user_lat :double]
    [:user_lon :double]
+   [:mail_new_messages :boolean "DEFAULT TRUE"]
+   [:mail_new_matches :boolean "DEFAULT TRUE"]
    [:modified "timestamp" "NOT NULL" "DEFAULT CURRENT_TIMESTAMP"]
    [:last_seek "timestamp" "NOT NULL" "DEFAULT '2013-01-01 8:00'"] ;; we need a valid ts here
    ))
@@ -225,6 +228,25 @@
   (create-unread-messages)
   (drop-unread-messages)
   )
+
+
+(defn create-email-notification-table
+  "creates table which holds information whether
+   we have already sent out an email notfication
+   about new matches respectively new profiles."
+  []
+  (create-table
+   :email_notification
+   [:user_id :integer]
+   [:notified_new_matches :boolean "DEFAULT FALSE"]
+   [:notified_new_mail :boolean "DEFAULT FALSE"]))
+
+(defn drop-email-notification-table
+  "deletes table for email_notification"
+  []
+  (drop-table :email_notification))
+
+
 
 ;; --- information retrieval ---
 
@@ -429,6 +451,24 @@
   (sql/update profiles
               (sql/set-fields {:last_seek (java.util.Date.)})
               (sql/where {:id id})))
+
+
+(defn update-profile-lang
+  "update users language in table profiles for given user id"
+  [id lang]
+  (sql/update profiles
+              (sql/set-fields {:lang lang})
+              (sql/where {:id id})))
+
+
+(defn get-profile-lang
+  "get users last used language tag for given user id"
+  [id]
+  (let [[{lang :lang}]
+        (sql/select profiles
+                    (sql/fields :lang)
+                    (sql/where {:id id}))]
+    lang))
 
 
 (comment usage illustration
@@ -688,6 +728,19 @@
   (sql/has-one messages {:fk :msg_id}))
 
 
+;; db concatenation of user and profile table
+(sql/defentity user-profiles
+  (sql/pk :id)
+  (sql/table :users)
+  (sql/has-one profiles {:fk :id}))
+
+(sql/defentity users-profiles-with-unread-messages
+  (sql/pk :id)
+  (sql/table :users)
+  (sql/has-one profiles {:fk :id})
+  (sql/has-many unread_messages {:fk :user_id}))
+
+
 (defn add-msg
   "add message
    (add-msg :reference_msg_id x :from_user_id y :to_user_id z :text text)"
@@ -837,6 +890,8 @@
     (transform-sql-resp res)))
 
 
+(declare set-new-mail-notifier-for)
+
 (defn get-unread-messages
   "retreives all messages that have not been read yet."
   [user-id]
@@ -851,6 +906,7 @@
                     (into % {:from_user_name from_user_name})) ;; attach user name
                  res)]
     (when-not (empty? res)
+      (set-new-mail-notifier-for user-id false) ; allow new notification to be sent
       (transform-sql-resp res))))
 
 
@@ -934,3 +990,50 @@
 (comment
   (new-message :sender-id 6 :recv-id "561" :msg-txt "Hallo Welt")
   )
+
+
+
+;; --- email notification ---
+
+(sql/defentity email_notification)
+
+
+(defn set-new-matches-notifier-for
+  "sets or clears db state indicating whether we
+   have already sent out an email about new matches"
+  [user-id state]
+  (if (empty? (sql/select email_notification (sql/where {:user_id user-id})))
+    (sql/insert email_notification
+                (sql/values {:user_id user-id :notified_new_matches state}))
+    (sql/update email_notification
+                (sql/set-fields {:notified_new_matches state})
+                (sql/where {:user_id user-id}))))
+
+(defn is-user-notified-about-new-matches?
+  "retrieves db state about new matches"
+  [user-id]
+  (let [[{:keys [notified_new_matches]}]
+      (sql/select email_notification
+                  (sql/fields :notified_new_matches)
+                  (sql/where {:user_id user-id}))]
+               notified_new_matches))
+
+(defn set-new-mail-notifier-for
+  "sets or clears db state indicating whether we
+   have already sent out an email about new mail"
+  [user-id state]
+  (if (empty? (sql/select email_notification (sql/where {:user_id user-id})))
+    (sql/insert email_notification
+                (sql/values {:user_id user-id :notified_new_mail state}))
+    (sql/update email_notification
+                (sql/set-fields {:notified_new_mail state})
+                (sql/where {:user_id user-id}))))
+
+(defn is-user-notified-about-new-mail?
+  "retrieves db state about new matches"
+  [user-id]
+  (let [[{:keys [notified_new_mail]}]
+      (sql/select email_notification
+                  (sql/fields :notified_new_mail)
+                  (sql/where {:user_id user-id}))]
+               notified_new_mail))

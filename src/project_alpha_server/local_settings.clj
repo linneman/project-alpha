@@ -43,6 +43,9 @@
 (def email-auth-name "projectalpha42@gmail.com")
 (def email-auth-password "projectalpha42")
 
+(def email-notify-new-matches true)
+(def email-notify-new-messages true)
+
 
 ;;; --- Local files e.g. used for sendmail ---
 
@@ -51,6 +54,10 @@
 (def confirm-email-subj-path "resources/templates/$lang$/confirm_email_subj.txt")
 (def reset-pw-email-msg-path "resources/templates/$lang$/reset_pw_email_msg.txt")
 (def reset-pw-email-subj-path "resources/templates/$lang$/reset_pw_email_subj.txt")
+(def new-matches-email-msg-path "resources/templates/$lang$/new_matches_email_msg.txt")
+(def new-matches-email-subj-path "resources/templates/$lang$/new_matches_email_subj.txt")
+(def new-messages-email-msg-path "resources/templates/$lang$/new_messages_email_msg.txt")
+(def new-messages-email-subj-path "resources/templates/$lang$/new_messages_email_subj.txt")
 
 ;;; --- profile setup ---
 (def ^{:doc "questionaire from question_1 .. question_<nr-questions>"} nr-questions 7)

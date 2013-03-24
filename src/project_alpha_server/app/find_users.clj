@@ -287,7 +287,8 @@
             matches (dissoc matches user-id) ; make sure not to integrate the user himself
             ]
         (do
-          (update-profile-last-seek-to-now user-id)
+          (update-profile-last-seek-to-now user-id)    ; update time stamp for last seek operation
+          (set-new-matches-notifier-for user-id false) ; allow new notification to be sent
           {:data matches}))
       {:error (check-profile user-id)})))
 
@@ -318,6 +319,20 @@
       {:error (check-profile user-id)})))
 
 
+(defn find-latest-matches-since
+  "finds matching users whose profile has been created
+   after the given date. This function is used for
+   email notification about new matches."
+  [date sex-hash]
+  (sql/select user-profiles
+              (sql/join profiles (= :users.id :profiles.id))
+              (sql/fields :users.id :users.name :users.created_at :profiles.last_seek)
+              (sql/where (= :users.level 1))
+              (sql/where {:profiles.user_sex (:user_interest_sex sex-hash)})
+              (sql/where {:profiles.user_interest_sex (:user_sex sex-hash)})
+              (sql/where (>= :users.created_at date))))
+
+
 (comment usage illustation
 
   (def x (find-all-matches :user-id 6))
@@ -332,7 +347,7 @@
   (def a
     (transform-sql-resp
      (find-users-in-vicinity
-      :user_lon 8.7 :user_lat 50.5167 :max-dist 30
+      :user-id 6 :user_lon 8.7 :user_lat 50.5167 :max-dist 30
       :user_sex "female" :user_interest_sex "male"
       :question_1 1 :question_2 1 :question_3 1
       :question_4 1 :question_5 1 :question_6 1
@@ -344,7 +359,7 @@
   (def b
     (transform-sql-resp
      (find-matching-users
-      :user_lon 8.7 :user_lat 50.5167 :max-match-variance 150
+      :user-id 6 :user_lon 8.7 :user_lat 50.5167 :max-match-variance 150
       :user_sex "female" :user_interest_sex "male"
       :question_1 1 :question_2 1 :question_3 1
       :question_4 1 :question_5 1 :question_6 1
@@ -355,7 +370,7 @@
   (def c
     (transform-sql-resp
      (find-recent-users
-      :user_lon 8.7 :user_lat 50.5167 :created-before-max-days 30
+      :user-id 6 :user_lon 8.7 :user_lat 50.5167 :created-before-max-days 30
       :user_sex "female" :user_interest_sex "male"
       :question_1 1 :question_2 1 :question_3 1
       :question_4 1 :question_5 1 :question_6 1
