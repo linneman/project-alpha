@@ -321,16 +321,16 @@
 
 (defn find-latest-matches-since
   "finds matching users whose profile has been created
-   after the given date. This function is used for
-   email notification about new matches."
-  [date sex-hash]
+   after the given profiles last seek date. This function
+   is used for email notification about new matches."
+  [profile]
   (sql/select user-profiles
               (sql/join profiles (= :users.id :profiles.id))
               (sql/fields :users.id :users.name :users.created_at :profiles.last_seek)
               (sql/where (= :users.level 1))
-              (sql/where {:profiles.user_sex (:user_interest_sex sex-hash)})
-              (sql/where {:profiles.user_interest_sex (:user_sex sex-hash)})
-              (sql/where (>= :users.created_at date))))
+              (sql/where {:profiles.user_sex (:user_interest_sex profile)})
+              (sql/where {:profiles.user_interest_sex (:user_sex profile)})
+              (sql/where (>= :users.created_at (:last_seek profile)))))
 
 
 (comment usage illustation

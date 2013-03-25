@@ -48,19 +48,21 @@
 
 (defn- iterate-userlist-and-trigger-for-new-matches
   "iterates through list of given users and checks whether
-   whether there are new matches since given date. If so
-   invokes notifier function which is in charge for sending
-   out the notification mail about new matches."
-  [inactive-user-list matches-since-date mail-fn]
+   there are new matches since given date. If so invokes
+   notifier function which is in charge for sending
+   out the notification mail about new matches.
+   Use current date to include all users in the given
+   search."
+  [inactive-user-list mail-fn]
   (doseq [user inactive-user-list]
     (let [{:keys [id name email lang]} user
-          [user-sex-map]
+          [user-profile]
           (sql/select profiles
-                      (sql/fields :user_sex :user_interest_sex)
+                      (sql/fields :user_sex :user_interest_sex :last_seek)
                       (sql/where (= :id id)))]
       (when-not
         (or ; notify only when there are new matches and we haven not mailed yet
-         (empty? (find-latest-matches-since matches-since-date user-sex-map))
+         (empty? (find-latest-matches-since user-profile))
          (is-user-notified-about-new-matches? id))
         (mail-fn {:name name :id id :email email :lang lang})
         (set-new-matches-notifier-for id true)
@@ -154,9 +156,11 @@
 
 (defn- get-last-trigger-date
   "defines the date when last notification email
-   has been sent out."
+   has been sent out. Currently not used anymore
+   to make sure to inform about all affected users
+   whenever new matches are availalbe."
   []
-  (let [last-trigger-date (. Calendar (getInstance))]
+  (let [last-trigger-date (get-next-trigger-date)]
     (.add last-trigger-date Calendar/DAY_OF_MONTH -1)
     last-trigger-date))
 
@@ -169,11 +173,9 @@
    whenever the user fetches the latest matching list via the
    'find' function in the web interface."
   []
-  (let [last-notification-date (get-last-trigger-date)
-        inactive-users (get-inactive-users (.getTime last-notification-date))]
+  (let [user-base (get-inactive-users (.getTime (get-next-trigger-date)))]
     (iterate-userlist-and-trigger-for-new-matches
-     inactive-users
-     (.getTime last-notification-date)
+     user-base
      send-new-matches-mail)))
 
 
