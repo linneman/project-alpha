@@ -399,7 +399,7 @@
    which retrieve this profile data (search)."
   [id]
   (flush-profile id)
-  (await-for 2000 profile-cache)
+  (await-for 5000 profile-cache)
   (println (str "flush operation completed, now checked check profile for user id " id))
   (check-profile-integrity id))
 

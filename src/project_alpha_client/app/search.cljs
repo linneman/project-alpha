@@ -20,6 +20,7 @@
             [goog.dom :as gdom]
             [goog.style :as style]
             [goog.events :as events]
+            [goog.events.EventType :as event-type]
             [goog.ui.Button :as Button]
             [goog.ui.ButtonRenderer :as ButtonRenderer]
             [goog.ui.FlatButtonRenderer :as FlatButtonRenderer]
@@ -54,6 +55,7 @@
   (def fav-user-data-atom (atom nil))
   (def banned-user-ids-atom (atom nil))
   (def banned-user-data-atom (atom nil))
+  (def support-button (get-element "support-button2" search-pane))
 
   ;; --- sortable search result table ---
 
@@ -135,6 +137,7 @@
                     "POST")
      100))
 
+  (declare start-animation-timer stop-animation-timer)
 
   (defn- request-result-pane [force-update]
     "retrieves all matching users and updates table view controller"
@@ -157,6 +160,11 @@
                                          "search-result-table"
                                          "search-result-controller"
                                          (gen-table-data (resp "data"))))
+                                (style/showElement (dom/get-element "no_matches_available")
+                                                   (empty? (resp "data")))
+                                (if (empty? (resp "data"))
+                                  (start-animation-timer)
+                                  (stop-animation-timer))
                                 (style/showElement (dom/get-element
                                                     "search_profile_incomplete") false))
                             (js/alert "Transmission Error!")))
@@ -452,6 +460,51 @@
     ) ; end of comment
 
 
+  ;;;
+  ;;; animated support button is handled separately
+  ;;; this is just duplicate code from the start side
+  ;;; and only temporarily used during start up phase
+  ;;;
+  (def support-button-opac-max 1)
+  (def support-button-opac-min 0.5)
+  (def support-button-delta (atom 0.1))
+  (def support-button-opac (atom support-button-opac-min))
+
+  (defn- set-support-button-animation-periods
+    [periods]
+    (reset! support-button-delta
+            (/ (- support-button-opac-max support-button-opac-min) periods)))
+
+  (set-support-button-animation-periods 100)
+
+  (defn- animate
+    []
+    (let [opac (+ @support-button-opac @support-button-delta)
+          delta @support-button-delta
+          delta (if (> opac support-button-opac-max) (- delta) delta)
+          delta (if (< opac support-button-opac-min) (- delta) delta)
+          opac (min support-button-opac-max opac)
+          opac (max support-button-opac-min opac)]
+      (. (. support-button -style) (setProperty "opacity" opac "important"))
+      (reset! support-button-opac opac)
+      (reset! support-button-delta delta)))
+
+
+  (def animation-timer (goog.Timer. 10))
+  (events/listen animation-timer goog.Timer/TICK animate)
+
+  (defn- start-animation-timer
+    []
+    (. animation-timer (start)))
+
+  (defn- stop-animation-timer
+    []
+    (. animation-timer (stop)))
+
+
+  (events/listen support-button event-type/CLICK #(dispatch/fire :support-button-clicked nil))
+  (events/listen support-button event-type/MOUSEOUT #(set-support-button-animation-periods 100))
+  (events/listen support-button event-type/MOUSEOVER #(set-support-button-animation-periods 30))
 
 ) ; (when search-pane
 
