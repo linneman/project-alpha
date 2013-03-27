@@ -24,6 +24,8 @@ body {
     margin-left:auto;
     margin-right:auto;
     font-family: 'PT Serif', serif;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 #main-menu-space {
