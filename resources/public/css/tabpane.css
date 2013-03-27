@@ -41,6 +41,7 @@
     padding: 2px;
     /* height: 500px; */
     height: 65%;
+    -webkit-overflow-scrolling: touch;
 }
 
 .goog-tabpane-tab, .goog-tabpane-tab-selected {
