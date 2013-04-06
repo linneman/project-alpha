@@ -201,3 +201,21 @@
     position:absolute;
     opacity:1;
 }
+
+#search-pane #search-setup {
+    margin-top:5%;
+    margin-left:5%;
+    margin-right:5%;
+}
+
+#search-pane #search-setup table {
+    width:70%;
+    border: 1px solid black;
+    empty-cells:show;
+    margin-top:40px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#search-pane #search-setup table * .desc { width: 90%; }
+#search-pane #search-setup table * .val { width: 10%; text-align: right; }

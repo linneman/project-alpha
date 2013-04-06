@@ -60,7 +60,7 @@
 (def new-messages-email-subj-path "resources/templates/$lang$/new_messages_email_subj.txt")
 
 ;;; --- profile setup ---
-(def ^{:doc "questionaire from question_1 .. question_<nr-questions>"} nr-questions 7)
+(def ^{:doc "questionaire from question_1 .. question_<nr-questions>"} nr-questions 10)
 
 
 ;;; --- Connection parameters to SQL database, currently MySQL ---
