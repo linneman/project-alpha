@@ -55,8 +55,10 @@
     (let [outer-frame (get-element "outer-frame")
           height (js/parseInt (style/getComputedStyle outer-frame "height"))
           ;; .goog-tabpane-cont = 65% tot height;  header and bottom table line 90px;
-          ;; lineheight is 42px
-          nr-lines (Math/floor (/ (- (* .65 height) 90) 42))]
+          ;; lineheight is 40px
+          nr-lines (Math/floor (/ (- (* .65 height) 90) 40))
+          nr-lines (max nr-lines 5) ;; ensure minimum 5 lines on smartphones
+          ]
       (init-sortable-search-result-table
        controller-id
        table-id
