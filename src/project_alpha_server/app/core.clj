@@ -176,7 +176,7 @@
   (GET "/:lang/status.html" [lang] (apply site lang (concat standard-pages release-scripts)))
   (GET "/:lang/profile.html" [lang] (apply site lang (concat standard-pages release-scripts)))
   (GET "/:lang/search.html" [lang] (apply site lang (concat standard-pages release-scripts)))
-  (GET "/:lang/mprint.html" [lang] (apply site lang (concat standard-pages release-scripts)))
+  (GET "/:lang/imprint.html" [lang] (apply site lang (concat standard-pages release-scripts)))
   (GET "/:lang/reset_pw.html" [lang] (apply site lang "register.html" "reset_pw.html" (concat standard-pages release-scripts)))
   (GET "/:lang/repl.html" [lang] (apply site lang "register.html" "reset_pw.html" (concat standard-pages debug-scripts)))
   ;; --- json handlers ---
