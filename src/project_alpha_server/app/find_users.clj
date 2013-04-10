@@ -289,10 +289,10 @@
     0))
 
 
-(defn- calcualte-question-4-match-rate-for
+(defn- calculate-question-4-match-rate-for
   "The 4th question: 'Are you willing to move?' gets a special treatment.
    Unfortunately the expression to be used is obviously too complex to
-   to be calculated inside MySQL so we postprocess the database result
+   be calculated inside MySQL so we postprocess the database result
    and do not include the calculation for question 4 inside the database.
    Refer to function match-variance-for for more detailed information
    about how we treat this special question."
@@ -302,7 +302,7 @@
             (map (fn [[id data]]
                    (let [question_4_b (data :question_4)
                          distance (data :distance)
-                         match-variance (data :match_variance)
+                         match-variance (or (data :match_variance) 100)
                          match-variance (+ match-variance (match-variance-for question_4_a question_4_b distance))
                          match-variance (min match-variance 100)
                          data (assoc data :match_variance match-variance)]
@@ -341,7 +341,7 @@
             matches (map #(transform-sql-resp (apply %1 (conj match-prf %2 :limit)))
                          [find-users-in-vicinity find-matching-users find-recent-users]
                          [max_hits_vicinity max_hits_matching max_hits_recently_created])
-            matches (calcualte-question-4-match-rate-for usr-prf (reduce merge matches))
+            matches (calculate-question-4-match-rate-for usr-prf (reduce merge matches))
             matches (dissoc matches user-id) ; make sure not to integrate the user himself
             ]
         (do
