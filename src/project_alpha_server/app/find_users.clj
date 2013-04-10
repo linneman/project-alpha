@@ -27,6 +27,15 @@
            [java.util TimerTask Timer]))
 
 
+(defn- generate-sql-select-exp
+  "generates the SQL expression to select database entities
+   we include question_4 (are you willing to move again)
+   since it gets a special treatment which cannot be
+   realized easily with MySQL."
+  []
+  "SELECT usr.id, usr.name, usr.created_at,prf.question_4,\n")
+
+
 (defn- generate-sql-match-calc-exp
   "generates the SQL expressiong to calculate the variance
    of the questionnaire answers between user and profile data.
@@ -40,12 +49,14 @@
    POW($question_2$ - prf.question_2, 2) +
    ...
 
-   POW($question_<nr-questions>$ - prf.question_<nr-questions>, 2)"
+   POW($question_<nr-questions>$ - prf.question_<nr-questions>, 2)
+
+   with the exception of question 4 which gets a special treatment."
   []
   (let [varexp (reduce
                 #(str %1 "+" (format "POW($question_%d$-prf.question_%d,2)" %2 %2))
                 ""
-                (range 1 (inc setup/nr-questions)))
+                (disj (set (range 1 (inc setup/nr-questions))) 4))
         varexp (. varexp (substring 1))]
     varexp))
 
@@ -95,14 +106,14 @@
    distance to the given position is returned."
   [& {:keys [user_lon user_lat max_dist user_sex user_interest_sex limit user-id] :as args}]
   (let [req (str
-              "SELECT usr.id, usr.name, usr.created_at,
-               ACOS(
+             (generate-sql-select-exp)
+             "ACOS(
                     SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
                     + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
                     - RADIANS($user_lon$))
                     ) * 6380 AS distance,"
-              (generate-sql-match-as-exp)
-              "FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id
+             (generate-sql-match-as-exp)
+             "FROM profiles prf LEFT JOIN users usr ON prf.id = usr.id
                WHERE usr.id NOT IN(SELECT match_id FROM user_banned_users WHERE user_id=$user-id$)
                AND ACOS(
                     SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
@@ -123,9 +134,9 @@
    best matching of the questionaire."
   [& {:keys [user_lon user_lat user_sex user_interest_sex
              max_match_variance limit user-id] :as args}]
-  (let [req (str "SELECT usr.id, usr.name, usr.created_at,
-                  ACOS(
-                       SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
+  (let [req (str (generate-sql-select-exp)
+                 "ACOS(
+                      SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
                        + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
                        - RADIANS($user_lon$))
                        ) * 6380 AS distance,"
@@ -149,8 +160,8 @@
              question_4 question_5 question_6
              question_7 question_8 question_9
              question_10 created_before_max_days limit user-id] :as args}]
-  (let [req (str "SELECT usr.id, usr.name, usr.created_at,
-                  ACOS(
+  (let [req (str (generate-sql-select-exp)
+                 "ACOS(
                        SIN(RADIANS(prf.user_lat)) * SIN(RADIANS($user_lat$))
                        + COS(RADIANS(prf.user_lat)) * COS(RADIANS($user_lat$)) * COS(RADIANS(prf.user_lon)
                        - RADIANS($user_lon$))
@@ -251,6 +262,53 @@
       (assoc-in [:user_interest_sex] (kv :user_sex))))
 
 
+(defn- square [x] (* x x))
+
+(defn- match-variance-for
+  "calculate matching score in percent for the 4th question
+   'Are you willing to move?'. The first two arguments are
+   the answers to this question from both matching parners,
+   the third argument is the distance between them.
+   When both partners strictly do not want to move and they
+   live more than 20 kilometers away from each other set
+   the match variance to 100% to indicate that this match
+   will never work. Otherwise handle take negatively into
+   account when poth partners answer to question-4 with
+   3 (do not really like to move) or higher. Worst case is
+   that one partners answer with 4 the other with five which
+   we currently weight with 20% variance corresponding to
+   two totally mismatched answers."
+  [question_4_a question_4_b distance]
+  (if (> distance 20) ; when potential couple does not live close togehter
+    (if (and (= question_4_a 5) (= question_4_b 5))
+      100 ; nobody wants definetly to move, this is no hit, 100% variance!
+      (if (and (> question_4_a 2) (> question_4_b 2))
+        ;; when nobody likes really to move (answer 4,5), weight as two non fitting questions
+        (* 0.8 (square (+ (- question_4_a 2) (- question_4_b 2))))
+        0))
+    0))
+
+
+(defn- calcualte-question-4-match-rate-for
+  "The 4th question: 'Are you willing to move?' gets a special treatment.
+   Unfortunately the expression to be used is obviously too complex to
+   to be calculated inside MySQL so we postprocess the database result
+   and do not include the calculation for question 4 inside the database.
+   Refer to function match-variance-for for more detailed information
+   about how we treat this special question."
+  [usr-prf matches]
+  (let [question_4_a (usr-prf :question_4)]
+    (reduce merge
+            (map (fn [[id data]]
+                   (let [question_4_b (data :question_4)
+                         distance (data :distance)
+                         match-variance (data :match_variance)
+                         match-variance (+ match-variance (match-variance-for question_4_a question_4_b distance))
+                         match-variance (min match-variance 100)
+                         data (assoc data :match_variance match-variance)]
+                     {id data}))
+                 matches))))
+
 
 (defn find-all-matches
   "database retrieval for profile matches. Matching is done under several
@@ -283,7 +341,7 @@
             matches (map #(transform-sql-resp (apply %1 (conj match-prf %2 :limit)))
                          [find-users-in-vicinity find-matching-users find-recent-users]
                          [max_hits_vicinity max_hits_matching max_hits_recently_created])
-            matches (reduce merge matches)
+            matches (calcualte-question-4-match-rate-for usr-prf (reduce merge matches))
             matches (dissoc matches user-id) ; make sure not to integrate the user himself
             ]
         (do
