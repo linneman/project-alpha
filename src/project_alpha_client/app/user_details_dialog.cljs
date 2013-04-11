@@ -211,9 +211,11 @@
       (doseq [k (range 1 11)]
         (let [rating (user-data (str "question_" k))
               quest-txt (. (get-element (str "prof-quest" k)) -innerHTML)
-              answ-txt (if rating (. (get-element
-                                      (str "prof-rating" rating)
-                                      ) -innerHTML)
+              answ_leading (. (get-element "prof_rating_leading") -innerHTML)
+              answ_trailing (. (get-element "prof_rating_trailing") -innerHTML)
+              answ-txt (if rating (str answ_leading " "
+                                       (. (get-element (str "prof-rating" rating)) -innerHTML)
+                                       " " answ_trailing)
                            " - ")]
           (set! (. (get-element (str "ud-quest" k)) -innerHTML) quest-txt)
           (set! (. (get-element (str "ud-answer" k)) -innerHTML) answ-txt)))
