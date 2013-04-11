@@ -305,7 +305,8 @@
                          match-variance (or (data :match_variance) 100)
                          match-variance (+ match-variance (match-variance-for question_4_a question_4_b distance))
                          match-variance (min match-variance 100)
-                         data (assoc data :match_variance match-variance)]
+                         data (assoc data :match_variance match-variance)
+                         data (dissoc data :question_4)]
                      {id data}))
                  matches))))
 
