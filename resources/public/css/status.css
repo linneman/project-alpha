@@ -82,13 +82,14 @@
 #status-pane .status-msg-in-pane h3 {
     text-align:center;
     margin-top:5%;
+    font-weight:bold;
 }
 
 #status-pane .status-msg-in-pane p {
-    text-align:center;
+    text-align:justify;
     margin-top:3%;
-    margin-left:25%;
-    margin-right:25%;
+    margin-left:20%;
+    margin-right:20%;
 }
 
 #status-pane .status-pic-in-pane {

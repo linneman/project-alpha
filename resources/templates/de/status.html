@@ -1,6 +1,6 @@
 <div id="status-pane">
 
-  <p class="pane-explanation">Hier werden sämtliche Nachrichten, die Sie empfangen, bereits gelesen und selbst verfasst haben aufgelistet. Über die Schaltfläche "Details" wird die gesamte Kommunikation mit der jeweiligen Kontaktperson angezeigt. Die Personen werden jeweils nur in einem Reiter angezeigt, um den Überblick zu erleichtern.</p>
+  <p class="pane-explanation">Auf dieser Seite werden alle Nachrichten gruppiert nach ungelesen, gelesen und unbeantwortet dargestellt. Ein Klick auf die Schaltfläche "Details" zeigt die gesamte Korrespondenz, die Sie mit der jeweiligen Kontaktperson ausgetausch haben. Für einen bessseren Überblick wird diese jeweils nur einem der drei Reiter zugeordnet.</p>
 
   <div id="compose-msg-dialog" class="project-alpha-dialog">
     <div id="cmp-msg-toolbar"></div>
@@ -8,7 +8,7 @@
 
     <div id="buttons">
       <div id="confirm-compose-msg" class="goog-flat-button goog-flat-button-disabled"
-	   title="Klicken Sie hier, wenn alle Einträge ausgefüllt sind!">Absenden</div>
+	   title="Zum Absenden hier Klicken!">Absenden</div>
       <div id="cancel-compose-msg" class="goog-flat-button goog-flat-button-disabled"
 	   title="Schließt diesen Dialog">Abbruch</div>
     </div>
@@ -24,8 +24,8 @@
   </div>
 
   <div id="status-messages" class="project-alpha-dialog">
-    <div id="compose-msg-dialog-title">Nachricht senden an: </div>
-    <div id="show-msg-dialog-title">Kommunikation mit: </div>
+    <div id="compose-msg-dialog-title">Nachricht senden an </div>
+    <div id="show-msg-dialog-title">Kommunikation mit </div>
     <div id="compose-msg-dialog-transmission-error">Fehler bei Datenübertragung zum Server aufgetreten!</div>
     <div id="showall-user-msg">Details</div>
     <div id="reply-user-msg">Antworten</div>
@@ -38,8 +38,8 @@
 
     <img class="status-pic-in-pane" src="img/closed_envelope.png" alt="closed_envelope"/>
     <div id="msg_no_new_messages" class="status-msg-in-pane">
-      <h3>Es sind noch keine neuen Nachrichten eingegangen!</h3>
-      <p>Alle zuletzt eingegangenen Nachrichten werden zunächst unter diesem Reiter gelistet. Die vollständige Nachricht und die gesamte Korrepondenz mit dem jeweiligen Absender wird angezeigt, sobald auf eine der Schaltfläche 'Details' oder 'Antworten' geklickt wird, worauf der entsprechende Listeneintrag nach 'Gelesene Nachrichten' verschoben wird.</p>
+      <h3>Es sind keine neuen Nachrichten eingegangen!</h3>
+      <p>Alle zuletzt eingegangenen Nachrichten werden zunächst in den Tabelleneinträgen unter diesem Reiter angezeigt. Die jeweiligen Einträge werden im Reiter "Gelesene Nachrichten" eingeordnet, sobald Sie die Schaltfläche "Details" oder "Antworten" klicken.</p>
     </div>
 
     <table id="new-messages-table" class="result-table">
@@ -76,8 +76,8 @@
 
     <img class="status-pic-in-pane" src="img/open_envelope.png" alt="open_envelope"/>
     <div id="msg_no_read_messages" class="status-msg-in-pane">
-      <h3>Im Moment keine Einträge</h3>
-      <p>Gelesene Korrespondenz wird unter diesem Reiter gelistet.</p>
+      <h3>Sie haben noch keine Post bekommen!</h3>
+      <p>Gelesene Nachrichten werden später unter diesem Reiter angezeigt. Im Moment haben Sie leider noch keine Post bekommen. Sorgen Sie durch ein aussagekräftige Beschreibung und Profilbilder unter dem Menüpunkt "Gefunden Werden" dafür, daß andere auf Sie aufmerksam werden.</p>
     </div>
 
     <table id="read-messages-table" class="result-table">
@@ -114,8 +114,9 @@
 
     <img class="status-pic-in-pane" src="img/unanswered_messages.png" alt="unanswered_messages"/>
     <div id="msg_no_unanswered_messages" class="status-msg-in-pane">
-      <h3>Im Moment keine Einträge</h3>
-      <p>Sämtliche Kontaktanfragen, die Sie abgesendet haben und die bisher unbeantwortet geblieben sind, werden hier aufgeführt.</p>
+      <h3>Sie haben noch keine Nachrichten verschickt!</h3>
+      <p>Stöbern Sie unter dem Menüpunkt "Finden" nach interessanten Kontakten und senden Sie eine Nachricht an das jeweilige Mitglied.</p>
+      <p>Sämtliche Kontaktanfragen, die Sie abgesendet haben und die bisher unbeantwortet geblieben sind, werden hier aufgeführt. Sie behalten somit immer den Überblick, was Sie wann wem geschrieben haben.</p>
     </div>
 
     <table id="unanswered-messages-table" class="result-table">
