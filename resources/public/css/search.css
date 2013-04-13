@@ -38,11 +38,19 @@
 }
 
 #search-pane .result-table .date { width:15%; }
-#search-pane .result-table .name { width:40%; }
-#search-pane .result-table .dist { width:15%; }
+#search-pane .result-table .name { width:38%; }
+#search-pane .result-table .dist { width:17%; }
 #search-pane .result-table .match { width:15%; }
 #search-pane .result-table .details { width:15%; }
 
+#search-pane .result-table * td.dist,
+#search-pane .result-table * td.match
+{
+    padding-right:20px;
+    text-align:right;
+}
+
+#search-pane .result-table * td.details { text-align:center; }
 
 #search-pane .result-controller {
     width:100%;
@@ -79,6 +87,7 @@
 
 #search-pane #search_no_favorites h3,
 #search-pane #search_no_banned h3 {
+    font-weight:bold;
     text-align:center;
     margin-top:5%;
 }
@@ -86,10 +95,10 @@
 #search-pane #search_no_favorites p,
 #search-pane #search_no_banned p
 {
-    text-align:center;
+    text-align:justify;
     margin-top:3%;
-    margin-left:25%;
-    margin-right:25%;
+    margin-left:20%;
+    margin-right:20%;
 }
 
 
