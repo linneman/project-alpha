@@ -202,7 +202,7 @@
     [zip]
     (let [cities (zip-cities-hash zip)]
       (reset! current-zip-code zip)
-      (. zipMenuButton (setCaption (str "PLZ Gebiet " zip)))
+      (. zipMenuButton (setCaption (str (goog.dom.getTextContent (get-element "postal-area" profile-pane)) zip)))
       (set! (. (dom/get-element "user-zip-city-list") -textContent) cities)))
 
 

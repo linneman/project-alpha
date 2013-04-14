@@ -1,11 +1,12 @@
 <div id="profile-pane">
 
   <div id="status-messages" class="project-alpha-dialog">
-    <div id="really-delete-profile">Wollen Sie wirklich Ihr gesamtes Profil löschen?</div>
-    <div id="pic-info-dialog-title">Informationen zum Einfügen von Profilbildern</div>
+    <div id="really-delete-profile">Do you really want to delete your profile data?</div>
+    <div id="pic-info-dialog-title">How to insert profile pictures</div>
+    <div id="postal-area">Postal Area </div>
   </div>
 
-  <p class="pane-explanation">Machen Sie die wichtigsten Angaben zur Ihrer Person, zu Ihren Vorlieben und vergessen Sie insbesondere nicht, den Fragenkatalog vollständig zu beantworten. Erst wenn alle Angaben vollständig sind, können Sie nach Kontakten suchen.</p>
+  <p class="pane-explanation">Please provide most important personal information about you, your preferences and do especially not forget to answer the questionaire completely. Only if this has been fully completed you can search for contacts.</p>
 
   <div id="bg">
   </div>
@@ -13,26 +14,26 @@
   <div id="tabpane1"></div>
 
   <div id="page1">
-    <h2>zur Person</h2>
+    <h2>Personal Data</h2>
     <p>
       <table>
 	<tr>
-	  <th>Ich bin</th>
-	  <td><input type="radio" name="user_sex" value="female">eine Frau</td>
-	  <td><input type="radio" name="user_sex" value="male">ein Mann</td>
+	  <th>I am</th>
+	  <td><input type="radio" name="user_sex" value="female">a woman</td>
+	  <td><input type="radio" name="user_sex" value="male">a man</td>
 	</tr>
 	<tr>
-	  <th>und suche</th>
-	  <td><input type="radio" name="user_interest_sex" value="female">eine Frau</td>
-	  <td><input type="radio" name="user_interest_sex" value="male">einen Mann</td>
+	  <th>I am looking for</th>
+	  <td><input type="radio" name="user_interest_sex" value="female">a woman</td>
+	  <td><input type="radio" name="user_interest_sex" value="male">a man</td>
 	</tr>
 	<tr>
-	  <th>Ich bin</th>
-	  <td><div id="user-age" class="profile-select-field" title="Das Alter sollte grob passen!"></div></td><td> Jahre alt</td>
+	  <th>I am</th>
+	  <td><div id="user-age" class="profile-select-field" title="The age should more or less fit!"></div></td><td> years old</td>
 	</tr>
 	<tr>
-	  <th>Ich lebe im</th>
-	  <td> <div id="user-open-zip-button" class="profile-select-field goog-flat-button goog-flat-button-disabled" title="Dient zur groben Zuordnung Ihres Standortes, damit Sie nicht soweit fahren müssen!">PLZ Gebiet</div>
+	  <th>I live in</th>
+	  <td> <div id="user-open-zip-button" class="profile-select-field goog-flat-button goog-flat-button-disabled" title="This is required to rougly assign your data to an area and maybe helps to avoid a lot of traveling.">Postal Area</div>
 	  </td>
 	  <td class="last-col"><div id="user-zip-city-list"></div></td>
 	</tr>
@@ -1060,130 +1061,130 @@
   </div>
 
   <div id="page2">
-    <h2>Freitext</h2>
+    <h2>Free Text</h2>
 
     <div id="pic-info-dialog" class="project-alpha-dialog">
       <ol>
-        <li>Stellen Sie Ihr Profilbild ins Internet, z.B. über <a href="http://www.flickr.com" target="_blank">flickr</a>, <a href="http://pinterest.com" target="_blank">pinterest</a> oder einen anderen Dienst.</li>
-        <li>Öffnen Sie ein neues Browserfenster über das Rolladenmenü Ablage->Neus Fenster</li>
-        <li>Rufen Sie in diesem Fenster die Internetseite auf, die Ihr gewünschte Profilbild zeigt.
+        <li>Upload your profile picture to the net, e.g. via <a href="http://www.flickr.com" target="_blank">flickr</a>, <a href="http://pinterest.com" target="_blank">pinterest</a> or whatever service you prefer.</li>
+        <li>Open a new browser window with the pulldown menu 'File->New Window'</li>
+        <li>In this window surf to the website which has your profile picture included.
           <div align="center">
-            <img id="help-pictures-illustration" src="img/help_pictures.png" alt="Darstellung bzgl. des Einfügens von Bildern"/>
+            <img id="help-pictures-illustration" src="img/help_pictures.png" alt="Illustration about how to insert pictures"/>
           </div>
         </li>
-        <li>Ziehen Sie das Bild wie oben dargestellt mit der Maus in den Profileditor.</li>
-        <li>Bringen Sie den Profileditor wieder in den Vordergrund, indem Sie mit der Maus in das Editorfeld klicken und betätigen Sie die Eingabetaste.</li>
-        <li>Sie können in dieser Weise beliebig viele Profilbilder einfügen. Alle Bilder werden später rechts ausgerichtet dargestellt.</li>
+        <li>Drag the picture as illustrated above into your profile editor on this page.</li>
+        <li>Make the profile editor the top-level window by clicking with the mouse in the text pane and confirm by pressing return.</li>
+        <li>You can insert as many pictures as you like this way. All pictures will be automatically right aligned later on.</li>
       </ol>
-      <p>Bilder können später in der gleichen Weise auch in Nachrichten an andere Nutzer eingefügt werden.</p>
+      <p>You can instert pictures in the same way in messages to other users, too.</p>
 
       <form>
         <div id="confirm-pic-info-dialog-dialog" class="goog-flat-button goog-flat-button-disabled project-alpha-dialog-button"
-	     title="Schließen">Schließen</div>
+	     title="Close">Close</div>
       </form>
     </div>
 
     <div id="pic-info-button">
       <img src="img/info.png" alt="Informationen bzgl. Einsetzen von Bildern"/>
-      <p>Hilfe zu Profilbildern</p>
+      <p>How to insert pictures</p>
     </div>
 
     <img class="profile-pic-in-pane" src="img/lonely_hearts_ad.png" alt="lonely_hearts_ad"/>
-    <p>Schreiben Sie etwas über sich!</p>
+    <p>Write something about you!</p>
     <div id="toolbar"></div>
     <div id="editMe"></div>
   </div>
 
   <div id="page3">
-    <h2>Fragenkatalog</h2>
+    <h2>Questionnaire</h2>
 
     <img id="election" class="profile-pic-in-pane" src="img/election.png" alt="election_icon"/>
-    <p>Bisher sind keine Algorithmen zum Auffinden eines geeignetes Partners bekannt. Offensichtliche Inkompatibilitäten lassen sich jedoch sehr wohl ausschließen. Betrachten Sie den hier zusammengestellten Fragekatalog ausschließlich unter diesem Aspekt.
-    <span class="ios">Zum Setzen berühren Sie die Markierung auf dem iPad bitte zweimal.</span></p>
+    <p>Algorithms for finding the right parnter do not exist yet. But obvious incompatibilities can be excluded very well. Consider the questionnaire below exclusively under this aspect.
+    <span class="ios">Touch two times to select an entry on the iPad.</span></p>
 
     <table id="five-questions-tab">
       <tr id="first-row">
 	<td></td>
-	<th id="prof_rating_leading">trifft</th>
-	<td class="sel bar" id="prof-rating1">voll</td>
-	<td class="sel bar" id="prof-rating2">überwiegend</td>
-	<td class="sel bar" id="prof-rating3">nur teilweise</td>
-	<td class="sel bar" id="prof-rating4">eher nicht</td>
-	<td class="sel" id="prof-rating5">gar nicht</td>
-	<th id="prof_rating_trailing">zu</th>
+	<th id="prof_rating_leading">applies</th>
+	<td class="sel bar" id="prof-rating1">fully</td>
+	<td class="sel bar" id="prof-rating2">largely</td>
+	<td class="sel bar" id="prof-rating3">partially</td>
+	<td class="sel bar" id="prof-rating4">rather not</td>
+	<td class="sel" id="prof-rating5">not at all</td>
+	<th id="prof_rating_trailing"></th>
       </tr>
       <tr id="odd-row">
-	<td id="prof-quest1">Wünschen Sie sich Kinder?</td>
+	<td id="prof-quest1">Do you want to have children?</td>
 	<td></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_1" value="1"><span>Sie können sich kein Leben ohne Kinder vorstellen und möchten möglichst bald ein Kind bekommen.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_1" value="2"><span>Sie können sich zwar kein Leben ohne Kinder vorstellen, wollen sich damit aber noch etwas Zeit lassen.</span></a></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_1" value="3"><span>Sie wünschen sich Kinder, können sich aber auch ein Leben ohne vorstellen.</span></a></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_1" value="4"><span>Der Kinderwunsch steht für Sie nicht im Vordergrund. Sie können sich aber vorstellen irgendwann einmal Kinder zu bekommen.</span></span></td>
-	<td class="sel"><span class="tooltip"><input type="radio" name="question_1" value="5"><span>Sie möchten auf keinen Fall Kinder bekommen!</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_1" value="1"><span>You cannot image life without children. You would like to get a child as soon as possible.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_1" value="2"><span>While you cannot image life withouth children you would like to take a little time for this.</span></a></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_1" value="3"><span>You would like to have children but you can image life without, too.</span></a></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_1" value="4"><span>Children do not have priority in your life. But you can image to get children sometime.</span></span></td>
+	<td class="sel"><span class="tooltip"><input type="radio" name="question_1" value="5"><span>You do not want to get children at all!</span></span></td>
 	<td></td>
       </tr>
       <tr id="even-row">
-	<td id="prof-quest2">Gretchenfrage: Sind Sie religiös?</td>
+	<td id="prof-quest2">Are you religious?</td>
 	<td></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_2" value="1"><span>Religion spielt eine zentrale Rolle in Ihrem Leben.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_2" value="2"><span>Ihr Glauben ist ihnen wichtig, aber Sie richten Ihr Leben nicht nur nach Ihrem Glauben aus.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_2" value="3"><span>Sie interessieren sich nicht so sehr für religöse Dinge, glauben aber, dass es einen Gott gibt.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_2" value="4"><span>Sie sind eher atheistisch veranlagt, haben dazu aber noch keine festgelegte Meinung.</span></span></td>
-	<td class="sel"><span class="tooltip"><input type="radio" name="question_2" value="5"><span>Sie sind überzeugter Atheist und stehen Religionen grundsätzlich eher kritisch gegenüber.</span></span></td>
-	<td></td>
-      </tr>
-      <tr id="odd-row">
-	<td id="prof-quest3">Haben Sie oft Ihren Wohnsitz gewechselt?</td>
-	<td></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_3" value="1"><span>Sie haben die meiste Zeit Ihres Lebens an verschiedenen Orten verbracht und waren auch im Ausland. Sie halten dies für eine großartige und wichtige Erfahrung und haben sich ganz bewusst dazu entschieden.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_3" value="2"><span>Sie haben bereits an verschiedenen Orten gelebt und waren vielleicht auch eine Zeit lang im Ausland. Sie waren aber die meiste Zeit auf der Suche nach einem Ort, an dem Sie länger oder vielleicht für immer bleiben würden.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_3" value="3"><span>Sie hatten bisher noch nicht die Möglichkeit, das Leben andernorts kennzulernen, bedauern dies aber in gewisser Weise.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_3" value="4"><span>Es ergab sich für Sie nie die Notwendigkeit, an einen anderen Ort zu ziehen, denn Sie sind an Ihrem Wohnort soweit glücklich und zufrieden.</span></span></td>
-	<td class="sel"><span class="tooltip"><input type="radio" name="question_3" value="5"><span>Sie sind sehr heimatverbunden und ein Umzug kam daher nie in Frage.</span></span></td>
-	<td></td>
-      </tr>
-      <tr id="even-row">
-	<td id="prof-quest4">Kommt ein erneuter Wohnortwechsel für Sie in Frage?</td>
-	<td></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_4" value="1"><span>Sie würden am liebsten sofort die Stadt bzw. das Land verlassen und schmieden schon diesbezügliche Pläne. Sie sind bereit, etwaige Nachteile z.B. berufliche in Kauf zu nehmen. </span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_4" value="2"><span>Sie würden gerne den Wohnort irgendwann wechseln, haben aber im Moment keine akuten Pläne, dies zu tun. Es gibt andere Aspekte wie z.B. berufliche Gründe, die Sie im Moment davon abhalten.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_4" value="3"><span>Sind fühlen sich im Großen und Ganzen an Ihrem jetzigen Wohnort wohl und würden dort gerne bleiben. Sie können sich einen Umzug an einen anderen Ort aber durchaus vorstellen, sofern andere Aspekte wie z.B. berufliche nicht im Wege stehen.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_4" value="4"><span>Sie sind aus beruflichen oder anderen Gründen so sehr an ihren jetzigen Wohnort gebunden, dass ein Wohnortwechsel für Sie kaum in Frage kommt.</span></span></td>
-	<td class="sel"><span class="tooltip"><input type="radio" name="question_4" value="5"><span>Sie sind sehr heimatverbunden. Ein Umzug kommt daher für Sie nicht in Frage.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_2" value="1"><span>Religion does play a major rule in your life.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_2" value="2"><span>While your religious believes are important for your you do not adjust your life exclusively on them.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_2" value="3"><span>You are not interested in religious affairs but you beliefe that god exists.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_2" value="4"><span>You are more an atheistist person but you have not completed your search for truth now.</span></span></td>
+	<td class="sel"><span class="tooltip"><input type="radio" name="question_2" value="5"><span>You are a convinced atheist. You are adopting a critical attitude towards religion in general.</span></span></td>
 	<td></td>
       </tr>
       <tr id="odd-row">
-	<td id="prof-quest5">Sind Sie ein Stadtmensch?</td>
+	<td id="prof-quest3">Have you often changed your residence?</td>
 	<td></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_5" value="1"><span>Sie können sich ein Leben außerhalb einer größeren Stadt nicht vorstellen.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_5" value="2"><span>Sie bevorzugen das Leben in der Stadt, können sich aber vorstellen, das Stadtleben unter Umständen aufzugeben.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_5" value="3"><span>Sie haben weder mit einem Leben in der Stadt noch mit einem Leben auf dem Land Probleme und sehen in beiden das Positive.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_5" value="4"><span>Sie bevorzugen das Leben auf dem Land, können sich aber vorstellen, aus beruflichen Gründen in die Stadt zu ziehen.</span></span></td>
-	<td class="sel"><span class="tooltip"><input type="radio" name="question_5" value="5"><span>Sie würden nie in die Stadt ziehen.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_3" value="1"><span>You have spend the most time of your life at various places and you have been abroad as well. You do think that this was a great experience and you made a conscious descision about that.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_3" value="2"><span>You have spend some time at various places and maybe you were abroad as well. But you were seeking most of the time for a place to stay forever.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_3" value="3"><span>You did not have the chance to live on another place yet but you miss that to a certain extend.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_3" value="4"><span>It was never necessary to move to another place because you are mostly happy and content where you are now.</span></span></td>
+	<td class="sel"><span class="tooltip"><input type="radio" name="question_3" value="5"><span>You have very close ties to your home region. There have been never the question of going to another place therefore.</span></span></td>
 	<td></td>
       </tr>
       <tr id="even-row">
-	<td id="prof-quest6">Treiben Sie Sport?</td>
+	<td id="prof-quest4">Can you image to change your residence once again?</td>
 	<td></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_6" value="1"><span>Sie haben einen sportorientierten Lebensstil, sind Profisportler oder aber in einem oder mehreren Vereinen tätig bzw. trainieren mehrmals in der Woche. Sie messen sich gerne mit anderen im sportlichen Wettkampf.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_6" value="2"><span>Sie würden sich als ein ambitionierter Freizeitsportler bezeichnen. Sport spielt in ihrem Leben allerdings keine zentrale Rolle.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_6" value="3"><span>Sie betrachten sich als durchschnittlich sportlich und gehen hin und wieder sportlichen Aktivitäten nach.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_6" value="4"><span>Sportliche Aktivitäten sind Ihnen nicht so wichtig. Sie kommen ihnen nur unregelmäßig nach.</span></span></td>
-	<td class="sel"><span class="tooltip"><input type="radio" name="question_6" value="5"><span>Sie halten es eher mit Churchills "No Sports"</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_4" value="1"><span>You would really like to leave the city respectively the country now. You are about to actually plan that and you are willing to accept possible inconviences e.g. regarding the job to do it.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_4" value="2"><span>You really like to go to another place some day but you have no concrete plans to do so. There are other aspects to consider like in example you job which prevent you from doing this now.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_4" value="3"><span>You feel mostly comortable where are you living now. You can image to move if other aspects like in example job opportunities are not conflicting whith that.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_4" value="4"><span>You very much tied to the place where you live now. For that reason you can hardly imagine to go to another place but you not completely exclude that.</span></span></td>
+	<td class="sel"><span class="tooltip"><input type="radio" name="question_4" value="5"><span>Your have very close ties to your home region. Going to another place is out of question therefore.</span></span></td>
 	<td></td>
       </tr>
       <tr id="odd-row">
-	<td id="prof-quest7">Rauchen Sie?</td>
+	<td id="prof-quest5">Are you an urbanite?</td>
 	<td></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_7" value="1"><span>Sie rauchen gerne und auch viel und stehe dazu.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_7" value="2"><span>Sie rauchen gerne und regelmässig. Es gibt aber Einschränkungen, z.B. nicht in der Wohnung.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_7" value="3"><span>Sie rauchen nur hin und wieder z.B. auf Parties und nicht regelmässig.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_7" value="4"><span>Sie sind Nichtraucher, haben aber kein Problem mit Rauchern und können sich auch vorstellen, mit einem Raucher zusammen zu sein, sofern Sie/Er Rücksicht nimmt.</span></span></td>
-	<td class="sel"><span class="tooltip"><input type="radio" name="question_7" value="5"><span>Sind sind Nichtraucher und der Gedanke an, einen Raucher als Parnter zu haben, gefällt Ihnen gar nicht.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_5" value="1"><span>You cannot image to live outside a bigger city.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_5" value="2"><span>You really prefer to live in the city but you imagine to give that up under certain circumstances.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_5" value="3"><span>You have no clear preferences regarding this question. Both, living in the city and on the country side applies to you. You see positive aspect in both.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_5" value="4"><span>You prefer to live in the countryside but you can imagine to move into the city in example if your job or something else requires it.</span></span></td>
+	<td class="sel"><span class="tooltip"><input type="radio" name="question_5" value="5"><span>You would absolutely not move into a city.</span></span></td>
 	<td></td>
       </tr>
       <tr id="even-row">
-	<td id="prof-quest8">Sind sehr groß?</td>
+	<td id="prof-quest6">Are you engaged in sports?</td>
+	<td></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_6" value="1"><span>You life is all about sport. You are professional sportsman/sportwoman, you are member in at least one sports club and train several times a week. Sportive competition plays an important rule for you.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_6" value="2"><span>You would describe yourself as an ambitious amateur. Sport is important for you but it is not the most important thing in your life.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_6" value="3"><span>You would describe yourself as belonging to the average group regarding sportiness. You do sport occassionally.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_6" value="4"><span>Sports activities are not that important for you. You do sports only infrequently.</span></span></td>
+	<td class="sel"><span class="tooltip"><input type="radio" name="question_6" value="5"><span>You follow the teachings of Churchill: "No Sports"</span></span></td>
+	<td></td>
+      </tr>
+      <tr id="odd-row">
+	<td id="prof-quest7">Do you smoke?</td>
+	<td></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_7" value="1"><span>You really like to smoke and do it a lot. You fully admit to that. </span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_7" value="2"><span>You like to smoke and you smoke frequently. But you accept certain restriction like in example not to smoke inside the apartment.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_7" value="3"><span>You smoke only occosionally in example on a party.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_7" value="4"><span>You do not smoke but you can imagine to be together with a person who does smoke if she/he takes enough care.</span></span></td>
+	<td class="sel"><span class="tooltip"><input type="radio" name="question_7" value="5"><span>You do not smoke and you do not like the idea at all of being together with person who does smoke.</span></span></td>
+	<td></td>
+      </tr>
+      <tr id="even-row">
+	<td id="prof-quest8">Are you very tall?</td>
 	<td></td>
 	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_8" value="1"><span>> 2m</span></span></td>
 	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_8" value="2"><span>1,90m .. 2m </span></span></td>
@@ -1193,23 +1194,23 @@
 	<td></td>
       </tr>
       <tr id="odd-row">
-	<td id="prof-quest9">Sind Sie Vegetarier oder Veganer?</td>
+	<td id="prof-quest9">Are you a vegetarian or a vegan?</td>
 	<td></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_9" value="1"><span>Sie sind Veganer</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_9" value="2"><span>Sie sind Vegetarier</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_9" value="3"><span>Sie ernähren sich sehr bewusst und versuche, den Verzehr von Fleisch zu vermeiden.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_9" value="4"><span>Sie essen gerne hin und wieder Fleisch.</span></span></td>
-	<td class="sel"><span class="tooltip"><input type="radio" name="question_9" value="5"><span>Ein Essen ohne Fleisch ist für Sie kein richtiges Essen.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_9" value="1"><span>You are a vegan.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_9" value="2"><span>You are a vegetarian.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_9" value="3"><span>You maintain a belanced diet and you try to avoid meat most of the time.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_9" value="4"><span>You like to have some good meat form time to time.</span></span></td>
+	<td class="sel"><span class="tooltip"><input type="radio" name="question_9" value="5"><span>A meal without meat is no real meal for you.</span></span></td>
 	<td></td>
       </tr>
       <tr id="even-row">
-	<td id="prof-quest10">Mögen Sie Haustiere?</td>
+	<td id="prof-quest10">Do you like pets?</td>
 	<td></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_10" value="1"><span>Sie haben mehrere Haustiere, verbringen viel Zeit mit Ihnen und können sich nicht vorstellen, ohne Sie zu leben.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_10" value="2"><span>Sie sind tierlieb und ein Freund von Haustieren, können sich aber auch ein Leben ohne Haustiere vorstellen.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_10" value="3"><span>Sie stehen Haustieren neutral gegenüber. Sie haben zwar im Moment keine, können sich aber vorstellen, z.B. einen Hund oder eine Katze im Haus zu halten.</span></span></td>
-	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_10" value="4"><span>Sie stehen Haustieren nicht sehr positiv gegenüber. Wenn es sein muss, kommen Sie aber auch mit Haustieren klar.</span></span></td>
-	<td class="sel"><span class="tooltip"><input type="radio" name="question_10" value="5"><span>Sie möchten unter keinen Umständen Haustiere in der Wohnung haben.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_10" value="1"><span>You have several pets, you spend a lot of time with them and cannot image to live without them.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_10" value="2"><span>You like animals and you like pets but you can imagine to live without them.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_10" value="3"><span>You have a neutral postition regarding pets. You do not have one but you can imagine to get in example a dog or a cat.</span></span></td>
+	<td class="sel bar"><span class="tooltip"><input type="radio" name="question_10" value="4"><span>You do not think in very positive way about pets. But if it is really necessary you get along with them.</span></span></td>
+	<td class="sel"><span class="tooltip"><input type="radio" name="question_10" value="5"><span>You do not want to have for whatever reason animals in your apartment.</span></span></td>
 	<td></td>
       </tr>
     </table>
@@ -1217,14 +1218,14 @@
 
 
   <div id="page4">
-    <h2>Liebingsbücher und Filme</h2>
-    <div class="fav_diag_frame">
-      <h3>Meine liebsten Bücher:</h3>
+    <h2>Favourite Books and Movies</h2>
+    <div class="fav_diag_frame" id="fav_books_frame">
+      <h3>My favourite books:</h3>
       <table id="fav_books">
 	<tr>
 	  <th></th>
 	  <th class="author-col">Author</th>
-	  <th class="title-col">Titel </th>
+	  <th class="title-col">Title</th>
 	</tr>
 	<tr>
 	  <th>1.</th>
@@ -1247,12 +1248,12 @@
     <div class="fav_diag_frame_space"></div>
 
     <div class="fav_diag_frame">
-      <h3>Meine liebsten Filme:</h3>
+      <h3>My favourite movies:</h3>
       <table id="fav_movies">
 	<tr>
 	  <th></th>
-	  <th class="author-col">Regisseur</th>
-	  <th class="title-col">Name</th>
+	  <th class="author-col">Director</th>
+	  <th class="title-col">Title</th>
 	</tr>
 	<tr>
 	  <th>1.</th>
@@ -1274,15 +1275,15 @@
   </div>
 
   <div id="page5">
-    <h2>Einstellungen</h2>
+    <h2>Setup</h2>
     <br />
-    <b>Profildaten löschen</b>
-    <p>Zum Löschen sämtlicher Einträge in Ihrem Profil klicken Sie bitte hier: <div id="delete-all-profile-data" class="goog-flat-button goog-flat-button-disabled">Profil Löschen</div></p>
+    <b>Delete Profile Data</b>
+    <p>Click here to delete all you profile data:<div id="delete-all-profile-data" class="goog-flat-button goog-flat-button-disabled">Delete Profile</div></p>
     <hr />
   </div>
 
   <div id="profile_request_progress">
-    <h3>Daten werden aktualisiert ...</h3>
+    <h3>Updating Data ...</h3>
     <img src="/img/spinner.gif">
   </div>
 

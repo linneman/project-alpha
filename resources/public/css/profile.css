@@ -17,15 +17,15 @@
 
 #profile-pane .profile-pic-in-pane {
     position:absolute;
-    right:-60px;
-    top:-53px;
+    right:-120px;
+    top:-90px;
     width:150px;
     z-index:2;
     opacity:1;
     }
 
 #profile-pane #election {
-    right:0px;
+    right:-90px;
     top:10px;
 }
 
@@ -256,9 +256,18 @@
     border-radius:10px;
 }
 
+#profile-pane #page4 .fav_diag_frame h3 {
+    margin-bottom:10px;
+}
+
 #profile-pane #page4 .fav_diag_frame_space {
     height:10%;
 }
+
+#profile-pane #page4 #fav_books_frame {
+    margin-top:30px;
+}
+
 
 #profile-pane #profile_request_progress {
     position:absolute;
