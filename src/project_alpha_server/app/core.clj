@@ -22,6 +22,8 @@
         [ring.middleware.session :only [wrap-session]]
         [ring.middleware.cookies :only [wrap-cookies]]
         [ring.middleware.multipart-params :only [wrap-multipart-params]]
+        [ring.middleware.resource]
+        [ring.middleware.file-info]
         [project-alpha-server.app.escape-handlers]
         [project-alpha-server.lib.model]
         [project-alpha-server.app.model]
@@ -269,6 +271,8 @@
       not-supported-handler
       json-params/wrap-json-params
       wrap-multipart-params
+      (wrap-resource "public")
+      (wrap-file-info)
       handler/api))
 
 
