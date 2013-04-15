@@ -1,6 +1,6 @@
 <div id="search-pane">
 
-  <p class="pane-explanation">Stöbern Sie durch die Liste aller Kontakte. Legen Sie interessante Partner in einer Favoritenliste ab. In der letzten Spalte der Tabelle können Sie über die Schaltfläche Details sämtliche Informationen inklusive - soweit vorhanden - Bildern einsehen und dem bzw. der Betreffenden eine Nachricht zukommen lassen.</p>
+  <p class="pane-explanation">Browse through list of all contacts. Put interesting profiles into the favourite list. You can get more details, pictures as available and send a message by clicking on the button 'details' in the last column on this list.</p>
 
   <div id="status-messages">
     <div id="show-details-button-txt">Details ...</div>
@@ -9,13 +9,13 @@
   <div id="tabpane-search"></div>
 
   <div id="search-results">
-    <h2>Kontakte finden</h2>
+    <h2>Find Contacts</h2>
     <table id="search-result-table" class="result-table">
       <tr id="header-row">
-	<th class="date" id="sort-by-date">Dabei seit</th>
+	<th class="date" id="sort-by-date">Registered since</th>
 	<th class="name" id="sort-by-name">Name</th>
-	<th class="dist" id="sort-by-dist">ungefäre Entfernung</th>
-	<th class="match" id="sort-by-match">Übereinstimmung</th>
+	<th class="dist" id="sort-by-dist">Est. Distance</th>
+	<th class="match" id="sort-by-match">Match</th>
 	<th class="details">&nbsp;</th>
       </tr>
       <tr id="prototype-row">
@@ -44,19 +44,19 @@
   </div>
 
   <div id="favorites">
-    <h2>Favoriten</h2>
+    <h2>Favourites</h2>
 
     <div id="search_no_favorites">
-      <h3>Noch keine Favoriten definiert!</h3>
-      <p>Interessante Kontaktpersonen können Sie unter der Schaltfläche "Kontakte Finden", "Details anzeigen" zu dieser Favoritenliste hinzufügen.</p>
+      <h3>No favourites specified yet!</h3>
+      <p>You can add interesting profiles by clicking the buttons "find Contacts", "Details" to this list.</p>
     </div>
 
     <table id="favorite-table" class="result-table">
       <tr id="header-row">
-	<th class="date" id="sort-by-date">Dabei seit</th>
+	<th class="date" id="sort-by-date">Registered since</th>
 	<th class="name" id="sort-by-name">Name</th>
-	<th class="dist" id="sort-by-dist">ungefäre Entfernung</th>
-	<th class="match" id="sort-by-match">Übereinstimmung</th>
+	<th class="dist" id="sort-by-dist">Est. Distance</th>
+	<th class="match" id="sort-by-match">Match</th>
 	<th class="details">&nbsp;</th>
       </tr>
       <tr id="prototype-row">
@@ -85,19 +85,19 @@
   </div>
 
   <div id="banned">
-    <h2>Geblockt</h2>
+    <h2>Blocked</h2>
 
     <div id="search_no_banned">
-      <h3>Es wurden noch keine Profile ausgefiltert!</h3>
-      <p>Profile, die Sie nicht interessieren, können Sie unter der Schaltfläche "Kontakte Finden", "Details anzeigen" zu der Liste der blockierten Profile hinzufügen. Die ausgewählten Kontakte werden darauf hin nicht mehr in der Suchliste sondern in der unter diesem Reiter gezeigten Tabelle aufgeführt.</p>
+      <h3>There have been no profiles banned yet!</h3>
+      <p>You can exclude profiles where you are not interested in by clicking the buttons "Find Contacts", "Details" from the search. These profiles are displayed in the list under this tab.</p>
     </div>
 
     <table id="banned-table" class="result-table">
       <tr id="header-row">
-	<th class="date" id="sort-by-date">Dabei seit</th>
+	<th class="date" id="sort-by-date">Registered since</th>
 	<th class="name" id="sort-by-name">Name</th>
-	<th class="dist" id="sort-by-dist">ungefäre Entfernung</th>
-	<th class="match" id="sort-by-match">Übereinstimmung</th>
+	<th class="dist" id="sort-by-dist">Est. Distance</th>
+	<th class="match" id="sort-by-match">Match</th>
 	<th class="details">&nbsp;</th>
       </tr>
       <tr id="prototype-row">
@@ -126,43 +126,41 @@
   </div>
 
   <div id="search-setup">
-    <h2>Einstellungen</h2>
-    <p>Für die Suche nach potentiellen Partnern werden im Moment die folgenden Parameter verwendet. Eine individuelle Anpassbarkeit dieser Parameter ist in Entwicklung.</p>
+    <h2>Setup</h2>
+    <p>The following parameters are used for seeking interesting profiles. The option to individually change this setup is under development.</p>
     <table>
-      <tr><td class="desc">Maximale Trefferanzahl von Mitgliedern mit hoher Übereinstimmung:</td><td class="val">245</td><td></td></tr>
-      <tr><td class="desc">Wertung als hohe Übereinstimmung ab:</td><td class="val">50</td><td>%</td></tr>
-      <tr><td class="desc">Maximale Trefferanzahl örtlich nächstgelegener Mitglieder:</td><td class="val">245</td><td></td></tr>
-      <tr><td class="desc">Anzahl gezeigter neu hinzugekommener Mitglieder:</td><td class="val">10</td><td></td></tr>
+      <tr><td class="desc">Maximum hit count for members with high matching rate:</td><td class="val">245</td><td></td></tr>
+      <tr><td class="desc">Member are assigned to high matching rate with more than:</td><td class="val">50</td><td>%</td></tr>
+      <tr><td class="desc">Maximum hit count for members in vincinity to your residence:</td><td class="val">245</td><td></td></tr>
+      <tr><td class="desc">Maximum number of indicated new members:</td><td class="val">10</td><td></td></tr>
     </table>
   </div>
 
   <div id="no_matches_available">
-    <h3>Im Moment gibt es leider noch keine Partner!</h3>
-    <p>Das Projekt wurde soeben erst gestartet und daher gibt es im Moment leider noch keine bzw. nur sehr wenige Mitglieder. Betrachten Sie es als Zeichen unserer Ehrlichkeit, dass wir mit dieser Situation offen umgehen.</p>
-    <p>Ein neues Angebot wird im Anfangsstadium immer eine kleine Mitgliederbasis aufweisen. Eine große Mitgliederbasis ist alledings nicht zwangsläufig ein Qualitätsmerkmal. Würde nur danach beurteilt, verblieben ausschließlich große kommerzielle Anbieter, die Geschäftsbedingungen zum Nachteil der Nutzer diktieren.</p>
-    <p>Betrachten Sie die Tatsache, dass Sie zu einem exklusiven Kreis von frühen Mitgliedern dieses Projektes gehören als Chance. Ihr Profil wird sich bei neu hinzukommenden Mitgliedern voller Aufmerksamkeit erfreuen. Wir werden Sie über eine email über neue Profile und Nachrichten von neuen Mitgliedern umgehend informieren.</p>
+    <h3>There are no members matching your profile yet!</h3>
+    <p>The project has been released just a few days ago. Therefore there are unfortunately no or only a few members. Please consider that we treat this unpleasent fact in an open way as a sign for our responsibility. A large base of members cannot necessarily be considered as quality intervention. If a side would be exclusibely rated by this there would only be a few big players who can dictate their business models to the disadvantage of their users.</p>
+    <p>Please consider the fact that you are part of an exclusive circle of early adopters of this project as your chance. Your profile will get the highest possible attention by all new members. We keep you of course informend about any new matching profiles and new messages from other members.</p>
     <div id="support-button2">
       <img src="img/support-icon.png" alt="support"/>
-      <p>Das Projekt unterstützen</p>
+      <p>Support this project</p>
     </div>
-    <p>Helfen Sie schon aus Ihrem eignene Interesse, andere auf dieses gemeinfreie Projekt aufmerksam zu machen. Mehr dazu erfahren Sie durch Klicken auf die Schaltfläche oben.</p>
+    <p>Help just for your own interest to draw attention to this public domain project. Click on the button above to get more information.</p>
   </div>
 
   <div id="search_profile_incomplete">
-    <h3>Profilaktualisierung noch nicht abgeschlossen!</h3>
-    <p>Machen Sie zunächst unter dem Menüpunkt "Gefunden werden" die folgenden Angaben, damit
-       Ihre Suchanfrage bearbeitet werden kann.</p>
+    <h3>Your profile data is not complete yet</h3>
+    <p>Please add the following data under the menu "Being Found" in order to allow others to find you:</p>
     <ul>
-      <li>Ihr Geschlecht</li>
-      <li>Suchen Sie eine Frau oder einen Mann?</li>
-      <li>Ungefähres Alter</li>
-      <li>PLZ-Region, in der Sie leben</li>
-      <li>Beantworten Sie bitte auch den Fragenkatalog.</li>
+      <li>Your sex</li>
+      <li>You are looking for a woman or a man?</li>
+      <li>Age category</li>
+      <li>Postal area of your residence</li>
+      <li>Please fill out the questionnaire as well</li>
     </ul>
   </div>
 
   <div id="search_request_progress">
-    <h3>Daten werden aktualisiert ...</h3>
+    <h3>Updating data ...</h3>
     <img src="/img/spinner.gif">
   </div>
 
