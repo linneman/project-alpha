@@ -156,7 +156,7 @@
                       (fn [ajax-evt]
                         (let [resp (. (. ajax-evt -target) (getResponseText))
                               resp (json/parse resp)]
-                          (if (resp "data")
+                          (if (contains? resp "data")
                             (do (reset! result-table-atom
                                         (render-table
                                          "search-result-table"
