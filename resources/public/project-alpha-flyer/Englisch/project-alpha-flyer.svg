@@ -174,19 +174,19 @@
          x="380.23755"
          y="418.00085"
          style="font-size:84px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:179.99999523%;writing-mode:lr-tb;text-anchor:middle;fill:url(#linearGradient2834);fill-opacity:1;font-family:Utopia;-inkscape-font-specification:Utopia"
-         id="tspan2838">fancy-free?</tspan></text>
+         id="tspan2838">single?</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:5.49762011;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Mend);marker-mid:none;marker-end:url(#Arrow2Mend)"
        d="m 379.77851,504.85901 c 0,89.71629 0,89.71629 0,89.71629"
        id="path2838" />
     <image
-       sodipodi:absref="/Users/ol/Desktop/project-alpha-flyer/Englisch/qrcode.png"
+       sodipodi:absref="/Users/ol/Entwicklung/clojure/project-alpha/resources/public/project-alpha-flyer/Englisch/qrcode.png"
        xlink:href="qrcode.png"
-       width="255"
-       height="255"
-       id="image4663"
+       y="653.34625"
        x="252.33133"
-       y="653.34625" />
+       id="image4663"
+       height="255"
+       width="255" />
     <text
        xml:space="preserve"
        style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Courier;-inkscape-font-specification:Courier"
