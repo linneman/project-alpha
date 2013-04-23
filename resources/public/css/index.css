@@ -74,6 +74,13 @@
   line-height:1.4em;
 }
 
+#title #subtitle {
+  color:#050;
+  margin-top:0.0em;
+  margin-left:2.0em;
+  font-size:26px;
+}
+
 #button-pane {
 }
 
