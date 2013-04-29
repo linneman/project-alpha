@@ -216,9 +216,12 @@
               answ-txt (if rating (str answ_leading " "
                                        (. (get-element (str "prof-rating" rating)) -innerHTML)
                                        " " answ_trailing)
-                           " - ")]
+                           " - ")
+              answ-size (. (get-element (str "prof-size" rating)) -innerHTML)]
           (set! (. (get-element (str "ud-quest" k)) -innerHTML) quest-txt)
-          (set! (. (get-element (str "ud-answer" k)) -innerHTML) answ-txt)))
+          (if (= k 8)
+            (set! (. (get-element (str "ud-answer" k)) -innerHTML) answ-size)
+            (set! (. (get-element (str "ud-answer" k)) -innerHTML) answ-txt))))
       (render-user-data user-details-dialog (. root -innerHTML))))
 
 
