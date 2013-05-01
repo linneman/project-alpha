@@ -62,6 +62,7 @@
 #index-pane #status-messages {
   position:absolute;
   opacity:0;
+  display:none;
 }
 
 

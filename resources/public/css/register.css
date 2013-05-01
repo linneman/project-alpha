@@ -46,6 +46,7 @@
 #register_messages {
     position:absolute;
     opacity:0;
+    display:none;
 }
 
 #register_progress {
