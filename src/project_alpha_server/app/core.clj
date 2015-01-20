@@ -276,17 +276,26 @@
       handler/api))
 
 
+(defn disable-sslv3
+  [server]
+  (doseq [c (.getConnectors server)]
+    (when (instance? org.eclipse.jetty.server.ssl.SslSelectChannelConnector c)
+      (let [f (.getSslContextFactory c)]
+        (.addExcludeProtocols f (into-array ["SSLv2Hello" "SSLv3"]))))
+  server))
+
+
 (defn start-server
   "starts the websever"
   []
   ;;; start the profile cache flush timer
   (start-profile-flush-cache-timer 60000)
   (start-email-notification-timer)
-  (defonce server (jetty/run-jetty #'app
-                                   setup/jetty-setup))
+  (let [jetty-setup (merge {:configurator disable-sslv3} setup/jetty-setup)]
+   (defonce server (jetty/run-jetty #'app
+                                   jetty-setup)))
   (.start server))
 
-; :configurator remove-non-ssl-connectors
 
 (defn stop-server
   "stop the webserver"
