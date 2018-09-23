@@ -23,7 +23,7 @@
   ;; :hooks [leiningen.cljsbuild]
   :cljsbuild {
               :repl-listen-port 9000
-              :crossovers [macros]
+              :crossovers [macros .]
               :crossover-jar true
               :builds {:release
                        {:source-paths ["src/project_alpha_client"]

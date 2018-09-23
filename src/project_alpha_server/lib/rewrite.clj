@@ -9,7 +9,7 @@
 
 
 (ns project-alpha-server.lib.rewrite
-  (:require [project-alpha-server.local-settings :as setup])
+  (:require [local-settings :as setup])
   (:use [clojure.string :only [split]]
         [project-alpha-server.lib.utils]))
 
@@ -32,7 +32,7 @@
   (fn [request]
     (let [uri (request :uri)
           headers (request :headers)
-          accept-lang (. (headers "accept-language") substring 0 2)
+          accept-lang (. (or (headers "accept-language") setup/default-language) substring 0 2)
           accept-lang (or (setup/languages accept-lang) setup/default-language)
           [[_ ext]] (re-seq #"\.([a-zA-Z0-9\-]+)$" uri)
           [[_ lang]] (re-seq #"^\/([a-z]+)\/" uri)
@@ -41,7 +41,7 @@
           request (if (= ext "html")
                     (if uri-def-lang ; only html remains lang-attribute
                       (assoc request :lang lang)
-                      (assoc request :uri (str "/" lang uri) :lang lang))
+                      (assoc request :uri (str "/project-alpha/" lang uri) :lang lang))
                     (if uri-def-lang ; if lang attributes is given, remove it
                       (assoc request :uri (str "/" (last (split uri #"\/" 3))) :lang lang)
                       (assoc request :lang lang)))]
@@ -68,6 +68,5 @@
          ((rewrite-handler identity) {:uri "/login"})
          ((rewrite-handler identity) {:uri "/login"})
          ((rewrite-handler identity) {:uri "/profile"})
-
 
          )

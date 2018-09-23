@@ -14,9 +14,9 @@
             [ring.middleware.json-params :as json-params]
             [ring.util.codec :as codec]
             [clojure.string :as str]
-            [project-alpha-server.local-settings :as setup])
+            [local-settings :as setup])
   (:use [compojure.core :only [GET POST PUT DELETE]]
-        [ring.util.response :only [response status set-cookie]]
+        [ring.util.response :only [response status set-cookie content-type charset]]
         [clojure.string :only [split]]
         [project-alpha-server.lib.model]
         [project-alpha-server.lib.crypto :only [get-secret-key]]
@@ -54,7 +54,7 @@
                     protocol (.getProtocol URL)]
                 (.toString (java.net.URL. protocol host port method))))
         key (codec/base64-encode (get-secret-key {}))
-        confirmation_link (str "/" lang "/confirm?key=" (url-encode key))
+        confirmation_link (str setup/base-url lang "/confirm?key=" (url-encode key))
         session (:session ring-args)
         cookies (:cookies ring-args)
         cookies (assoc cookies
@@ -111,7 +111,7 @@
                                             {:max-age setup/cookie-max-age})
                       "registered" {:value "true" :max-age setup/cookie-max-age})
             session (assoc session :registered true)
-            confirmation_link (str "/" lang "/reset_pw_conf?key=" (url-encode key))]
+            confirmation_link (str setup/base-url lang "/reset_pw_conf?key=" (url-encode key))]
         (send-reset-passwd-mail lang email (cat setup/host-url confirmation_link))
         (-> (response "OK") (assoc :session session) (assoc :cookies cookies)))
       (response "NOT OK"))))
@@ -138,7 +138,8 @@
         (-> (response (forward-url url))
             (assoc :session session)
             (assoc :cookies cookies)
-            ))
+            (content-type "text/html")
+            (charset "utf-8")))
       (response "NOT OK"))))
 
 
@@ -253,7 +254,8 @@
           resp)
         ;; not authenticated, when html request redirect to login side otherwise return error message
         (if is-url-request
-          (-> (response (forward-url login-get-uri)) (assoc :session upd-session))
+          (-> (response (forward-url login-get-uri)) (assoc :session upd-session)
+              (content-type "text/html") (charset "utf-8"))
           (-> (set-cookie
                (status (response "NOT AUTHENTICATED") 403)
                "authenticated" "false")))))))

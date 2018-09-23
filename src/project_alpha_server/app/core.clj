@@ -13,9 +13,9 @@
             [compojure.route :as route]
             [compojure.handler :as handler]
             [net.cgrand.enlive-html :as html]
-            [project-alpha-server.local-settings :as setup]
+            [local-settings :as setup]
             [swank.swank])
-  (:use [clojure.string :only [split]]
+  (:use [clojure.string :only [split replace-first]]
         [compojure.core :only [GET POST PUT DELETE]]
         [ring.util.response :only [response content-type charset]]
         [ring.util.codec :only [url-decode url-encode]]
@@ -81,9 +81,22 @@
   [handler]
   (fn [request]
     (let [response (handler request)]
-      (println (str "REQUEST -> " (request :uri)))
+      (println (str "REQUEST -> URI: " (request :uri)))
+      (println (str "REQUEST -> HEADERS:\n" (request :headers)))
+      ;(println "RESPONSE:\n")
       ;(println response)
+      (println "_________________________")
       response)))
+
+
+(defn wrap-uri-prefix
+  "removes uri prefix aka base url from :uri tag"
+  [handler prefix]
+  (fn [request]
+    (handler (assoc request
+                    :uri (replace-first (:uri request)
+                                        (re-pattern (str "^" prefix "/?"))
+                                        "/")))))
 
 
 (defn session-counter
@@ -182,12 +195,12 @@
   (GET "/:lang/reset_pw.html" [lang] (apply site lang "register.html" "reset_pw.html" (concat standard-pages release-scripts)))
   (GET "/:lang/repl.html" [lang] (apply site lang "register.html" "reset_pw.html" (concat standard-pages debug-scripts)))
   ;; --- json handlers ---
-  (GET "/clear-session" args (-> (response (forward-url (str "/" setup/default-language "/index.html")))
+  (GET "/clear-session" args (-> (response (forward-url (str setup/host-url setup/default-language "/index.html")))
                (assoc :session "")
                (assoc :cookies "")))
   (GET "/status" _ "server-running")
-  (GET "/confirm" args (confirm args (str "/" (args :lang) "/profile.html")))
-  (GET "/reset_pw_conf" args (confirm args (str "/" (args :lang) "/reset_pw.html")))
+  (GET "/confirm" args (confirm args (str setup/host-url (args :lang) "/profile.html")))
+  (GET "/reset_pw_conf" args (confirm args (str setup/host-url (args :lang) "/reset_pw.html")))
   (GET "/session" args (str "<body>" args "</body>"))
   (GET "/counter" args (session-counter args))
 
@@ -226,7 +239,7 @@
   [handler]
   (fn [request]
     (let [headers (request :headers)
-          lang (. (headers "accept-language") substring 0 2)
+          lang (. (or (headers "accept-language") setup/default-language)  substring 0 2)
           lang (or (setup/languages lang) setup/default-language)
           agent (headers "user-agent")
           is-ie-agent (re-seq #"(?i).*(msie).*" agent)]
@@ -264,16 +277,19 @@
   (-> main-routes
       save-lang-handler
       anti-xss-handler
-      ;log-request-handler
       (wrap-authentication login-get-uri white-list-handlers)
-      (wrap-session {:store (db-session-store) :cookie-attrs {:max-age setup/cookie-max-age}})
+      (wrap-session {:store (db-session-store)
+                     :cookie-attrs {:max-age setup/cookie-max-age}})
       rewrite-handler
       not-supported-handler
       json-params/wrap-json-params
       wrap-multipart-params
       (wrap-resource "public")
       (wrap-file-info)
-      handler/api))
+      handler/api
+      (wrap-uri-prefix "/project-alpha")
+      ;log-request-handler
+      ))
 
 
 (defn disable-sslv3
@@ -296,6 +312,13 @@
                                    jetty-setup)))
   (.start server))
 
+(comment
+  (.stop server)
+  (let [jetty-setup (merge {:configurator disable-sslv3} setup/jetty-setup)]
+    (def server (jetty/run-jetty #'app jetty-setup)))
+  (.start server)
+
+  )
 
 (defn stop-server
   "stop the webserver"

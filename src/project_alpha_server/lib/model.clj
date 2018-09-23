@@ -15,7 +15,7 @@
             [korma.core :as sql]
             [clojure.java.jdbc :as jdbc]
             [ring.util.codec :as codec]
-            [project-alpha-server.local-settings :as setup])
+            [local-settings :as setup])
   (:use [ring.middleware.session.store :only [SessionStore]]
         [project-alpha-server.lib.crypto :only
          [get-secret-key get-encrypt-pass-and-salt hash-password]]

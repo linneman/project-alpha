@@ -16,7 +16,8 @@
             [clojure.browser.dom   :as dom]
             [goog.events :as events]
             [goog.events.EventType :as event-type]
-            [goog.Timer :as timer])
+            [goog.Timer :as timer]
+            [local-settings :as setup])
   (:use [project-alpha-client.lib.pages :only [get-lang-id switch-to-page-deferred]]
         [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.auth :only [clear-app-cookies]]))
@@ -25,7 +26,7 @@
 (defn- exp-url
   "expands method by language tag, later derived from URL"
   [url]
-  (str "/" (get-lang-id) url))
+  (str setup/base-url (get-lang-id) url))
 
 
 (defn- ajax-response-handler

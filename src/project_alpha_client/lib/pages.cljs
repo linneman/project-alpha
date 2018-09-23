@@ -18,7 +18,8 @@
             [goog.events :as events]
             [goog.events.EventType :as event-type]
             [goog.Timer :as timer]
-            [goog.style :as style])
+            [goog.style :as style]
+            [local-settings :as setup])
   (:use [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.auth :only [clear-app-cookies]]))
 
@@ -57,7 +58,7 @@
    otherwise login is impossible due to remaining cookie
    zombies."
   [lang]
-  (let [new-url (str "/" lang "/" (. (str @page) (substring 1)) ".html")]
+  (let [new-url (str setup/base-url lang "/" (. (str @page) (substring 1)) ".html")]
     ;; (clear-app-cookies) ; not required anymore
     (reload-url new-url)))
 
@@ -66,7 +67,7 @@
   "switches to new page and rewrites the url
    This is emulating a new page load from server."
   [new-page]
-  (let [new-url (str "/" (get-lang-id) "/" (. (str new-page) (substring 1)) ".html")]
+  (let [new-url (str setup/base-url (get-lang-id) "/" (. (str new-page) (substring 1)) ".html")]
     (swap! page #(when (not= % new-page)
                    (loginfo (str "switched to page " new-page))
                    (rewrite-url new-url)

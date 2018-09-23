@@ -15,7 +15,7 @@
             [korma.core :as sql]
             [clojure.java.jdbc :as jdbc]
             [ring.util.codec :as codec]
-            [project-alpha-server.local-settings :as setup]
+            [local-settings :as setup]
             [clojure.string :as string])
   (:use [project-alpha-server.app.model]
         [project-alpha-server.lib.model]
@@ -451,4 +451,3 @@
       :limit 10)))
 
   )
-

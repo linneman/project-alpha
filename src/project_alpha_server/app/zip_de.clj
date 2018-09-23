@@ -16,7 +16,7 @@
   (:require [korma.db :as db]
             [korma.core :as sql]
             [clojure.java.jdbc :as jdbc]
-            [project-alpha-server.local-settings :as setup]
+            [local-settings :as setup]
             [clojure.string :as string])
   (:use [clojure.data.json :only [json-str write-json read-json]]
         [project-alpha-server.lib.utils]))
@@ -229,7 +229,3 @@
   (get-vicinity-to-zip "354" 10) ; giessen
 
   )
-
-
-
-

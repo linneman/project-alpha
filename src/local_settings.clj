@@ -5,18 +5,23 @@
 ;;;
 ;;; December 2011, Otto Linnemann
 
-(ns project-alpha-server.local-settings)
+(ns local-settings)
 
 
 ;;; --- Port and domain setup ---
 
-(def http-port 3000)
+(def http-port 8000)
 (def https-port 3443)
-(def host-url (str "https://localhost" (when-not (= https-port 443) (str ":" https-port)) "/"))
+(def use-https false)
+(def port (if use-https https-port http-port))
+(def host "https://central-services.dnsdojo.org")
+(def base-url "/project-alpha/")
+(def host-url (str host base-url))
+
 (def jetty-setup
-  {:port http-port
+  {:port port
    :join? false
-   :ssl? true
+   :ssl? use-https
    :ssl-port https-port
    :keystore "resources/keys/key_crt.jks"
    :key-password "password"})
@@ -39,9 +44,9 @@
 (def email-ssl-smtp-port "465")
 (def email-set-ssl true)
 (def email-from-name "project alpha")
-(def email-from-email "projectalpha42@gmail.com")
-(def email-auth-name "projectalpha42@gmail.com")
-(def email-auth-password "projectalpha42")
+(def email-from-email "projectalpha46@gmail.com")
+(def email-auth-name "projectalpha46@gmail.com")
+(def email-auth-password "password")
 
 (def email-notify-new-matches true)
 (def email-notify-new-messages true)
@@ -68,9 +73,9 @@
 (def sql-connection
   {:db "project-alpha"
    :host "localhost"
-   :port 8889
+   :port 3306
    :user "project-alpha"
-   :password "test"})
+   :password "password"})
 
 
 ;;; --- Conection to German zip location database, currently MySQL ----
@@ -79,6 +84,6 @@
 (def sql-connection-opengeodb-de
   {:db "opengeodb_de"
    :host "localhost"
-   :port 8889
+   :port 3306
    :user "project-alpha"
-   :password "test"})
+   :password "password"})

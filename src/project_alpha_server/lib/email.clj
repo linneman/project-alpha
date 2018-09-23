@@ -11,7 +11,7 @@
 
 (ns project-alpha-server.lib.email
   (:use [project-alpha-server.lib.utils])
-  (:require [project-alpha-server.local-settings :as setup])
+  (:require [local-settings :as setup])
   (:import [org.apache.commons.mail SimpleEmail]))
 
 
@@ -54,5 +54,3 @@
     (sendmail to-address subj (str msg url))))
 
 ; (send-confirm-mail "linneman@gmx.de" "/confirm/abcdef")
-
-
