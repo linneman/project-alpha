@@ -33,7 +33,7 @@
   (:use [project-alpha-client.lib.logging :only [loginfo]]
         [project-alpha-client.lib.utils :only [get-button-group-value
                                                set-button-group-value get-element
-                                               get-modal-dialog open-modal-dialog]]
+                                               get-modal-dialog open-modal-dialog str-replace]]
         [project-alpha-client.lib.ajax :only [send-request]]
         [project-alpha-client.lib.auth :only [authenticated? clear-app-cookies]]))
 
@@ -246,7 +246,7 @@
     "resizes and adjusts all images inside an html string"
     [txt]
     (let [image-urls (filter-image-urls txt)
-          no-image-txt (string/replace txt #"<img[^>]*>" "")
+          no-image-txt (str-replace txt "<img[^>]*>" "")
           images (map #(str "<img src=\"" %
                             "\" width=\"200\" align=\"right\" style=\"clear:both;padding-bottom:10px;padding-left:10px\">")
                       image-urls)]

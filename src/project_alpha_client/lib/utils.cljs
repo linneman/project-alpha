@@ -22,7 +22,9 @@
             [goog.net.XhrIo :as ajax]
             [goog.events :as events]
             [goog.events.EventType :as event-type]
-            [goog.style :as style])
+            [goog.style :as style]
+            [goog.string :as gstring]
+            [goog.string.format :as gformat])
   (:use [project-alpha-client.lib.logging :only [loginfo]]))
 
 
@@ -212,3 +214,15 @@
   (let [ios-nodes (gdom/findNodes (gdom/getDocument)
                                   (fn [e] (= (. e -className) class)))]
     (dorun (map #(set! (. (. % -style) -display) "inline") ios-nodes))))
+
+
+(defn str-replace
+  "clojure.string/replace does not work anymore with old versions
+     of ClojureScript, so provide a replacement here."
+  [s regex-string repl]
+  (let [regex (js/RegExp. regex-string "g")]
+    (. s (replace regex repl))))
+
+(comment
+  (str-replace "abc <img myimage.jpg> def" "<img[^>]*>" "")
+  )
